@@ -39,6 +39,10 @@ async function main() {
   await MerchantFacet.waitForDeployment();
   console.log("MerchantFacet:    ", await MerchantFacet.getAddress());
 
+  const OrderFacet = await ethers.deployContract("OrderFacet");
+  await OrderFacet.waitForDeployment();
+  console.log("OrderFacet:       ", await OrderFacet.getAddress());
+
   console.log("\n── Deploying Diamond proxy...");
   const Diamond = await ethers.deployContract("Diamond", [
     deployer.address,
@@ -77,15 +81,37 @@ async function main() {
       action: FacetCutAction.Add,
       functionSelectors: getSelectors(MerchantFacet),
     },
+    {
+      facetAddress: await OrderFacet.getAddress(),
+      action: FacetCutAction.Add,
+      functionSelectors: getSelectors(OrderFacet),
+    },
   ];
 
   const USDC_ADDRESS =
     process.env.USDC_ADDRESS || "0x052FA28895F1dd4A8fdF7c373c9dB6F35F1604e9";
   const MIN_MERCHANT_STAKE = process.env.MIN_MERCHANT_STAKE_USDC || "300000000"; // 1 USDC if 6 decimals
+  // Default per-channel volume ceilings (USDC 6d). Overridable via env; `0` on both
+  // means unlimited. `600 * 1e6` and `6200 * 1e6`.
+  const DEFAULT_CHANNEL_DAILY_LIMIT_USDC =
+    process.env.DEFAULT_CHANNEL_DAILY_LIMIT_USDC || "600000000";
+  const DEFAULT_CHANNEL_MONTHLY_LIMIT_USDC =
+    process.env.DEFAULT_CHANNEL_MONTHLY_LIMIT_USDC || "6200000000";
+  // Order-engine hardcoded oracle prices (INR per whole USDC).
+  const BUY_PRICE_INR_PER_USDC = process.env.BUY_PRICE_INR_PER_USDC || "95";
+  const SELL_PRICE_INR_PER_USDC = process.env.SELL_PRICE_INR_PER_USDC || "90";
+  // Dispute window for SELL orders (default 10 min).
+  const DISPUTE_WINDOW_SECONDS =
+    process.env.DISPUTE_WINDOW_SECONDS || "600";
 
   const initCalldata = DiamondInit.interface.encodeFunctionData("init", [
     USDC_ADDRESS,
     MIN_MERCHANT_STAKE,
+    DEFAULT_CHANNEL_DAILY_LIMIT_USDC,
+    DEFAULT_CHANNEL_MONTHLY_LIMIT_USDC,
+    BUY_PRICE_INR_PER_USDC,
+    SELL_PRICE_INR_PER_USDC,
+    DISPUTE_WINDOW_SECONDS,
   ]);
 
   console.log("\n── Running initial diamondCut...");
@@ -106,10 +132,14 @@ async function main() {
   console.log("OwnershipFacet:   ", await OwnershipFacet.getAddress());
   console.log("ConfigFacet:      ", await ConfigFacet.getAddress());
   console.log("MerchantFacet:    ", await MerchantFacet.getAddress());
+  console.log("OrderFacet:       ", await OrderFacet.getAddress());
   console.log("─────────────────────────────────────────");
   console.log("Diamond owner:   ", deployer.address);
   console.log("Platform admin:  ", deployer.address, "(set in DiamondInit)");
   console.log("USDC:            ", USDC_ADDRESS);
+  console.log("BUY price (INR): ", BUY_PRICE_INR_PER_USDC);
+  console.log("SELL price (INR):", SELL_PRICE_INR_PER_USDC);
+  console.log("Dispute window:  ", DISPUTE_WINDOW_SECONDS, "seconds");
 
   const addresses = {
     diamond: diamondAddress,
@@ -118,6 +148,7 @@ async function main() {
     ownershipFacet: await OwnershipFacet.getAddress(),
     configFacet: await ConfigFacet.getAddress(),
     merchantFacet: await MerchantFacet.getAddress(),
+    orderFacet: await OrderFacet.getAddress(),
     diamondInit: await DiamondInit.getAddress(),
   };
 

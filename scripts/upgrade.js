@@ -25,6 +25,7 @@ const SUPPORTED_FACETS = [
   "OwnershipFacet",
   "ConfigFacet",
   "MerchantFacet",
+  "OrderFacet",
 ];
 
 // ── main ─────────────────────────────────────────────────────────────────────
@@ -149,6 +150,46 @@ async function main() {
   const receipt = await tx.wait();
   if (!receipt.status) throw new Error("diamondCut upgrade failed");
   console.log("diamondCut completed. Tx:", tx.hash);
+
+  // ── Post-cut: initialize order-engine config if not set ────────────────
+  // The diamond was originally initialized before OrderFacet existed, so
+  // buyPrice / sellPrice / disputeWindow are still 0 in storage. Seed them
+  // via the ConfigFacet admin setters here (idempotent — skip if already set).
+  if (facetsToReplace.includes("OrderFacet") || facetsToReplace.includes("ConfigFacet")) {
+    const config = await ethers.getContractAt("ConfigFacet", diamondAddress);
+    let pricing;
+    try {
+      pricing = await config.getOrderPricing();
+    } catch {
+      pricing = null;
+    }
+
+    const buyPrice = pricing ? pricing[0] : 0n;
+    const sellPrice = pricing ? pricing[1] : 0n;
+    const disputeWindow = pricing ? pricing[2] : 0n;
+
+    const targetBuy = BigInt(process.env.BUY_PRICE_INR_PER_USDC || "95");
+    const targetSell = BigInt(process.env.SELL_PRICE_INR_PER_USDC || "90");
+    const targetWindow = BigInt(process.env.DISPUTE_WINDOW_SECONDS || "600");
+
+    if (buyPrice === 0n && sellPrice === 0n) {
+      console.log(`\n── Seeding order pricing: buy=${targetBuy} sell=${targetSell}`);
+      const t1 = await config.setOrderPricing(targetBuy, targetSell);
+      await t1.wait();
+      console.log("  setOrderPricing tx:", t1.hash);
+    } else {
+      console.log(`\n── Order pricing already set (buy=${buyPrice}, sell=${sellPrice}) — skipping.`);
+    }
+
+    if (disputeWindow === 0n) {
+      console.log(`\n── Seeding dispute window: ${targetWindow}s`);
+      const t2 = await config.setDisputeWindow(targetWindow);
+      await t2.wait();
+      console.log("  setDisputeWindow tx:", t2.hash);
+    } else {
+      console.log(`\n── Dispute window already set (${disputeWindow}s) — skipping.`);
+    }
+  }
 
   // persist updated addresses
   const fs = require("fs");

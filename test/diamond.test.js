@@ -34,6 +34,7 @@ async function deployDiamondWithUsdc(usdcAddress, minStake) {
   const ownershipFacet = await ethers.deployContract("OwnershipFacet");
   const configFacet = await ethers.deployContract("ConfigFacet");
   const merchantFacet = await ethers.deployContract("MerchantFacet");
+  const orderFacet = await ethers.deployContract("OrderFacet");
   const diamondInit = await ethers.deployContract("DiamondInit");
 
   const diamond = await ethers.deployContract("Diamond", [
@@ -63,11 +64,21 @@ async function deployDiamondWithUsdc(usdcAddress, minStake) {
       action: FacetCutAction.Add,
       functionSelectors: getSelectors(merchantFacet),
     },
+    {
+      facetAddress: await orderFacet.getAddress(),
+      action: FacetCutAction.Add,
+      functionSelectors: getSelectors(orderFacet),
+    },
   ];
 
   const initCalldata = diamondInit.interface.encodeFunctionData("init", [
     usdcAddress,
     minStake,
+    ethers.parseUnits("600", 6),
+    ethers.parseUnits("6200", 6),
+    95, // BUY price INR/USDC
+    90, // SELL price INR/USDC
+    600, // 10 min dispute window
   ]);
 
   const dc = await ethers.getContractAt("IDiamondCut", diamondAddress);
@@ -78,6 +89,7 @@ async function deployDiamondWithUsdc(usdcAddress, minStake) {
   const ownership = await ethers.getContractAt("OwnershipFacet", diamondAddress);
   const config = await ethers.getContractAt("ConfigFacet", diamondAddress);
   const merchants = await ethers.getContractAt("MerchantFacet", diamondAddress);
+  const orders = await ethers.getContractAt("OrderFacet", diamondAddress);
 
   return {
     deployer,
@@ -89,11 +101,13 @@ async function deployDiamondWithUsdc(usdcAddress, minStake) {
     ownershipFacet,
     configFacet,
     merchantFacet,
+    orderFacet,
     diamondCut,
     loupe,
     ownership,
     config,
     merchants,
+    orders,
   };
 }
 
@@ -108,9 +122,9 @@ describe("Diamond (EIP-2535)", function () {
     fx.minStake = minStake;
   });
 
-  it("deploys 5 facets (Cut + Loupe + Ownership + Config + Merchant)", async function () {
+  it("deploys 6 facets (Cut + Loupe + Ownership + Config + Merchant + Order)", async function () {
     const facetAddrs = await fx.loupe.facetAddresses();
-    expect(facetAddrs.length).to.equal(5);
+    expect(facetAddrs.length).to.equal(6);
   });
 
   it("loupe facetAddress resolves for facets()", async function () {
@@ -357,6 +371,94 @@ describe("MerchantFacet — flows", function () {
     await fx.merchants.connect(fx.deployer).creditChannelFiat(channelId, 42);
     const ch = await fx.merchants.getChannel(channelId);
     expect(ch.fiatBalance).to.equal(42);
+  });
+});
+
+describe("Channel volume limits", function () {
+  const DAY = 24 * 60 * 60;
+  const MONTH = 30 * DAY;
+  let fx;
+
+  beforeEach(async function () {
+    const usdc = await ethers.deployContract("MockERC20", ["USDC", "USDC", 6]);
+    fx = await deployDiamondWithUsdc(await usdc.getAddress(), ethers.parseUnits("300", 6));
+    await usdc.mint(fx.merchant.address, ethers.parseUnits("10000", 6));
+    await usdc
+      .connect(fx.merchant)
+      .approve(fx.diamondAddress, ethers.parseUnits("10000", 6));
+  });
+
+  async function newApprovedChannel() {
+    await fx.merchants
+      .connect(fx.merchant)
+      .registerMerchant(ethers.parseUnits("300", 6), "tg");
+    await fx.merchants
+      .connect(fx.merchant)
+      .addPaymentChannel("SBI", "1234", "u@upi", "primary");
+    const [id] = await fx.merchants.connect(fx.merchant).getMyChannels();
+    const channelId = id.channelId;
+    await fx.merchants.connect(fx.deployer).approveChannel(channelId);
+    return channelId;
+  }
+
+  it("DiamondInit seeds the platform defaults from init args", async function () {
+    const [dailyUsdc, monthlyUsdc] = await fx.config.getChannelLimitDefaults();
+    expect(dailyUsdc).to.equal(ethers.parseUnits("600", 6));
+    expect(monthlyUsdc).to.equal(ethers.parseUnits("6200", 6));
+  });
+
+  it("admin can update platform defaults", async function () {
+    await fx.config
+      .connect(fx.deployer)
+      .setDefaultChannelLimits(ethers.parseUnits("1000", 6), ethers.parseUnits("20000", 6));
+    const [dailyUsdc, monthlyUsdc] = await fx.config.getChannelLimitDefaults();
+    expect(dailyUsdc).to.equal(ethers.parseUnits("1000", 6));
+    expect(monthlyUsdc).to.equal(ethers.parseUnits("20000", 6));
+  });
+
+  it("non-admin cannot update platform defaults", async function () {
+    await expect(
+      fx.config.connect(fx.other).setDefaultChannelLimits(1, 2)
+    ).to.be.revertedWith("Not admin");
+  });
+
+  it("rejects monthly < daily on the platform default setter", async function () {
+    await expect(
+      fx.config.connect(fx.deployer).setDefaultChannelLimits(1000, 500)
+    ).to.be.revertedWith("Monthly < daily");
+  });
+
+  it("new channel returns platform defaults via getChannelLimits", async function () {
+    const channelId = await newApprovedChannel();
+    const lim = await fx.merchants.getChannelLimits(channelId);
+    expect(lim.dailyLimitUsdc).to.equal(ethers.parseUnits("600", 6));
+    expect(lim.monthlyLimitUsdc).to.equal(ethers.parseUnits("6200", 6));
+    expect(lim.dailyVolumeUsed).to.equal(0);
+    expect(lim.monthlyVolumeUsed).to.equal(0);
+  });
+
+  it("channel picks up new platform defaults immediately (no per-channel state)", async function () {
+    const channelId = await newApprovedChannel();
+    await fx.config
+      .connect(fx.deployer)
+      .setDefaultChannelLimits(ethers.parseUnits("1500", 6), ethers.parseUnits("20000", 6));
+    const lim = await fx.merchants.getChannelLimits(channelId);
+    expect(lim.dailyLimitUsdc).to.equal(ethers.parseUnits("1500", 6));
+    expect(lim.monthlyLimitUsdc).to.equal(ethers.parseUnits("20000", 6));
+  });
+
+  it("windowStatus resetsAt advances after a day passes", async function () {
+    const channelId = await newApprovedChannel();
+    const before = await fx.merchants.getChannelLimits(channelId);
+    // dailyResetsAt when no consumption is now + 1 day
+    expect(before.dailyResetsAt).to.be.gt(0);
+
+    await ethers.provider.send("evm_increaseTime", [DAY + 1]);
+    await ethers.provider.send("evm_mine", []);
+
+    const after = await fx.merchants.getChannelLimits(channelId);
+    expect(after.dailyResetsAt).to.be.gt(before.dailyResetsAt);
+    expect(after.monthlyResetsAt).to.be.gt(before.monthlyResetsAt);
   });
 });
 

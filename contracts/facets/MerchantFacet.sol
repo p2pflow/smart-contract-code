@@ -311,6 +311,26 @@ contract MerchantFacet is Modifiers {
         return s.channels[channelId];
     }
 
+    /// @notice Effective limits + current window usage for a channel. Resolves platform
+    ///         defaults if the channel has no override, and auto-projects the next reset
+    ///         boundary. Useful for UI badges and off-chain quote pre-flight.
+    function getChannelLimits(bytes32 channelId)
+        external
+        view
+        returns (
+            uint256 dailyLimitUsdc,
+            uint256 dailyVolumeUsed,
+            uint256 dailyResetsAt,
+            uint256 monthlyLimitUsdc,
+            uint256 monthlyVolumeUsed,
+            uint256 monthlyResetsAt
+        )
+    {
+        PaymentChannel storage ch = s.channels[channelId];
+        require(ch.channelId != bytes32(0), "Channel not found");
+        return LibMerchants.windowStatus(ch, s.defaultChannelDailyLimitUsdc, s.defaultChannelMonthlyLimitUsdc);
+    }
+
     function getMerchantChannels(address wallet) external view returns (PaymentChannel[] memory) {
         bytes32[] storage ids = s.merchants[wallet].channelIds;
         PaymentChannel[] memory result = new PaymentChannel[](ids.length);
