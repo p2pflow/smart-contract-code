@@ -1262,6 +1262,488 @@ async function runAllTests(fx) {
         });
     }
 
+    // ── 18) Security: cross-actor authorization on individual orders ────
+    group("18. Security — cross-actor authorization");
+
+    await wrap("SECURITY: non-accepting merchant cannot confirmPayment on someone else's BUY", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        await seedMerchant(fx, fx.m2, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        // m1 accepts. m2 (also registered, also assigned) must NOT be able to confirm.
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.orders.connect(fx.u1).markPaymentSent(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.m2).confirmPayment(orderId), "Only merchant");
+    });
+
+    await wrap("SECURITY: non-accepting merchant cannot markPaymentSent on someone else's SELL", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await seedMerchant(fx, fx.m2, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, ch1, 500); // seed fiat
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await assertReverts(fx.orders.connect(fx.m2).markPaymentSent(orderId), "Only merchant");
+    });
+
+    await wrap("SECURITY: random EOA cannot confirmPayment on any order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.orders.connect(fx.u1).markPaymentSent(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.keeper).confirmPayment(orderId), "Only merchant");
+    });
+
+    await wrap("SECURITY: random EOA cannot markPaymentSent on any order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await assertReverts(fx.orders.connect(fx.keeper).markPaymentSent(orderId), "Only user");
+    });
+
+    await wrap("SECURITY: user cannot confirmPayment on their own BUY order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.orders.connect(fx.u1).markPaymentSent(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.u1).confirmPayment(orderId), "Only merchant");
+    });
+
+    await wrap("SECURITY: user cannot acceptOrder on their own BUY (they aren't a merchant)", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.u1).acceptOrder(orderId, ch1), "Not assigned");
+    });
+
+    await wrap("SECURITY: merchant cannot cancelOrder on a user's order", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.m1).cancelOrder(orderId), "Only user");
+    });
+
+    await wrap("SECURITY: random EOA cannot cancelOrder on someone else's order", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.keeper).cancelOrder(orderId), "Only user");
+    });
+
+    await wrap("SECURITY: user A cannot markPaymentSent on user B's BUY order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await assertReverts(fx.orders.connect(fx.u2).markPaymentSent(orderId), "Only user");
+    });
+
+    await wrap("SECURITY: random EOA cannot raiseDispute on someone else's SELL", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.keeper).raiseDispute(orderId), "Not a party");
+    });
+
+    // ── 19) Security: illegal state transitions ─────────────────────────
+    group("19. Security — illegal state transitions");
+
+    await wrap("SECURITY: cannot acceptOrder on CANCELLED order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.u1).cancelOrder(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.m1).acceptOrder(orderId, ch1), "Order not open");
+    });
+
+    await wrap("SECURITY: cannot acceptOrder on COMPLETED order", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        await seedMerchant(fx, fx.m2, { stake: 500 });
+        const ch2 = (await fx.merchantsCtr.connect(fx.m2).getMyProfile()).channelIds[0];
+        const orderId = await runBuyLifecycle(fx, fx.u1, fx.m1, ch1, 50);
+        await assertReverts(fx.orders.connect(fx.m2).acceptOrder(orderId, ch2), "Order not open");
+    });
+
+    await wrap("SECURITY: cannot cancelOrder after ACCEPTED (already tested — reinforce message)", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await assertReverts(fx.orders.connect(fx.u1).cancelOrder(orderId), "Only cancel CREATED");
+    });
+
+    await wrap("SECURITY: cannot cancelOrder after PAID (BUY)", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.orders.connect(fx.u1).markPaymentSent(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.u1).cancelOrder(orderId), "Only cancel CREATED");
+    });
+
+    await wrap("SECURITY: cannot cancelOrder after COMPLETED", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const orderId = await runBuyLifecycle(fx, fx.u1, fx.m1, ch1, 50);
+        await assertReverts(fx.orders.connect(fx.u1).cancelOrder(orderId), "Only cancel CREATED");
+    });
+
+    await wrap("SECURITY: cannot cancelOrder twice (double cancel)", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.u1).cancelOrder(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.u1).cancelOrder(orderId), "Only cancel CREATED");
+    });
+
+    await wrap("SECURITY: cannot markPaymentSent on CREATED order (not yet accepted)", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.u1).markPaymentSent(orderId), "Not ACCEPTED");
+    });
+
+    await wrap("SECURITY: cannot markPaymentSent on CANCELLED order", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.u1).cancelOrder(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.u1).markPaymentSent(orderId), "Not ACCEPTED");
+    });
+
+    await wrap("SECURITY: cannot confirmPayment on CREATED order", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.m1).confirmPayment(orderId), "Not PAID");
+    });
+
+    await wrap("SECURITY: cannot confirmPayment on ACCEPTED (before user markPaymentSent)", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await assertReverts(fx.orders.connect(fx.m1).confirmPayment(orderId), "Not PAID");
+    });
+
+    // ── 20) Security: dispute + settlement guardrails ───────────────────
+    group("20. Security — dispute & settlement");
+
+    await wrap("SECURITY: cannot raiseDispute on a BUY order (SELL-only)", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const orderId = await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 50);
+        await assertReverts(fx.orders.connect(fx.u1).raiseDispute(orderId), "Only SELL disputable");
+    });
+
+    await wrap("SECURITY: cannot raiseDispute if dispute already OPEN", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        // Second attempt by the merchant (also a party) must fail — dispute already open.
+        await assertReverts(fx.orders.connect(fx.m1).raiseDispute(orderId), "Dispute already exists");
+    });
+
+    await wrap("SECURITY: cannot raiseDispute after resolveDispute (SETTLED)", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.MERCHANT_WINS)).wait();
+        await assertReverts(fx.orders.connect(fx.u2).raiseDispute(orderId), "Dispute already exists");
+    });
+
+    await wrap("SECURITY: cannot resolveDispute if no dispute exists", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await assertReverts(
+            fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.USER_WINS),
+            "Dispute not open",
+        );
+    });
+
+    await wrap("SECURITY: cannot resolveDispute twice", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.MERCHANT_WINS)).wait();
+        await assertReverts(
+            fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.USER_WINS),
+            "Dispute not open",
+        );
+    });
+
+    await wrap("SECURITY: resolveDispute rejects NONE result", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        await assertReverts(
+            fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.NONE),
+            "Bad result",
+        );
+    });
+
+    await wrap("SECURITY: cannot settleOrder while dispute is OPEN", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        // Fast-forward past the window.
+        await fx.provider.send("evm_increaseTime", [Number(DISPUTE_WINDOW) + 1]);
+        await fx.provider.send("evm_mine", []);
+        await assertReverts(fx.orders.connect(fx.keeper).settleOrder(orderId), "Dispute open");
+    });
+
+    await wrap("SECURITY: cannot settleOrder a BUY order (SELL-only)", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const orderId = await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 50);
+        await assertReverts(fx.orders.connect(fx.keeper).settleOrder(orderId), "Only SELL settles");
+    });
+
+    await wrap("SECURITY: USER_WINS dispute slashes merchant.usdcLiquidity by exactly usdcAmount", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const before = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
+        const sellAmt = 5n; // 5 USDC
+        const { orderId } = await createSell(fx, fx.u2, Number(sellAmt));
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.USER_WINS)).wait();
+        const after = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
+        // Merchant liquidity was `before + sellAmt` after markPaymentSent (SELL credits USDC to
+        // merchant liquidity but locks it in riskUsdc). USER_WINS removes exactly sellAmt.
+        assertEq(after, before);
+    });
+
+    await wrap("SECURITY: MERCHANT_WINS dispute does NOT reduce merchant.usdcLiquidity", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const sellAmt = 5n;
+        const { orderId } = await createSell(fx, fx.u2, Number(sellAmt));
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        const midTotal = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
+        await (await fx.orders.connect(fx.m1).raiseDispute(orderId)).wait();
+        await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.MERCHANT_WINS)).wait();
+        const afterTotal = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
+        assertEq(afterTotal, midTotal); // no slash
+        const bal = await fx.orders.getMerchantBalances(fx.m1.address);
+        assertEq(bal.riskUsdc, 0n); // risk released
+    });
+
+    // ── 21) Security: admin-only functions ──────────────────────────────
+    group("21. Security — admin-only functions");
+
+    await wrap("SECURITY: non-admin cannot rejectChannel", async () => {
+        await registerMerchant(fx, fx.m1, 300, "@m1");
+        await (await fx.merchantsCtr.connect(fx.m1).addPaymentChannel("HDFC", "1234", "u@hdfc", "primary")).wait();
+        const p = await fx.merchantsCtr.connect(fx.m1).getMyProfile();
+        await assertReverts(fx.merchantsCtr.connect(fx.u1).rejectChannel(p.channelIds[0]), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot setMerchantDisputed", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await assertReverts(fx.merchantsCtr.connect(fx.u1).setMerchantDisputed(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot clearMerchantDispute", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.merchantsCtr.connect(fx.deployer).setMerchantDisputed(fx.m1.address)).wait();
+        await assertReverts(fx.merchantsCtr.connect(fx.u1).clearMerchantDispute(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot approveMerchantUnstake", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.merchantsCtr.connect(fx.m1).withdrawStake()).wait();
+        await assertReverts(fx.merchantsCtr.connect(fx.u1).approveMerchantUnstake(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot rejectMerchantUnstake", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.merchantsCtr.connect(fx.m1).withdrawStake()).wait();
+        await assertReverts(fx.merchantsCtr.connect(fx.u1).rejectMerchantUnstake(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot transferPlatformAdmin", async () => {
+        await assertReverts(fx.config.connect(fx.u1).transferPlatformAdmin(fx.u2.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot setDefaultChannelLimits", async () => {
+        await assertReverts(
+            fx.config.connect(fx.u1).setDefaultChannelLimits(1000n * USDC_UNIT, 10_000n * USDC_UNIT),
+            "Not admin",
+        );
+    });
+
+    await wrap("SECURITY: non-admin cannot setMinMerchantStake", async () => {
+        await assertReverts(fx.config.connect(fx.u1).setMinMerchantStake(1n * USDC_UNIT), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot addEligibleMerchant", async () => {
+        await assertReverts(fx.config.connect(fx.u1).addEligibleMerchant(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot removeEligibleMerchant", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.config.connect(fx.deployer).addEligibleMerchant(fx.m1.address)).wait();
+        await assertReverts(fx.config.connect(fx.u1).removeEligibleMerchant(fx.m1.address), "Not admin");
+    });
+
+    await wrap("SECURITY: non-admin cannot clearEligibleMerchants", async () => {
+        await assertReverts(fx.config.connect(fx.u1).clearEligibleMerchants(), "Not admin");
+    });
+
+    await wrap("SECURITY: non-owner cannot transferOwnership (Diamond)", async () => {
+        const ownership = new ethers.Contract(fx.diamondAddress, [
+            "function owner() view returns (address)",
+            "function transferOwnership(address)",
+        ], fx.deployer);
+        await assertReverts(
+            ownership.connect(fx.u1).transferOwnership(fx.u2.address),
+            "LibDiamond: Must be contract owner",
+        );
+    });
+
+    // ── 22) Security: channel status enforcement on accept ──────────────
+    group("22. Security — channel status enforcement");
+
+    await wrap("SECURITY: cannot accept with INACTIVE channel (approved but toggled off)", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.merchantsCtr.connect(fx.m1).setPaymentChannelInactive(ch1)).wait();
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.m1).acceptOrder(orderId, ch1), "Channel not ACTIVE");
+    });
+
+    await wrap("SECURITY: cannot accept with REJECTED channel", async () => {
+        await registerMerchant(fx, fx.m1, 300, "@m1");
+        await (await fx.merchantsCtr.connect(fx.m1).addPaymentChannel("HDFC", "1234", "u@hdfc", "primary")).wait();
+        const p = await fx.merchantsCtr.connect(fx.m1).getMyProfile();
+        await (await fx.merchantsCtr.connect(fx.deployer).rejectChannel(p.channelIds[0])).wait();
+        // Now create an order and try to accept with the rejected channel.
+        // Merchant must first have an APPROVED channel to be eligible for assignment — add one.
+        await (await fx.merchantsCtr.connect(fx.m1).addPaymentChannel("SBI", "5555", "sbi@upi", "sbi")).wait();
+        const p2 = await fx.merchantsCtr.connect(fx.m1).getMyProfile();
+        const approvedCh = p2.channelIds[1];
+        await (await fx.merchantsCtr.connect(fx.deployer).approveChannel(approvedCh)).wait();
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.m1).acceptOrder(orderId, p.channelIds[0]), "Channel not APPROVED");
+    });
+
+    await wrap("SECURITY: cannot accept with PENDING channel (never approved)", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.merchantsCtr.connect(fx.m1).addPaymentChannel("SBI", "5555", "sbi@upi", "sbi")).wait();
+        const p = await fx.merchantsCtr.connect(fx.m1).getMyProfile();
+        const pendingCh = p.channelIds[1]; // just-added, still PENDING
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await assertReverts(fx.orders.connect(fx.m1).acceptOrder(orderId, pendingCh), "Channel not APPROVED");
+    });
+
+    await wrap("SECURITY: setPaymentChannelActive reverts on non-existent channel id", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const bogus = "0x" + "cc".repeat(32);
+        await assertReverts(fx.merchantsCtr.connect(fx.m1).setPaymentChannelActive(bogus));
+    });
+
+    // ── 23) Security: pause enforcement (kill-switch) ───────────────────
+    group("23. Security — pause enforcement");
+
+    await wrap("SECURITY: paused platform blocks createBuyOrder", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(fx.orders.connect(fx.u1).createBuyOrder(10n * USDC_UNIT), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks createSellOrder", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await mintAndApprove(fx, fx.u2, 5n * USDC_UNIT);
+        await assertReverts(fx.orders.connect(fx.u2).createSellOrder(5n * USDC_UNIT), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks acceptOrder", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(fx.orders.connect(fx.m1).acceptOrder(orderId, ch1), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks markPaymentSent", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(fx.orders.connect(fx.u1).markPaymentSent(orderId), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks confirmPayment", async () => {
+        const ch1 = await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, ch1)).wait();
+        await (await fx.orders.connect(fx.u1).markPaymentSent(orderId)).wait();
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(fx.orders.connect(fx.m1).confirmPayment(orderId), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks raiseDispute", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(fx.orders.connect(fx.u2).raiseDispute(orderId), "Platform is paused");
+    });
+
+    await wrap("SECURITY: paused platform blocks addPaymentChannel", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await assertReverts(
+            fx.merchantsCtr.connect(fx.m1).addPaymentChannel("SBI", "5555", "sbi@upi", "sbi"),
+            "Platform is paused",
+        );
+    });
+
+    await wrap("SECURITY: paused → cancelOrder STILL works (user exit path)", async () => {
+        await seedMerchant(fx, fx.m1, { stake: 500 });
+        const { orderId } = await createBuy(fx, fx.u1, 50);
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        // cancelOrder has no `notPaused` — should succeed even when paused.
+        await (await fx.orders.connect(fx.u1).cancelOrder(orderId)).wait();
+        const o = await fx.orders.getOrder(orderId);
+        assertEq(o.status, OrderStatus.CANCELLED);
+    });
+
+    await wrap("SECURITY: paused → settleOrder STILL works (post-window release path)", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await fx.provider.send("evm_increaseTime", [Number(DISPUTE_WINDOW) + 1]);
+        await fx.provider.send("evm_mine", []);
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await (await fx.orders.connect(fx.keeper).settleOrder(orderId)).wait();
+        const bal = await fx.orders.getMerchantBalances(fx.m1.address);
+        assertEq(bal.riskUsdc, 0n);
+    });
+
+    await wrap("SECURITY: paused → resolveDispute STILL works (admin exit path)", async () => {
+        const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
+        await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
+        const { orderId } = await createSell(fx, fx.u2, 5);
+        await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
+        await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
+        await (await fx.config.connect(fx.deployer).pausePlatform()).wait();
+        await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.MERCHANT_WINS)).wait();
+        const o = await fx.orders.getOrder(orderId);
+        assertEq(o.disputeStatus, DisputeStatus.SETTLED);
+    });
+
     // Post-suite bookkeeping.
     return results;
 }
