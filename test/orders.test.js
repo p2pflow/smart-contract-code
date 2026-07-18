@@ -25,6 +25,7 @@ const OrderStatus = {
 };
 const DisputeStatus = { NONE: 0, OPEN: 1, SETTLED: 2 };
 const DisputeResult = { NONE: 0, USER_WINS: 1, MERCHANT_WINS: 2 };
+const MerchantAccountStatus = { ACTIVE: 0, INACTIVE: 1, BLACKLISTED: 2, DISPUTED: 3 };
 const ChannelStatus = { PENDING: 0, APPROVED: 1, REJECTED: 2, TERMINATED: 3 };
 const ChannelAvailability = { ACTIVE: 0, INACTIVE: 1 };
 
@@ -395,6 +396,8 @@ describe("OrderFacet — dispute flow", function () {
     await fx.orders.connect(fx.user).raiseDispute(orderId);
     const o = await fx.orders.getOrder(orderId);
     expect(o.disputeStatus).to.equal(DisputeStatus.OPEN);
+    const merchant = await fx.merchants.getMerchant(fx.m1.address);
+    expect(merchant.accountStatus).to.equal(MerchantAccountStatus.DISPUTED);
 
     // Cannot settle while dispute open even after window elapses
     await ethers.provider.send("evm_increaseTime", [Number(DISPUTE_WINDOW) + 1]);
@@ -416,6 +419,8 @@ describe("OrderFacet — dispute flow", function () {
     const bal = await fx.orders.getMerchantBalances(fx.m1.address);
     expect(bal.riskUsdc).to.equal(0);
     expect(bal.totalUsdc).to.equal(ethers.parseUnits("400", 6));
+    const merchant = await fx.merchants.getMerchant(fx.m1.address);
+    expect(merchant.accountStatus).to.equal(MerchantAccountStatus.ACTIVE);
   });
 
   it("admin resolves USER_WINS → merchant slashed, USDC returned to user", async function () {

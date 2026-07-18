@@ -5,6 +5,7 @@ import {
     Modifiers,
     Merchant,
     MerchantAccountStatus,
+    MerchantAvailability,
     PaymentChannel,
     ChannelStatus,
     ChannelAvailability,
@@ -58,6 +59,8 @@ contract OrderFacet is Modifiers {
         DisputeResult result,
         uint256 resolvedAt
     );
+    event MerchantDisputed(address indexed wallet);
+    event MerchantDisputeCleared(address indexed wallet);
 
     // ── Creation ─────────────────────────────────────────────────────────────
 
@@ -245,6 +248,12 @@ contract OrderFacet is Modifiers {
         require(block.timestamp < o.disputeExpiresAt, "Window elapsed");
 
         o.disputeStatus = DisputeStatus.OPEN;
+        Merchant storage m = s.merchants[o.merchant];
+        if (m.accountStatus == MerchantAccountStatus.ACTIVE) {
+            m.accountStatus = MerchantAccountStatus.DISPUTED;
+            m.availability = MerchantAvailability.OFFLINE;
+            emit MerchantDisputed(o.merchant);
+        }
         emit DisputeRaised(orderId, msg.sender, block.timestamp);
     }
 
@@ -268,6 +277,11 @@ contract OrderFacet is Modifiers {
         if (result == DisputeResult.USER_WINS) {
             m.usdcLiquidity -= o.usdcAmount;
             IERC20(s.config.usdcToken).safeTransfer(o.user, o.usdcAmount);
+        }
+
+        if (m.accountStatus == MerchantAccountStatus.DISPUTED) {
+            m.accountStatus = MerchantAccountStatus.ACTIVE;
+            emit MerchantDisputeCleared(o.merchant);
         }
 
         emit DisputeResolved(orderId, msg.sender, result, block.timestamp);
