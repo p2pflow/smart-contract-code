@@ -3,7 +3,9 @@
 // Deploy Diamond + core EIP-2535 facets + MerchantFacet; init via DiamondInit.
 // Run: npx hardhat run scripts/deploy.js --network localhost
 
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
 
 function getSelectors(contract) {
   const signatures = contract.interface.fragments
@@ -88,8 +90,13 @@ async function main() {
     },
   ];
 
-  const USDC_ADDRESS =
-    process.env.USDC_ADDRESS || "0x052FA28895F1dd4A8fdF7c373c9dB6F35F1604e9";
+  let USDC_ADDRESS = process.env.USDC_ADDRESS;
+  if (!USDC_ADDRESS && network.name !== "baseSepolia") {
+    USDC_ADDRESS = "0x052FA28895F1dd4A8fdF7c373c9dB6F35F1604e9";
+  }
+  if (!USDC_ADDRESS) {
+    throw new Error("USDC_ADDRESS is required for Base Sepolia. Deploy MockERC20 first with npm run deploy:mock-usdc:base-sepolia.");
+  }
   const MIN_MERCHANT_STAKE = process.env.MIN_MERCHANT_STAKE_USDC || "300000000"; // 1 USDC if 6 decimals
   // Default per-channel volume ceilings (USDC 6d). Overridable via env; `0` on both
   // means unlimited. `600 * 1e6` and `6200 * 1e6`.
@@ -141,7 +148,10 @@ async function main() {
   console.log("SELL price (INR):", SELL_PRICE_INR_PER_USDC);
   console.log("Dispute window:  ", DISPUTE_WINDOW_SECONDS, "seconds");
 
+  const chain = await ethers.provider.getNetwork();
   const addresses = {
+    network: network.name,
+    chainId: Number(chain.chainId),
     diamond: diamondAddress,
     diamondCutFacet: await DiamondCutFacet.getAddress(),
     diamondLoupeFacet: await DiamondLoupeFacet.getAddress(),
@@ -150,14 +160,23 @@ async function main() {
     merchantFacet: await MerchantFacet.getAddress(),
     orderFacet: await OrderFacet.getAddress(),
     diamondInit: await DiamondInit.getAddress(),
+    usdc: USDC_ADDRESS,
+    deployedAtBlock: receipt.blockNumber,
+    deployedAtTx: tx.hash,
+    deployedAt: new Date().toISOString(),
   };
 
-  const fs = require("fs");
   fs.writeFileSync(
     "./deployed-addresses.json",
     JSON.stringify(addresses, null, 2)
   );
+  fs.mkdirSync("./deployments", { recursive: true });
+  fs.writeFileSync(
+    path.join("./deployments", `${network.name}.json`),
+    JSON.stringify(addresses, null, 2)
+  );
   console.log("\nAddresses saved to deployed-addresses.json");
+  console.log(`Network deployment saved to deployments/${network.name}.json`);
 }
 
 main().catch((err) => {

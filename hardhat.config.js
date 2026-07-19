@@ -1,6 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+const deployerKey = process.env.DEPLOYER_PRIVATE_KEY || process.env.PRIVATE_KEY;
+const deployerAccounts = deployerKey ? [deployerKey] : [];
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
@@ -18,9 +21,11 @@ module.exports = {
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: (process.env.DEPLOYER_PRIVATE_KEY || process.env.PRIVATE_KEY)
-        ? [process.env.DEPLOYER_PRIVATE_KEY || process.env.PRIVATE_KEY]
-        : [],
+      accounts: deployerAccounts,
+    },
+    baseSepolia: {
+      url: process.env.BASE_SEPOLIA_RPC_URL || "",
+      accounts: deployerAccounts,
     },
   },
   etherscan: {

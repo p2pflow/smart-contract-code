@@ -393,6 +393,10 @@ describe("OrderFacet — dispute flow", function () {
   });
 
   it("user can raise dispute within the window", async function () {
+    await expect(
+      fx.orders.connect(fx.m1).raiseDispute(orderId)
+    ).to.be.revertedWith("Only user");
+
     await fx.orders.connect(fx.user).raiseDispute(orderId);
     const o = await fx.orders.getOrder(orderId);
     expect(o.disputeStatus).to.equal(DisputeStatus.OPEN);

@@ -8,8 +8,11 @@
     "stress": "hardhat compile && node scripts/stressTest.js",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:base-sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "deploy:mock-usdc:base-sepolia": "hardhat run scripts/deployMockUsdc.js --network baseSepolia",
     "upgrade:local": "hardhat run scripts/upgrade.js --network localhost",
     "upgrade:sepolia": "hardhat run scripts/upgrade.js --network sepolia",
+    "upgrade:base-sepolia": "hardhat run scripts/upgrade.js --network baseSepolia",
     "node": "hardhat node"
   },
   "devDependencies": {

@@ -235,12 +235,12 @@ contract OrderFacet is Modifiers {
 
     // ── Disputes ─────────────────────────────────────────────────────────────
 
-    /// @notice Either party can raise a dispute during the window for a SELL order
+    /// @notice The user can raise a dispute during the window for a SELL order
     ///         that has COMPLETED (i.e. merchant claimed payment). Locks risk_usdc
     ///         indefinitely until admin resolves.
     function raiseDispute(bytes32 orderId) external notPaused {
         Order storage o = _requireOrder(orderId);
-        require(msg.sender == o.user || msg.sender == o.merchant, "Not a party");
+        require(msg.sender == o.user, "Only user");
         require(o.orderType == OrderType.SELL, "Only SELL disputable");
         require(o.status == OrderStatus.COMPLETED, "Not COMPLETED");
         require(o.disputeStatus == DisputeStatus.NONE, "Dispute already exists");

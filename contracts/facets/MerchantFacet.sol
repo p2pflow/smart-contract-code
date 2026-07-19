@@ -101,7 +101,6 @@ contract MerchantFacet is Modifiers {
         Merchant storage m = s.merchants[msg.sender];
         require(m.wallet != address(0), "Not a merchant");
         require(m.accountStatus == MerchantAccountStatus.ACTIVE, "Account not active");
-        require(m.usdcLiquidity >= s.config.minMerchantStakeUsdc, "Below min USDC liquidity");
         m.availability = MerchantAvailability.ONLINE;
         emit AvailabilityChanged(msg.sender, MerchantAvailability.ONLINE);
     }
