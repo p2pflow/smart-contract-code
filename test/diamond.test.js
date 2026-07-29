@@ -20,7 +20,6 @@ const MerchantAccountStatus = {
   INACTIVE: 1,
   BLACKLISTED: 2,
   DISPUTED: 3,
-  DORMANT: 4,
 };
 
 const ChannelStatus = { PENDING: 0, APPROVED: 1, REJECTED: 2, TERMINATED: 3 };
@@ -252,57 +251,64 @@ describe("MerchantFacet — flows", function () {
     expect(p.availability).to.equal(0); // ONLINE
   });
 
-  it("pendingChannelIds: add two PENDING, approve one, queue length updates", async function () {
+  it("getPendingChannels: add two PENDING, approve one, scan result updates", async function () {
     const m = fx.merchants.connect(fx.merchant);
     await m.registerMerchant(fx.minStake, "tg");
     await m.addPaymentChannel("B1", "1111", "a@x", "c1");
     await m.addPaymentChannel("B2", "2222", "b@x", "c2");
-    expect(await fx.merchants.getPendingChannelCount()).to.equal(2);
-    const pending = await fx.merchants.getPendingChannels();
+    let pending = await fx.merchants.getPendingChannels();
     expect(pending.length).to.equal(2);
     await fx.merchants.connect(fx.deployer).approveChannel(pending[0]);
-    expect(await fx.merchants.getPendingChannelCount()).to.equal(1);
+    pending = await fx.merchants.getPendingChannels();
+    expect(pending.length).to.equal(1);
   });
 
-  it("rejectChannel removes from pending queue", async function () {
+  it("rejectChannel removes the channel from the pending scan", async function () {
     const m = fx.merchants.connect(fx.merchant);
     await m.registerMerchant(fx.minStake, "tg");
     await m.addPaymentChannel("B1", "3333", "c@x", "c1");
     const pending = await fx.merchants.getPendingChannels();
     await fx.merchants.connect(fx.deployer).rejectChannel(pending[0]);
-    expect(await fx.merchants.getPendingChannelCount()).to.equal(0);
+    expect((await fx.merchants.getPendingChannels()).length).to.equal(0);
   });
 
-  it("withdrawStake deactivates APPROVED channel availability", async function () {
+  it("verified baseline: withdrawStake leaves an APPROVED channel ACTIVE", async function () {
     const { m, channelId } = await registerAndAddApprovedChannel();
     let ch = await fx.merchants.getChannel(channelId);
     expect(ch.status).to.equal(ChannelStatus.APPROVED);
     expect(ch.availability).to.equal(ChannelAvailability.ACTIVE);
     await m.withdrawStake();
     ch = await fx.merchants.getChannel(channelId);
-    expect(ch.availability).to.equal(ChannelAvailability.INACTIVE);
+    expect(ch.availability).to.equal(ChannelAvailability.ACTIVE);
     const p = await m.getMyProfile();
     expect(p.accountStatus).to.equal(MerchantAccountStatus.INACTIVE);
     expect(p.unstakePending).to.equal(true);
   });
 
-  it("CRITICAL: cannot withdrawStake while any channel fiat balance > 0", async function () {
+  it("verified baseline: withdrawStake does not block on channel fiat obligations", async function () {
     const { m, channelId } = await registerAndAddApprovedChannel();
-    await fx.merchants
-      .connect(fx.deployer)
-      .creditChannelFiat(channelId, ethers.parseUnits("1", 6));
-    expect(await fx.merchants.getMerchantTotalFiatBalance(fx.merchant.address)).to.be.gt(0);
-    await expect(m.withdrawStake()).to.be.revertedWith("Fiat obligations");
+    const amount = ethers.parseUnits("1", 6);
+    await fx.orders.connect(fx.other).createBuyOrder(amount);
+    const [orderId] = await fx.orders.getUserOrders(fx.other.address);
+    await fx.orders.connect(fx.merchant).acceptOrder(orderId, channelId);
+    await fx.orders.connect(fx.other).markPaymentSent(orderId);
+    await fx.orders.connect(fx.merchant).confirmPayment(orderId);
+
+    expect((await fx.merchants.getChannel(channelId)).fiatBalance).to.be.gt(0);
+    await m.withdrawStake();
+    const p = await m.getMyProfile();
+    expect(p.accountStatus).to.equal(MerchantAccountStatus.INACTIVE);
+    expect(p.unstakePending).to.equal(true);
   });
 
-  it("approveMerchantUnstake leaves DORMANT (not ACTIVE) when liquidity hits zero", async function () {
+  it("verified baseline: approveMerchantUnstake leaves ACTIVE status at zero liquidity", async function () {
     const m = fx.merchants.connect(fx.merchant);
     await m.registerMerchant(fx.minStake, "tg");
     await m.withdrawStake();
     await fx.merchants.connect(fx.deployer).approveMerchantUnstake(fx.merchant.address);
     const p = await m.getMyProfile();
     expect(p.usdcLiquidity).to.equal(0);
-    expect(p.accountStatus).to.equal(MerchantAccountStatus.DORMANT);
+    expect(p.accountStatus).to.equal(MerchantAccountStatus.ACTIVE);
     expect(p.unstakePending).to.equal(false);
   });
 
@@ -316,17 +322,19 @@ describe("MerchantFacet — flows", function () {
     expect(p.unstakePending).to.equal(false);
   });
 
-  it("depositStake from DORMANT restores ACTIVE when crossing min", async function () {
+  it("verified baseline: zero-liquidity ACTIVE account can deposit stake again", async function () {
     const m = fx.merchants.connect(fx.merchant);
     await m.registerMerchant(fx.minStake, "tg");
     await m.withdrawStake();
     await fx.merchants.connect(fx.deployer).approveMerchantUnstake(fx.merchant.address);
     let p = await m.getMyProfile();
-    expect(p.accountStatus).to.equal(MerchantAccountStatus.DORMANT);
+    expect(p.accountStatus).to.equal(MerchantAccountStatus.ACTIVE);
+    expect(p.usdcLiquidity).to.equal(0);
     await fx.usdc.mint(fx.merchant.address, fx.minStake);
     await m.depositStake(fx.minStake);
     p = await m.getMyProfile();
     expect(p.accountStatus).to.equal(MerchantAccountStatus.ACTIVE);
+    expect(p.usdcLiquidity).to.equal(fx.minStake);
   });
 
   it("setPaymentChannelActive/Inactive + migrateAndTerminate", async function () {
@@ -343,13 +351,20 @@ describe("MerchantFacet — flows", function () {
     let c0 = await fx.merchants.getChannel(id0);
     expect(c0.availability).to.equal(ChannelAvailability.INACTIVE);
     await m.setPaymentChannelActive(id0);
-    await fx.merchants.connect(fx.deployer).creditChannelFiat(id0, 1000);
+    await fx.orders.connect(fx.other).createBuyOrder(ethers.parseUnits("1", 6));
+    const [orderId] = await fx.orders.getUserOrders(fx.other.address);
+    await fx.orders.connect(fx.merchant).acceptOrder(orderId, id0);
+    await fx.orders.connect(fx.other).markPaymentSent(orderId);
+    await fx.orders.connect(fx.merchant).confirmPayment(orderId);
+    c0 = await fx.merchants.getChannel(id0);
+    const fiatToMigrate = c0.fiatBalance;
+    expect(fiatToMigrate).to.be.gt(0);
     await m.migrateAndTerminate(id0, id1);
     const after0 = await fx.merchants.getChannel(id0);
     const after1 = await fx.merchants.getChannel(id1);
     expect(after0.status).to.equal(ChannelStatus.TERMINATED);
     expect(after0.fiatBalance).to.equal(0);
-    expect(after1.fiatBalance).to.equal(1000);
+    expect(after1.fiatBalance).to.equal(fiatToMigrate);
   });
 
   it("blacklistMerchant + setMerchantDisputed + clearMerchantDispute", async function () {
@@ -366,11 +381,16 @@ describe("MerchantFacet — flows", function () {
     expect(p.accountStatus).to.equal(MerchantAccountStatus.BLACKLISTED);
   });
 
-  it("creditChannelFiat (admin)", async function () {
-    const { channelId } = await registerAndAddApprovedChannel();
-    await fx.merchants.connect(fx.deployer).creditChannelFiat(channelId, 42);
-    const ch = await fx.merchants.getChannel(channelId);
-    expect(ch.fiatBalance).to.equal(42);
+  it("verified baseline: exposes no arbitrary admin fiat-credit selectors", async function () {
+    const absent = [
+      "creditChannelFiat(bytes32,uint256)",
+      "getMerchantTotalFiatBalance(address)",
+      "getPendingChannelCount()",
+    ];
+    for (const signature of absent) {
+      const selector = ethers.id(signature).slice(0, 10);
+      expect(await fx.loupe.facetAddress(selector)).to.equal(ethers.ZeroAddress);
+    }
   });
 });
 
