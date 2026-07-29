@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-helper-operations
+  labels:
+    app.kubernetes.io/name: order-helper
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: order-helper
+  ports:
+    - name: operations
+      port: 8080
+      targetPort: operations
+      protocol: TCP

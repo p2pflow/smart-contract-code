@@ -1,0 +1,26 @@
+{
+  "name": "@p2pflow/order-helper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic, shadow-first off-chain order assignment helper",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "node scripts/clean.mjs",
+    "lint": "tsc -p tsconfig.json --noEmit && node scripts/lint.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "simulate": "npm run build && node dist/src/cli/simulate.js --orders 100000",
+    "replay": "npm run build && node dist/src/cli/replay.js"
+  },
+  "dependencies": {
+    "@noble/hashes": "1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
+  }
+}
