@@ -6,9 +6,25 @@ function blockedMessage(action) {
   return `Council verdict ${COUNCIL_VERDICT} (${COUNCIL_BILL_SHA256}); ${action} is disabled`;
 }
 
-function assertCouncilLocalSimulation(networkName, action) {
-  if (networkName !== "hardhat" && networkName !== "localhost") {
+const DEFAULT_HARDHAT_MNEMONIC =
+  "test test test test test test test test test test test junk";
+
+function assertCouncilLocalSimulation(networkName, action, networkConfig = {}) {
+  if (networkName !== "hardhat") {
     throw new Error(blockedMessage(`${action} on network ${networkName || "unknown"}`));
+  }
+  if (networkConfig.forking && (networkConfig.forking.enabled || networkConfig.forking.url)) {
+    throw new Error(blockedMessage(`${action} on a forked Hardhat network`));
+  }
+  if (Array.isArray(networkConfig.accounts)) {
+    throw new Error(blockedMessage(`${action} with explicit signer accounts`));
+  }
+  if (
+    networkConfig.accounts &&
+    networkConfig.accounts.mnemonic &&
+    networkConfig.accounts.mnemonic !== DEFAULT_HARDHAT_MNEMONIC
+  ) {
+    throw new Error(blockedMessage(`${action} with a non-development mnemonic`));
   }
 }
 

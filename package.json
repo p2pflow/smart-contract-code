@@ -15,14 +15,14 @@
     "provenance:live": "node scripts/provenance/live-snapshot.js",
     "provenance:custody": "node scripts/provenance/custody-reconcile.js",
     "stress": "hardhat compile && node scripts/stressTest.js",
-    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:local": "hardhat run scripts/deploy.js",
     "deploy:sepolia": "node scripts/councilGate.js deploy:sepolia",
     "deploy:base-sepolia": "node scripts/councilGate.js deploy:base-sepolia",
     "deploy:mock-usdc:base-sepolia": "node scripts/councilGate.js deploy:mock-usdc:base-sepolia",
-    "upgrade:local": "hardhat run scripts/upgrade.js --network localhost",
+    "upgrade:local": "hardhat run scripts/upgrade.js",
     "upgrade:sepolia": "node scripts/councilGate.js upgrade:sepolia",
     "upgrade:base-sepolia": "node scripts/councilGate.js upgrade:base-sepolia",
-    "node": "hardhat node"
+    "node": "hardhat node --hostname 127.0.0.1"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

@@ -622,13 +622,15 @@ Merchant.usdcLiquidity = X
 
 ---
 
-## 13. Deploy script
+## 13. Local-only deployment simulation
 
-File: [scripts/deploy.js](scripts/deploy.js). Run:
+File: [scripts/deploy.js](scripts/deploy.js). The current council bill is
+`REJECT` (SHA-256
+`4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916`).
+Only an ephemeral, non-forked in-process Hardhat simulation is permitted:
 
 ```bash
-npm run deploy:local     # localhost node
-npm run deploy:sepolia   # sepolia via SEPOLIA_RPC_URL + DEPLOYER_PRIVATE_KEY
+npm run deploy:local
 ```
 
 Sequence:
@@ -654,15 +656,19 @@ Post-conditions:
 
 ---
 
-## 14. Upgrade script
+`deploy:sepolia`, `deploy:base-sepolia`, and mock-USDC testnet deployment exit
+at `scripts/councilGate.js` before environment, signer, or network access.
 
-File: [scripts/upgrade.js](scripts/upgrade.js). Run:
+## 14. Dormant upgrade script
 
-```bash
-REPLACE_FACETS=MerchantFacet,ConfigFacet npm run upgrade:sepolia
-```
+File: [scripts/upgrade.js](scripts/upgrade.js). This is historical local
+scaffolding, not an approved upgrade path. Packaged remote upgrade commands are
+disabled. A direct invocation accepts only the non-forked in-process `hardhat`
+network using the default deterministic development accounts; it rejects
+`localhost`, custom signer arrays, non-development mnemonics, and forks before
+input or signer access.
 
-Requires `DIAMOND_ADDRESS` in `.env`. Supported names:
+Supported historical facet names:
 
 `DiamondCutFacet, DiamondLoupeFacet, OwnershipFacet, ConfigFacet, MerchantFacet`.
 
@@ -692,41 +698,23 @@ Caveats:
 
 ---
 
-## 15. Smoke test script
+## 15. Live smoke script
 
-File: [scripts/smokeTest.js](scripts/smokeTest.js). Run:
-
-```bash
-DIAMOND_ADDRESS=0x... npx hardhat run scripts/smokeTest.js --network sepolia
-```
-
-Read-only. Prints:
-
-- `getConfig()` — admin, USDC, min stake, paused, initialized.
-- `getAllMerchants()` count + list.
-- For each merchant: `getMerchant(wallet)` decoded (status/availability numeric,
-  liquidity raw 6-dec, timestamps ISO-formatted).
-- For each channel id on that merchant: `getChannel(id)` decoded similarly.
-
-Sends no transactions. Safe to run against production. Fails hard if
-`DIAMOND_ADDRESS` isn't set.
+The legacy script is disabled at the council gate before environment, Hardhat,
+RPC, or payment-data access. It no longer prints Telegram, bank, account-last4,
+UPI, or label fields. Use the redacted transaction-disabled tools under
+`scripts/provenance/` for approved pinned-block read-only evidence.
 
 ---
 
-## 16. Environment variables
+## 16. Environment boundary
 
-File: [.env.example](.env.example).
-
-| Variable | Required for | Notes |
-| --- | --- | --- |
-| `SEPOLIA_RPC_URL` | `deploy:sepolia`, `upgrade:sepolia` | Any Sepolia JSON-RPC (Alchemy / Infura / public). |
-| `DEPLOYER_PRIVATE_KEY` (or `PRIVATE_KEY`) | non-local networks | Signer for deploys / upgrades. |
-| `ETHERSCAN_API_KEY` | `hardhat verify` | Optional. |
-| `USDC_ADDRESS` | `deploy.js` | Falls back to the Circle Sepolia test USDC hard-coded default. |
-| `MIN_MERCHANT_STAKE_USDC` | `deploy.js` | 6-decimal raw. Default: `300000000` (300 USDC). |
-| `TREASURY` | (declared in `.env.example`) | **Not consumed by any current facet or script.** Reserved for future fee routing. |
-| `DIAMOND_ADDRESS` | `upgrade.js`, `smokeTest.js` | Written to `deployed-addresses.json` automatically by `deploy.js`, but you must also copy it into `.env` manually for the upgrade/smoke scripts. |
-| `REPLACE_FACETS` | `upgrade.js` | Comma-separated facet names; empty ⇒ no-op. |
+File: [.env.example](.env.example). No environment variable is required for
+compile, tests, or local simulation. Hardhat does not call dotenv, does not
+declare a remote network, and does not wire any private key. The example file
+intentionally contains no variable assignment. Optional public RPC input for
+the transaction-disabled provenance CLIs is documented in
+`scripts/provenance/README.md`; it is never a signer input.
 
 ---
 

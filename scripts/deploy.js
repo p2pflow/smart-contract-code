@@ -17,7 +17,7 @@ function getSelectors(contract) {
 }
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "Diamond deployment");
+  assertCouncilLocalSimulation(network.name, "Diamond deployment", network.config);
   const [deployer] = await ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
 

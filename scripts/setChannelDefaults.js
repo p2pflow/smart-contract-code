@@ -12,7 +12,7 @@ const { ethers, network } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "channel-default mutation");
+  assertCouncilLocalSimulation(network.name, "channel-default mutation", network.config);
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set in .env");
 

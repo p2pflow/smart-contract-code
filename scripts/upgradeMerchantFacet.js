@@ -11,7 +11,7 @@ const { ethers, network } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "MerchantFacet upgrade");
+  assertCouncilLocalSimulation(network.name, "MerchantFacet upgrade", network.config);
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set");
 

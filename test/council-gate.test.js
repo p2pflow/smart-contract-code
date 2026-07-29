@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const { network } = require("hardhat");
 
 const root = path.join(__dirname, "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
@@ -17,18 +18,31 @@ describe("council safety gate", function () {
     expect(COUNCIL_BILL_SHA256).to.equal(
       "4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916",
     );
-    expect(() => assertCouncilLocalSimulation("hardhat", "test")).not.to.throw();
-    expect(() => assertCouncilLocalSimulation("localhost", "test")).not.to.throw();
+    expect(() => assertCouncilLocalSimulation("hardhat", "test", {})).not.to.throw();
+    expect(() =>
+      assertCouncilLocalSimulation(network.name, "resolved-config test", network.config),
+    ).not.to.throw();
+    expect(() => assertCouncilLocalSimulation("localhost", "test", {})).to.throw(
+      /Council verdict REJECT/,
+    );
     expect(() => assertCouncilLocalSimulation("baseSepolia", "test")).to.throw(
       /Council verdict REJECT/,
     );
+    expect(() =>
+      assertCouncilLocalSimulation("hardhat", "test", {
+        forking: { enabled: true, url: "https://example.invalid" },
+      }),
+    ).to.throw(/Council verdict REJECT/);
+    expect(() =>
+      assertCouncilLocalSimulation("hardhat", "test", { accounts: ["0xdead"] }),
+    ).to.throw(/Council verdict REJECT/);
   });
 
   it("fails external package entrypoints without credentials", function () {
     const result = spawnSync(process.execPath, ["scripts/councilGate.js", "testnet write"], {
       cwd: root,
       encoding: "utf8",
-      env: { PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin" },
+      env: { PATH: "/usr/local/bin:/usr/bin:/bin" },
     });
     expect(result.status).to.equal(1);
     expect(result.stdout).to.equal("");
@@ -73,23 +87,52 @@ describe("council safety gate", function () {
       "scripts/setChannelDefaults.js",
     ]) {
       const source = read(relative);
-      const gate = source.indexOf("assertCouncilLocalSimulation(network.name");
+      const main = source.indexOf("async function main");
+      const gate = source.indexOf("assertCouncilLocalSimulation(", main);
       const signer = source.indexOf("ethers.getSigners()");
       expect(gate, `${relative} lacks the council network gate`).to.be.greaterThan(-1);
       expect(signer, `${relative} lacks signer access`).to.be.greaterThan(-1);
       expect(gate, `${relative} gates too late`).to.be.lessThan(signer);
       expect(source).not.to.include('require("dotenv").config()');
+      expect(source).to.include("network.config");
+    }
+  });
+
+  it("disables the legacy live smoke script before env, RPC, or payment data", function () {
+    const source = read("scripts/smokeTest.js");
+    expect(source).to.include("rejectExternalAction");
+    for (const forbidden of [
+      "dotenv",
+      "process.env",
+      'require("hardhat")',
+      "telegramUsername",
+      "bankName",
+      "accountLast4",
+      "upiId",
+    ]) {
+      expect(source).not.to.include(forbidden);
     }
   });
 
   it("owns and verifies a fresh loopback-only stress chain", function () {
     const source = read("scripts/stressTest.js");
-    expect(source).to.include('const ANVIL_HOST = "127.0.0.1"');
+    expect(source).to.include('const DEV_CHAIN_HOST = "127.0.0.1"');
     expect(source).to.include("allocateLoopbackPort");
     expect(source).to.include('"node"');
-    expect(source).to.include('"--hostname", ANVIL_HOST');
-    expect(source).to.include('const HARDHAT_BIN = path.join(__dirname, "..", "node_modules", ".bin", "hardhat")');
-    expect(source).to.include('const EXPECTED_CHAIN_ID = "0x7a69"');
+    expect(source).to.include('"--hostname", DEV_CHAIN_HOST');
+    expect(source).to.include("const HARDHAT_CLI = path.join(PROJECT_ROOT");
+    expect(source).to.include("process.execPath");
+    expect(source).to.include("cwd: PROJECT_ROOT");
+    expect(source).to.include('PATH: "/usr/local/bin:/usr/bin:/bin"');
+    expect(source).not.to.include("process.env.PATH");
+    expect(source).to.include("hardhat_metadata");
+    expect(source).to.include("metadata.instanceId !== devChainInstanceId");
+    expect(source).to.include("metadata.forkedNetwork");
+    expect(source).to.include("await stopOwnedDevChain()");
+    expect(source).to.include('child.kill("SIGKILL")');
+    expect(source).to.include("crypto.randomInt");
+    expect(source).to.include("createUniqueHardhatConfig");
+    expect(source).not.to.include("const EXPECTED_CHAIN_ID");
     expect(source).to.include("EXPECTED_FIRST_ACCOUNT");
     expect(source).to.include('stdio: "ignore"');
     expect(source).not.to.include("process.env.ANVIL");

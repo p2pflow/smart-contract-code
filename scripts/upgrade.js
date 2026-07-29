@@ -31,7 +31,7 @@ const SUPPORTED_FACETS = [
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "Diamond upgrade");
+  assertCouncilLocalSimulation(network.name, "Diamond upgrade", network.config);
   // --- resolve env vars ---
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) {

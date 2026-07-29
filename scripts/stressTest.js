@@ -16,18 +16,24 @@
 //   deployer, m1, m2, m3, u1..u10, keeper
 
 const { spawn } = require("child_process");
+const crypto = require("crypto");
+const fs = require("fs");
 const net = require("net");
+const os = require("os");
 const path = require("path");
-const { existsSync } = require("fs");
 const { ethers } = require("ethers");
 
 // ── Config ────────────────────────────────────────────────────────────────
 
-const ANVIL_HOST = "127.0.0.1";
-const HARDHAT_BIN = path.join(__dirname, "..", "node_modules", ".bin", "hardhat");
-const EXPECTED_CHAIN_ID = "0x7a69";
+const DEV_CHAIN_HOST = "127.0.0.1";
+const PROJECT_ROOT = path.resolve(__dirname, "..");
+const HARDHAT_CLI = path.join(PROJECT_ROOT, "node_modules", "hardhat", "internal", "cli", "cli.js");
 const EXPECTED_FIRST_ACCOUNT = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-let anvilPort = null;
+let devChainPort = null;
+let expectedChainId = null;
+let devChainInstanceId = null;
+let devChainConfigDir = null;
+let devChainConfigPath = null;
 let rpcUrl = null;
 
 // Anvil's deterministic mnemonic derives 10 default accounts. That's exactly
@@ -47,14 +53,14 @@ const OrderStatus = { CREATED: 0, ACCEPTED: 1, PAID: 2, COMPLETED: 3, CANCELLED:
 const DisputeStatus = { NONE: 0, OPEN: 1, SETTLED: 2 };
 const DisputeResult = { NONE: 0, USER_WINS: 1, MERCHANT_WINS: 2 };
 
-// ── Anvil lifecycle ───────────────────────────────────────────────────────
+// ── Owned dev-chain lifecycle ─────────────────────────────────────────────
 
 function allocateLoopbackPort() {
     return new Promise((resolve, reject) => {
         const server = net.createServer();
         server.unref();
         server.on("error", reject);
-        server.listen({ host: ANVIL_HOST, port: 0, exclusive: true }, () => {
+        server.listen({ host: DEV_CHAIN_HOST, port: 0, exclusive: true }, () => {
             const address = server.address();
             if (!address || typeof address === "string") {
                 server.close(() => reject(new Error("could not allocate an owned loopback port")));
@@ -80,17 +86,32 @@ async function rpc(method, params = []) {
     return payload.result;
 }
 
-async function waitForRpc(url, timeoutMs = 15_000) {
+async function waitForRpc(timeoutMs = 15_000) {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
         try {
+            if (
+                devChainProc === null ||
+                devChainProc.pid === undefined ||
+                devChainProc.exitCode !== null ||
+                devChainProc.signalCode !== null
+            ) {
+                throw new Error("spawned Hardhat process exited before RPC identity verification");
+            }
             const chainId = await rpc("eth_chainId");
             const accounts = await rpc("eth_accounts");
+            const metadata = await rpc("hardhat_metadata");
             if (
-                chainId === EXPECTED_CHAIN_ID &&
+                chainId === expectedChainId &&
                 Array.isArray(accounts) &&
-                String(accounts[0] || "").toLowerCase() === EXPECTED_FIRST_ACCOUNT
+                String(accounts[0] || "").toLowerCase() === EXPECTED_FIRST_ACCOUNT &&
+                metadata &&
+                metadata.chainId === Number.parseInt(expectedChainId, 16) &&
+                typeof metadata.instanceId === "string" &&
+                metadata.instanceId.length > 0 &&
+                !metadata.forkedNetwork
             ) {
+                devChainInstanceId = metadata.instanceId;
                 return true;
             }
             throw new Error("listener does not match the owned deterministic dev-chain identity");
@@ -102,51 +123,140 @@ async function waitForRpc(url, timeoutMs = 15_000) {
     return false;
 }
 
-let anvilProc = null;
-async function ensureAnvil() {
-    if (anvilProc !== null || anvilPort !== null || rpcUrl !== null) {
+let devChainProc = null;
+let stopDevChainPromise = null;
+
+function createUniqueHardhatConfig() {
+    const chainId = crypto.randomInt(100_000, 2_000_000_000);
+    expectedChainId = `0x${chainId.toString(16)}`;
+    devChainConfigDir = fs.mkdtempSync(path.join(os.tmpdir(), "p2pflow-stress-"));
+    devChainConfigPath = path.join(devChainConfigDir, "hardhat.config.cjs");
+    const contents = [
+        "module.exports = {",
+        "  networks: {",
+        "    hardhat: {",
+        `      chainId: ${chainId},`,
+        `      accounts: { mnemonic: ${JSON.stringify(DEFAULT_MNEMONIC)} },`,
+        "    },",
+        "  },",
+        "};",
+        "",
+    ].join("\n");
+    fs.writeFileSync(devChainConfigPath, contents, { encoding: "utf8", mode: 0o600 });
+}
+
+async function ensureOwnedDevChain() {
+    if (
+        devChainProc !== null ||
+        devChainPort !== null ||
+        rpcUrl !== null ||
+        devChainConfigDir !== null
+    ) {
         throw new Error("stress runner attempted to allocate its dev chain more than once");
     }
-    if (!existsSync(HARDHAT_BIN)) {
-        throw new Error(`local Hardhat binary not found at ${HARDHAT_BIN}; run npm ci first`);
+    if (!fs.existsSync(HARDHAT_CLI)) {
+        throw new Error(`local Hardhat CLI not found at ${HARDHAT_CLI}; run npm ci first`);
     }
-    anvilPort = await allocateLoopbackPort();
-    rpcUrl = `http://${ANVIL_HOST}:${anvilPort}`;
-    console.log(`↳ spawning owned Hardhat dev chain on ${ANVIL_HOST}:${anvilPort}`);
-    anvilProc = spawn(
-        HARDHAT_BIN,
+    devChainPort = await allocateLoopbackPort();
+    createUniqueHardhatConfig();
+    rpcUrl = `http://${DEV_CHAIN_HOST}:${devChainPort}`;
+    console.log(`↳ spawning owned Hardhat dev chain on ${DEV_CHAIN_HOST}:${devChainPort}`);
+    devChainProc = spawn(
+        process.execPath,
         [
+            HARDHAT_CLI,
+            "--config", devChainConfigPath,
             "node",
-            "--hostname", ANVIL_HOST,
-            "--port", String(anvilPort),
+            "--hostname", DEV_CHAIN_HOST,
+            "--port", String(devChainPort),
         ],
         {
             stdio: "ignore",
-            env: { PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin" },
+            cwd: PROJECT_ROOT,
+            env: {
+                HOME: os.homedir(),
+                PATH: "/usr/local/bin:/usr/bin:/bin",
+            },
         },
     );
-    anvilProc.on("exit", (code) => {
-        if (code && code !== 0) console.error(`anvil exited with code ${code}`);
+    devChainProc.on("exit", (code) => {
+        if (code && code !== 0) console.error(`owned Hardhat process exited with code ${code}`);
     });
-    const up = await waitForRpc(rpcUrl);
+    const up = await waitForRpc();
     if (!up) throw new Error("owned Hardhat dev chain did not become ready within 15s");
-    return anvilProc;
+    return devChainProc;
 }
 
-function stopAnvil() {
-    if (anvilProc) {
-        try { anvilProc.kill("SIGTERM"); } catch { /* ignore */ }
+async function assertOwnedDevChainIdentity() {
+    if (
+        devChainProc === null ||
+        devChainProc.exitCode !== null ||
+        devChainProc.signalCode !== null ||
+        devChainInstanceId === null
+    ) {
+        throw new Error("owned Hardhat process is not alive");
+    }
+    const metadata = await rpc("hardhat_metadata");
+    const chainId = await rpc("eth_chainId");
+    if (
+        chainId !== expectedChainId ||
+        !metadata ||
+        metadata.instanceId !== devChainInstanceId ||
+        metadata.chainId !== Number.parseInt(expectedChainId, 16) ||
+        metadata.forkedNetwork
+    ) {
+        throw new Error("owned Hardhat process identity changed before signing");
     }
 }
-process.on("SIGINT", () => { stopAnvil(); process.exit(130); });
-process.on("SIGTERM", () => { stopAnvil(); process.exit(143); });
+
+async function stopOwnedDevChain() {
+    if (stopDevChainPromise !== null) return stopDevChainPromise;
+    stopDevChainPromise = (async () => {
+        const child = devChainProc;
+        if (child !== null && child.exitCode === null && child.signalCode === null) {
+            await new Promise((resolve) => {
+                let forceTimer;
+                const finish = () => {
+                    clearTimeout(forceTimer);
+                    resolve();
+                };
+                child.once("exit", finish);
+                forceTimer = setTimeout(() => {
+                    try { child.kill("SIGKILL"); } catch { /* already gone */ }
+                }, 5_000);
+                try {
+                    child.kill("SIGTERM");
+                } catch {
+                    finish();
+                }
+            });
+        }
+        devChainProc = null;
+        if (devChainConfigDir !== null) {
+            fs.rmSync(devChainConfigDir, { force: true, recursive: true });
+        }
+        devChainConfigDir = null;
+        devChainConfigPath = null;
+    })();
+    return stopDevChainPromise;
+}
+
+let signalShutdownStarted = false;
+async function shutdownForSignal(exitCode) {
+    if (signalShutdownStarted) return;
+    signalShutdownStarted = true;
+    await stopOwnedDevChain();
+    process.exit(exitCode);
+}
+process.once("SIGINT", () => { void shutdownForSignal(130); });
+process.once("SIGTERM", () => { void shutdownForSignal(143); });
 
 // ── Artifact loading (hardhat's compile output) ───────────────────────────
 
 const ARTIFACT_ROOT = path.join(__dirname, "..", "artifacts", "contracts");
 function loadArtifact(relPath) {
     const full = path.join(ARTIFACT_ROOT, relPath);
-    if (!existsSync(full)) {
+    if (!fs.existsSync(full)) {
         throw new Error(`Artifact missing: ${relPath}. Run 'npx hardhat compile' first.`);
     }
     // eslint-disable-next-line global-require
@@ -180,9 +290,10 @@ async function deployStack() {
     // "nonce too low" (client keeps re-signing with nonce=0). `staticNetwork`
     // skips the chain-id round-trip on every call. `batchMaxCount: 1`
     // disables JSON-RPC batching so each request fires immediately.
-    if (rpcUrl === null || anvilProc === null) {
+    if (rpcUrl === null || devChainProc === null) {
         throw new Error("owned Hardhat dev chain was not initialized");
     }
+    await assertOwnedDevChainIdentity();
     const provider = new ethers.JsonRpcProvider(rpcUrl, undefined, {
         staticNetwork: true,
         batchMaxCount: 1,
@@ -1780,7 +1891,7 @@ async function runAllTests(fx) {
 (async function main() {
     const t0 = Date.now();
     try {
-        await ensureAnvil();
+        await ensureOwnedDevChain();
         console.log("↳ deploying full Diamond stack...");
         const fx = await deployStack();
         console.log(`↳ diamond deployed at ${fx.diamondAddress}`);
@@ -1790,7 +1901,7 @@ async function runAllTests(fx) {
         console.error("\nFATAL:", e?.message || e);
         results.failed += 1;
     } finally {
-        stopAnvil();
+        await stopOwnedDevChain();
     }
 
     const totalMs = Date.now() - t0;
@@ -1805,7 +1916,8 @@ async function runAllTests(fx) {
             console.log(`  ✗ ${c.name}`);
             console.log(`      ${c.err}`);
         }
-        process.exit(1);
+        process.exitCode = 1;
+        return;
     }
-    process.exit(0);
+    process.exitCode = 0;
 })();

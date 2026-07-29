@@ -20,12 +20,16 @@ value-moving work.
 The repository enforces that stop in code. `hardhat.config.js` neither loads
 `.env` nor declares a remote network or signer account. Every packaged Sepolia
 deploy/upgrade/mint command exits through `scripts/councilGate.js`, and each
-state-changing Hardhat script checks the network before reading mutation inputs
-or accessing a signer. Only `hardhat`/`localhost` simulations are permitted.
-The stress runner creates, identity-checks, and terminates its own dynamically
-allocated loopback Hardhat chain; it accepts no endpoint, mnemonic, or binary
-override and never reuses a listener. Removing any of these locks requires a
-separate reviewed commit after a future passing bill.
+state-changing Hardhat script checks the resolved configuration before reading
+mutation inputs or accessing a signer. Only a non-forked in-process `hardhat`
+network with deterministic development accounts is permitted; even a network
+named `localhost` is rejected. The stress runner launches the absolute local
+Hardhat CLI through the absolute current Node binary, using a minimal
+environment, fixed project directory, unique random chain ID, non-forked
+instance identity, and dynamically allocated loopback port. It rechecks that
+same live child immediately before signing and awaits termination (with bounded
+SIGKILL escalation) before exit. Removing any lock requires a separate reviewed
+commit after a future passing bill.
 
 ## Non-negotiable rules
 

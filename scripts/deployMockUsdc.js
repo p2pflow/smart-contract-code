@@ -4,7 +4,11 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "mock USDC deployment or mint");
+  assertCouncilLocalSimulation(
+    network.name,
+    "mock USDC deployment or mint",
+    network.config,
+  );
   const [deployer] = await ethers.getSigners();
   console.log("Deploying Mock USDC with account:", deployer.address);
   console.log("Network:", network.name);
