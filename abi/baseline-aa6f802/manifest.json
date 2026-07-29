@@ -1,0 +1,56 @@
+{
+  "baseline": "aa6f802",
+  "contracts": [
+    {
+      "abiHash": "0x866fac051b7c9497e88b4198f6baa846a45beea6f2e549a2513c5a3e48cdeb30",
+      "contractName": "Diamond",
+      "file": "Diamond.abi.json",
+      "runtimeHash": "0x054daffcd2719790d6adf588677a3d33d1fed526c9f7df652982639c082fb2ac",
+      "sourceName": "contracts/Diamond.sol"
+    },
+    {
+      "abiHash": "0xfb47f3cebf2f1952197bf140c6403bcd3a36dde83acab6970582c85a98e24667",
+      "contractName": "DiamondCutFacet",
+      "file": "DiamondCutFacet.abi.json",
+      "runtimeHash": "0x2424f646578e3de36e604b7e34216ce8897386fa839098c3c5b3ea673bc45882",
+      "sourceName": "contracts/facets/DiamondCutFacet.sol"
+    },
+    {
+      "abiHash": "0xe8d2d3aca31f5f06da15c3d70082647cdbe66b1a1bf5e8867a641bdda5bac708",
+      "contractName": "DiamondLoupeFacet",
+      "file": "DiamondLoupeFacet.abi.json",
+      "runtimeHash": "0x5014f72ae8c67eb0e572ea963fb29fa738ac907030beb07fc05ec4a2ae9d9fa2",
+      "sourceName": "contracts/facets/DiamondLoupeFacet.sol"
+    },
+    {
+      "abiHash": "0xf80b01dbc0affacef475d06312dad7611bec2c10e3f048629885241a7af0f1a2",
+      "contractName": "OwnershipFacet",
+      "file": "OwnershipFacet.abi.json",
+      "runtimeHash": "0x17ec3cbff6f1fc9cee7a73c2088afd37c239942643991f82bf5c915983e2cca9",
+      "sourceName": "contracts/facets/OwnershipFacet.sol"
+    },
+    {
+      "abiHash": "0x83e6dc6e894edd557d00f48b6bcefa8cc071bdd9656747d02661e1da6afdc5f1",
+      "contractName": "ConfigFacet",
+      "file": "ConfigFacet.abi.json",
+      "runtimeHash": "0xcfcc9996adf72d0bebab17b5695c21a14aa325057a3255ad4764b3242dde5a27",
+      "sourceName": "contracts/facets/ConfigFacet.sol"
+    },
+    {
+      "abiHash": "0x62f815e60687413407a371e9947be56fc57907eaec5881fb32e2d687d9fad5a1",
+      "contractName": "MerchantFacet",
+      "file": "MerchantFacet.abi.json",
+      "runtimeHash": "0x30cc890cbb1341416dd68abfdf11802579ababd6a56ffdd0601dc96d0cfa2541",
+      "sourceName": "contracts/facets/MerchantFacet.sol"
+    },
+    {
+      "abiHash": "0x63d7d7b5e3407db23c38f23bb3794287e8916a99e0e279be0b3f45df6030292d",
+      "contractName": "OrderFacet",
+      "file": "OrderFacet.abi.json",
+      "runtimeHash": "0xa31a0fef91f6d951ef4aff395a1273e6331248aff54bdd82342570168df354a6",
+      "sourceName": "contracts/facets/OrderFacet.sol"
+    }
+  ],
+  "kind": "p2pflow-aa6-abi-export-manifest",
+  "schemaVersion": 1
+}

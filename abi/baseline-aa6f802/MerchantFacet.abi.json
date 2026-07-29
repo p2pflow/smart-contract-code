@@ -1,0 +1,1050 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MerchantAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "AvailabilityChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "ChannelAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "ChannelApproved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ChannelAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "ChannelAvailabilityChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "ChannelRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "ChannelTerminated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "fromChannelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "toChannelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FiatMigrated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantBlacklisted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantDisputeCleared",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantDisputed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usdcLiquidity",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "UnstakeRequestRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "UnstakeRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "UsdcDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "UsdcWithdrawn",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "bankName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "accountLast4",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "upiId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "label",
+        "type": "string"
+      }
+    ],
+    "name": "addPaymentChannel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "approveChannel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "approveMerchantUnstake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "blacklistMerchant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "clearMerchantDispute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositStake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllMerchants",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getChannel",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "bankName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "accountLast4",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "upiId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "enum ChannelStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum ChannelAvailability",
+            "name": "availability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fiatBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "appliedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_dailyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_monthlyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiat",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PaymentChannel",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getChannelLimits",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "dailyLimitUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "dailyVolumeUsed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "dailyResetsAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "monthlyLimitUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "monthlyVolumeUsed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "monthlyResetsAt",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "getMerchant",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "enum MerchantAccountStatus",
+            "name": "accountStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum MerchantAvailability",
+            "name": "availability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "usdcLiquidity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "unstakePending",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unstakeRequestedAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "telegramUsername",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "channelIds",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "riskUsdc",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Merchant",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "getMerchantChannels",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "bankName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "accountLast4",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "upiId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "enum ChannelStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum ChannelAvailability",
+            "name": "availability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fiatBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "appliedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_dailyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_monthlyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiat",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PaymentChannel[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getMyChannels",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "bankName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "accountLast4",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "upiId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "enum ChannelStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum ChannelAvailability",
+            "name": "availability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fiatBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "appliedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_dailyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "__deprecated_monthlyLimitUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyVolumeUsed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyWindowStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiat",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PaymentChannel[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getMyProfile",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "enum MerchantAccountStatus",
+            "name": "accountStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum MerchantAvailability",
+            "name": "availability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "usdcLiquidity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "unstakePending",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unstakeRequestedAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "telegramUsername",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "channelIds",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "riskUsdc",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Merchant",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPendingChannels",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "goOffline",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "goOnline",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "fromChannelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "toChannelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "migrateAndTerminate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakeAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "telegramUsername",
+        "type": "string"
+      }
+    ],
+    "name": "registerMerchant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "rejectChannel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "rejectMerchantUnstake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "setMerchantDisputed",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setPaymentChannelActive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setPaymentChannelInactive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdrawStake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

@@ -1,0 +1,351 @@
+{
+  "baseline": "embedded-exact-aa6",
+  "comparison": {
+    "actions": {
+      "Add": [],
+      "Remove": [],
+      "Replace": []
+    },
+    "calldataIncluded": false,
+    "changedSelectorCount": 0,
+    "collisions": [],
+    "executableDiamondCutIncluded": false,
+    "ok": true,
+    "signatureHashCollisions": [],
+    "summary": {
+      "add": 0,
+      "baselineFacetCount": 6,
+      "baselineSelectorCount": 63,
+      "collision": 0,
+      "currentFacetCount": 6,
+      "currentSelectorCount": 63,
+      "remove": 0,
+      "replace": 0,
+      "unchanged": 63
+    },
+    "transactionDisabled": true,
+    "unchanged": [
+      {
+        "facet": "DiamondLoupeFacet",
+        "selector": "0x01ffc9a7",
+        "signature": "supportsInterface(bytes4)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x0586296c",
+        "signature": "migrateAndTerminate(bytes32,bytes32)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x09ec0f24",
+        "signature": "addEligibleMerchant(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x1a9ba7eb",
+        "signature": "unpausePlatform()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x1dcad144",
+        "signature": "setPaymentChannelInactive(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x1e3e148d",
+        "signature": "getChannelFiat(bytes32)"
+      },
+      {
+        "facet": "DiamondCutFacet",
+        "selector": "0x1f931c1c",
+        "signature": "diamondCut((address,uint8,bytes4[])[],address,bytes)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x1fee2a96",
+        "signature": "addPaymentChannel(string,string,string,string)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x21527e50",
+        "signature": "getMyProfile()"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x2f583d4b",
+        "signature": "getEligibleMerchants()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x30321dcc",
+        "signature": "blacklistMerchant(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x332226d0",
+        "signature": "setDisputeWindow(uint256)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x3397d9a2",
+        "signature": "transferPlatformAdmin(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x3551ac6c",
+        "signature": "clearEligibleMerchants()"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x3611d088",
+        "signature": "confirmPayment(bytes32)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x38a9f5df",
+        "signature": "rejectChannel(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x3af1b286",
+        "signature": "markPaymentSent(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x3c81c4b8",
+        "signature": "createSellOrder(uint256)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x3d58ff4a",
+        "signature": "approveChannel(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x49085d8c",
+        "signature": "settleOrder(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x4ebac543",
+        "signature": "getMerchantOrders(address)"
+      },
+      {
+        "facet": "DiamondLoupeFacet",
+        "selector": "0x52ef6b2c",
+        "signature": "facetAddresses()"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x5778472a",
+        "signature": "getOrder(bytes32)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x5b020623",
+        "signature": "getChannelLimits(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x63c69f08",
+        "signature": "getUserOrders(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x64ec2ceb",
+        "signature": "setMinMerchantStake(uint256)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x66d3b61c",
+        "signature": "rejectMerchantUnstake(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x6a96f84d",
+        "signature": "removeEligibleMerchant(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x6b78c29b",
+        "signature": "pausePlatform()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x6e5b676b",
+        "signature": "goOnline()"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x7372f2f1",
+        "signature": "getAssignedMerchants(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x7489ec23",
+        "signature": "cancelOrder(bytes32)"
+      },
+      {
+        "facet": "DiamondLoupeFacet",
+        "selector": "0x7a0ed627",
+        "signature": "facets()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x8307d08b",
+        "signature": "getPendingChannels()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x831c2b82",
+        "signature": "getChannel(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x84ce1bfc",
+        "signature": "createBuyOrder(uint256)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x892b8a9c",
+        "signature": "setDefaultChannelLimits(uint256,uint256)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x8ce2df51",
+        "signature": "getAllMerchants()"
+      },
+      {
+        "facet": "OwnershipFacet",
+        "selector": "0x8da5cb5b",
+        "signature": "owner()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0x8e0540de",
+        "signature": "setMerchantDisputed(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0x903eadc0",
+        "signature": "isEligibleMerchant(address)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0x9e0acf8f",
+        "signature": "getOrderIds()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xa6485ccd",
+        "signature": "goOffline()"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0xab211bd9",
+        "signature": "getOrderPricing()"
+      },
+      {
+        "facet": "DiamondLoupeFacet",
+        "selector": "0xadfca15e",
+        "signature": "facetFunctionSelectors(address)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xae180328",
+        "signature": "getMyChannels()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xb00c52b0",
+        "signature": "registerMerchant(uint256,string)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xb2734eaf",
+        "signature": "getMerchant(address)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xb4de411c",
+        "signature": "getMerchantChannels(address)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0xb641237c",
+        "signature": "resolveDispute(bytes32,uint8)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xb7889c93",
+        "signature": "setPaymentChannelActive(bytes32)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xbb634d55",
+        "signature": "approveMerchantUnstake(address)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xbed9d861",
+        "signature": "withdrawStake()"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0xbf284d84",
+        "signature": "getChannelLimitDefaults()"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0xc3f909d4",
+        "signature": "getConfig()"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xcb82cc8f",
+        "signature": "depositStake(uint256)"
+      },
+      {
+        "facet": "DiamondLoupeFacet",
+        "selector": "0xcdffacc6",
+        "signature": "facetAddress(bytes4)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0xd6039a61",
+        "signature": "acceptOrder(bytes32,bytes32)"
+      },
+      {
+        "facet": "MerchantFacet",
+        "selector": "0xd91b0a8d",
+        "signature": "clearMerchantDispute(address)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0xe14f5b7d",
+        "signature": "raiseDispute(bytes32)"
+      },
+      {
+        "facet": "OrderFacet",
+        "selector": "0xeb0817c5",
+        "signature": "getMerchantBalances(address)"
+      },
+      {
+        "facet": "OwnershipFacet",
+        "selector": "0xf2fde38b",
+        "signature": "transferOwnership(address)"
+      },
+      {
+        "facet": "ConfigFacet",
+        "selector": "0xf7260e6e",
+        "signature": "setOrderPricing(uint256,uint256)"
+      }
+    ]
+  },
+  "councilGate": "REJECTED_NO_EXECUTION",
+  "kind": "p2pflow-selector-diff",
+  "metadataOnly": true,
+  "ok": true,
+  "schemaVersion": 1,
+  "transactionDisabled": true
+}

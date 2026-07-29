@@ -1,0 +1,1313 @@
+{
+  "appStorage": {
+    "finalAllocatedSlot": "21",
+    "lastDeclaredRoot": {
+      "label": "eligibleMerchantIndex",
+      "offset": 0,
+      "slot": "21"
+    },
+    "numberOfBytes": "704",
+    "rootVariable": {
+      "astId": 8158,
+      "contract": "contracts/shared/AppStorage.sol:Modifiers",
+      "label": "s",
+      "offset": 0,
+      "slot": "0",
+      "typeId": "t_struct(AppStorage)8155_storage"
+    },
+    "roots": [
+      {
+        "absoluteSlot": "0",
+        "astId": 8081,
+        "label": "config",
+        "offset": 0,
+        "relativeSlot": "0",
+        "type": {
+          "encoding": "inplace",
+          "label": "struct PlatformConfig",
+          "numberOfBytes": "128",
+          "typeId": "t_struct(PlatformConfig)8078_storage"
+        }
+      },
+      {
+        "absoluteSlot": "4",
+        "astId": 8086,
+        "label": "merchants",
+        "offset": 0,
+        "relativeSlot": "4",
+        "type": {
+          "encoding": "mapping",
+          "key": "address",
+          "label": "mapping(address => struct Merchant)",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_address,t_struct(Merchant)8023_storage)",
+          "value": "struct Merchant"
+        }
+      },
+      {
+        "absoluteSlot": "5",
+        "astId": 8089,
+        "label": "merchantList",
+        "offset": 0,
+        "relativeSlot": "5",
+        "type": {
+          "base": "address",
+          "encoding": "dynamic_array",
+          "label": "address[]",
+          "numberOfBytes": "32",
+          "typeId": "t_array(t_address)dyn_storage"
+        }
+      },
+      {
+        "absoluteSlot": "6",
+        "astId": 8094,
+        "label": "channels",
+        "offset": 0,
+        "relativeSlot": "6",
+        "type": {
+          "encoding": "mapping",
+          "key": "bytes32",
+          "label": "mapping(bytes32 => struct PaymentChannel)",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_bytes32,t_struct(PaymentChannel)8065_storage)",
+          "value": "struct PaymentChannel"
+        }
+      },
+      {
+        "absoluteSlot": "7",
+        "astId": 8099,
+        "label": "channelDuplicateGuard",
+        "offset": 0,
+        "relativeSlot": "7",
+        "type": {
+          "encoding": "mapping",
+          "key": "bytes32",
+          "label": "mapping(bytes32 => bool)",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_bytes32,t_bool)",
+          "value": "bool"
+        }
+      },
+      {
+        "absoluteSlot": "8",
+        "astId": 8102,
+        "label": "_reentrancyStatus",
+        "offset": 0,
+        "relativeSlot": "8",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "9",
+        "astId": 8105,
+        "label": "defaultChannelDailyLimitUsdc",
+        "offset": 0,
+        "relativeSlot": "9",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "10",
+        "astId": 8108,
+        "label": "defaultChannelMonthlyLimitUsdc",
+        "offset": 0,
+        "relativeSlot": "10",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "11",
+        "astId": 8111,
+        "label": "buyPriceInrPerUsdc",
+        "offset": 0,
+        "relativeSlot": "11",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "12",
+        "astId": 8114,
+        "label": "sellPriceInrPerUsdc",
+        "offset": 0,
+        "relativeSlot": "12",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "13",
+        "astId": 8117,
+        "label": "disputeWindowSeconds",
+        "offset": 0,
+        "relativeSlot": "13",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "14",
+        "astId": 8120,
+        "label": "orderNonce",
+        "offset": 0,
+        "relativeSlot": "14",
+        "type": {
+          "encoding": "inplace",
+          "label": "uint256",
+          "numberOfBytes": "32",
+          "typeId": "t_uint256"
+        }
+      },
+      {
+        "absoluteSlot": "15",
+        "astId": 8125,
+        "label": "orders",
+        "offset": 0,
+        "relativeSlot": "15",
+        "type": {
+          "encoding": "mapping",
+          "key": "bytes32",
+          "label": "mapping(bytes32 => struct Order)",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_bytes32,t_struct(Order)7994_storage)",
+          "value": "struct Order"
+        }
+      },
+      {
+        "absoluteSlot": "16",
+        "astId": 8128,
+        "label": "orderIds",
+        "offset": 0,
+        "relativeSlot": "16",
+        "type": {
+          "base": "bytes32",
+          "encoding": "dynamic_array",
+          "label": "bytes32[]",
+          "numberOfBytes": "32",
+          "typeId": "t_array(t_bytes32)dyn_storage"
+        }
+      },
+      {
+        "absoluteSlot": "17",
+        "astId": 8133,
+        "label": "userOrderIds",
+        "offset": 0,
+        "relativeSlot": "17",
+        "type": {
+          "encoding": "mapping",
+          "key": "address",
+          "label": "mapping(address => bytes32[])",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_address,t_array(t_bytes32)dyn_storage)",
+          "value": "bytes32[]"
+        }
+      },
+      {
+        "absoluteSlot": "18",
+        "astId": 8138,
+        "label": "merchantOrderIds",
+        "offset": 0,
+        "relativeSlot": "18",
+        "type": {
+          "encoding": "mapping",
+          "key": "address",
+          "label": "mapping(address => bytes32[])",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_address,t_array(t_bytes32)dyn_storage)",
+          "value": "bytes32[]"
+        }
+      },
+      {
+        "absoluteSlot": "19",
+        "astId": 8145,
+        "label": "orderAssignmentIndex",
+        "offset": 0,
+        "relativeSlot": "19",
+        "type": {
+          "encoding": "mapping",
+          "key": "bytes32",
+          "label": "mapping(bytes32 => mapping(address => bool))",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+          "value": "mapping(address => bool)"
+        }
+      },
+      {
+        "absoluteSlot": "20",
+        "astId": 8149,
+        "label": "eligibleMerchants",
+        "offset": 0,
+        "relativeSlot": "20",
+        "type": {
+          "base": "address",
+          "encoding": "dynamic_array",
+          "label": "address[]",
+          "numberOfBytes": "32",
+          "typeId": "t_array(t_address)dyn_storage"
+        }
+      },
+      {
+        "absoluteSlot": "21",
+        "astId": 8154,
+        "label": "eligibleMerchantIndex",
+        "offset": 0,
+        "relativeSlot": "21",
+        "type": {
+          "encoding": "mapping",
+          "key": "address",
+          "label": "mapping(address => uint256)",
+          "numberOfBytes": "32",
+          "typeId": "t_mapping(t_address,t_uint256)",
+          "value": "uint256"
+        }
+      }
+    ],
+    "slotCount": "22"
+  },
+  "baseline": "aa6f802",
+  "baselineAttestation": "verified",
+  "buildInfo": {
+    "compiler": {
+      "longVersion": "0.8.24+commit.e11b9ed9",
+      "settings": {
+        "evmVersion": "paris",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "": ["ast"],
+            "*": [
+              "abi",
+              "evm.bytecode",
+              "evm.deployedBytecode",
+              "evm.methodIdentifiers",
+              "metadata",
+              "storageLayout"
+            ]
+          }
+        }
+      },
+      "version": "0.8.24"
+    },
+    "file": "artifacts/build-info/9d6dd9e2d3ebbfcd8fe2a7fb5657c07c.json",
+    "id": "9d6dd9e2d3ebbfcd8fe2a7fb5657c07c",
+    "runtimeAttestations": [
+      {
+        "available": true,
+        "contractName": "Diamond",
+        "expectedAa6RuntimeHash": "0x054daffcd2719790d6adf588677a3d33d1fed526c9f7df652982639c082fb2ac",
+        "matchesAa6": true,
+        "runtimeHash": "0x054daffcd2719790d6adf588677a3d33d1fed526c9f7df652982639c082fb2ac"
+      },
+      {
+        "available": true,
+        "contractName": "DiamondCutFacet",
+        "expectedAa6RuntimeHash": "0x2424f646578e3de36e604b7e34216ce8897386fa839098c3c5b3ea673bc45882",
+        "matchesAa6": true,
+        "runtimeHash": "0x2424f646578e3de36e604b7e34216ce8897386fa839098c3c5b3ea673bc45882"
+      },
+      {
+        "available": true,
+        "contractName": "DiamondLoupeFacet",
+        "expectedAa6RuntimeHash": "0x5014f72ae8c67eb0e572ea963fb29fa738ac907030beb07fc05ec4a2ae9d9fa2",
+        "matchesAa6": true,
+        "runtimeHash": "0x5014f72ae8c67eb0e572ea963fb29fa738ac907030beb07fc05ec4a2ae9d9fa2"
+      },
+      {
+        "available": true,
+        "contractName": "OwnershipFacet",
+        "expectedAa6RuntimeHash": "0x17ec3cbff6f1fc9cee7a73c2088afd37c239942643991f82bf5c915983e2cca9",
+        "matchesAa6": true,
+        "runtimeHash": "0x17ec3cbff6f1fc9cee7a73c2088afd37c239942643991f82bf5c915983e2cca9"
+      },
+      {
+        "available": true,
+        "contractName": "ConfigFacet",
+        "expectedAa6RuntimeHash": "0xcfcc9996adf72d0bebab17b5695c21a14aa325057a3255ad4764b3242dde5a27",
+        "matchesAa6": true,
+        "runtimeHash": "0xcfcc9996adf72d0bebab17b5695c21a14aa325057a3255ad4764b3242dde5a27"
+      },
+      {
+        "available": true,
+        "contractName": "MerchantFacet",
+        "expectedAa6RuntimeHash": "0x30cc890cbb1341416dd68abfdf11802579ababd6a56ffdd0601dc96d0cfa2541",
+        "matchesAa6": true,
+        "runtimeHash": "0x30cc890cbb1341416dd68abfdf11802579ababd6a56ffdd0601dc96d0cfa2541"
+      },
+      {
+        "available": true,
+        "contractName": "OrderFacet",
+        "expectedAa6RuntimeHash": "0xa31a0fef91f6d951ef4aff395a1273e6331248aff54bdd82342570168df354a6",
+        "matchesAa6": true,
+        "runtimeHash": "0xa31a0fef91f6d951ef4aff395a1273e6331248aff54bdd82342570168df354a6"
+      }
+    ],
+    "source": {
+      "keccak256": "0xf07c0ae67f2eaaed163f5fdc39eda1772f397f149e15acdf69b08d952b856e1d",
+      "name": "contracts/shared/AppStorage.sol"
+    }
+  },
+  "enums": [
+    {
+      "astId": 7930,
+      "members": [
+        {
+          "astId": 7928,
+          "name": "ACTIVE",
+          "ordinal": 0
+        },
+        {
+          "astId": 7929,
+          "name": "INACTIVE",
+          "ordinal": 1
+        }
+      ],
+      "name": "ChannelAvailability",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(ChannelAvailability)7930"
+    },
+    {
+      "astId": 7926,
+      "members": [
+        {
+          "astId": 7922,
+          "name": "PENDING",
+          "ordinal": 0
+        },
+        {
+          "astId": 7923,
+          "name": "APPROVED",
+          "ordinal": 1
+        },
+        {
+          "astId": 7924,
+          "name": "REJECTED",
+          "ordinal": 2
+        },
+        {
+          "astId": 7925,
+          "name": "TERMINATED",
+          "ordinal": 3
+        }
+      ],
+      "name": "ChannelStatus",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(ChannelStatus)7926"
+    },
+    {
+      "astId": 7948,
+      "members": [
+        {
+          "astId": 7945,
+          "name": "NONE",
+          "ordinal": 0
+        },
+        {
+          "astId": 7946,
+          "name": "USER_WINS",
+          "ordinal": 1
+        },
+        {
+          "astId": 7947,
+          "name": "MERCHANT_WINS",
+          "ordinal": 2
+        }
+      ],
+      "name": "DisputeResult",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(DisputeResult)7948"
+    },
+    {
+      "astId": 7944,
+      "members": [
+        {
+          "astId": 7941,
+          "name": "NONE",
+          "ordinal": 0
+        },
+        {
+          "astId": 7942,
+          "name": "OPEN",
+          "ordinal": 1
+        },
+        {
+          "astId": 7943,
+          "name": "SETTLED",
+          "ordinal": 2
+        }
+      ],
+      "name": "DisputeStatus",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(DisputeStatus)7944"
+    },
+    {
+      "astId": 7916,
+      "members": [
+        {
+          "astId": 7912,
+          "name": "ACTIVE",
+          "ordinal": 0
+        },
+        {
+          "astId": 7913,
+          "name": "INACTIVE",
+          "ordinal": 1
+        },
+        {
+          "astId": 7914,
+          "name": "BLACKLISTED",
+          "ordinal": 2
+        },
+        {
+          "astId": 7915,
+          "name": "DISPUTED",
+          "ordinal": 3
+        }
+      ],
+      "name": "MerchantAccountStatus",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(MerchantAccountStatus)7916"
+    },
+    {
+      "astId": 7920,
+      "members": [
+        {
+          "astId": 7918,
+          "name": "ONLINE",
+          "ordinal": 0
+        },
+        {
+          "astId": 7919,
+          "name": "OFFLINE",
+          "ordinal": 1
+        }
+      ],
+      "name": "MerchantAvailability",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(MerchantAvailability)7920"
+    },
+    {
+      "astId": 7940,
+      "members": [
+        {
+          "astId": 7935,
+          "name": "CREATED",
+          "ordinal": 0
+        },
+        {
+          "astId": 7936,
+          "name": "ACCEPTED",
+          "ordinal": 1
+        },
+        {
+          "astId": 7937,
+          "name": "PAID",
+          "ordinal": 2
+        },
+        {
+          "astId": 7938,
+          "name": "COMPLETED",
+          "ordinal": 3
+        },
+        {
+          "astId": 7939,
+          "name": "CANCELLED",
+          "ordinal": 4
+        }
+      ],
+      "name": "OrderStatus",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(OrderStatus)7940"
+    },
+    {
+      "astId": 7934,
+      "members": [
+        {
+          "astId": 7932,
+          "name": "BUY",
+          "ordinal": 0
+        },
+        {
+          "astId": 7933,
+          "name": "SELL",
+          "ordinal": 1
+        }
+      ],
+      "name": "OrderType",
+      "numberOfBytes": "1",
+      "sourceName": "contracts/shared/AppStorage.sol",
+      "typeId": "t_enum(OrderType)7934"
+    }
+  ],
+  "kind": "p2pflow-app-storage-layout",
+  "nestedStructs": [
+    {
+      "label": "struct Merchant",
+      "members": [
+        {
+          "absoluteSlot": "0",
+          "astId": 7996,
+          "label": "wallet",
+          "offset": 0,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "0",
+          "astId": 7999,
+          "label": "accountStatus",
+          "offset": 20,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum MerchantAccountStatus",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(MerchantAccountStatus)7916"
+          }
+        },
+        {
+          "absoluteSlot": "0",
+          "astId": 8002,
+          "label": "availability",
+          "offset": 21,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum MerchantAvailability",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(MerchantAvailability)7920"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 8004,
+          "label": "usdcLiquidity",
+          "offset": 0,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "2",
+          "astId": 8007,
+          "label": "unstakePending",
+          "offset": 0,
+          "relativeSlot": "2",
+          "type": {
+            "encoding": "inplace",
+            "label": "bool",
+            "numberOfBytes": "1",
+            "typeId": "t_bool"
+          }
+        },
+        {
+          "absoluteSlot": "3",
+          "astId": 8009,
+          "label": "unstakeRequestedAmount",
+          "offset": 0,
+          "relativeSlot": "3",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "4",
+          "astId": 8011,
+          "label": "telegramUsername",
+          "offset": 0,
+          "relativeSlot": "4",
+          "type": {
+            "encoding": "bytes",
+            "label": "string",
+            "numberOfBytes": "32",
+            "typeId": "t_string_storage"
+          }
+        },
+        {
+          "absoluteSlot": "5",
+          "astId": 8013,
+          "label": "registeredAt",
+          "offset": 0,
+          "relativeSlot": "5",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "6",
+          "astId": 8016,
+          "label": "channelIds",
+          "offset": 0,
+          "relativeSlot": "6",
+          "type": {
+            "base": "bytes32",
+            "encoding": "dynamic_array",
+            "label": "bytes32[]",
+            "numberOfBytes": "32",
+            "typeId": "t_array(t_bytes32)dyn_storage"
+          }
+        },
+        {
+          "absoluteSlot": "7",
+          "astId": 8019,
+          "label": "reservedUsdc",
+          "offset": 0,
+          "relativeSlot": "7",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "8",
+          "astId": 8022,
+          "label": "riskUsdc",
+          "offset": 0,
+          "relativeSlot": "8",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        }
+      ],
+      "numberOfBytes": "288",
+      "slotCount": 9,
+      "typeId": "t_struct(Merchant)8023_storage"
+    },
+    {
+      "label": "struct Order",
+      "members": [
+        {
+          "absoluteSlot": "0",
+          "astId": 7950,
+          "label": "orderId",
+          "offset": 0,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "bytes32",
+            "numberOfBytes": "32",
+            "typeId": "t_bytes32"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 7953,
+          "label": "orderType",
+          "offset": 0,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum OrderType",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(OrderType)7934"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 7956,
+          "label": "status",
+          "offset": 1,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum OrderStatus",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(OrderStatus)7940"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 7958,
+          "label": "user",
+          "offset": 2,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "2",
+          "astId": 7960,
+          "label": "merchant",
+          "offset": 0,
+          "relativeSlot": "2",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "3",
+          "astId": 7962,
+          "label": "channelId",
+          "offset": 0,
+          "relativeSlot": "3",
+          "type": {
+            "encoding": "inplace",
+            "label": "bytes32",
+            "numberOfBytes": "32",
+            "typeId": "t_bytes32"
+          }
+        },
+        {
+          "absoluteSlot": "4",
+          "astId": 7964,
+          "label": "usdcAmount",
+          "offset": 0,
+          "relativeSlot": "4",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "5",
+          "astId": 7966,
+          "label": "fiatAmount",
+          "offset": 0,
+          "relativeSlot": "5",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "6",
+          "astId": 7968,
+          "label": "price",
+          "offset": 0,
+          "relativeSlot": "6",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "7",
+          "astId": 7970,
+          "label": "createdAt",
+          "offset": 0,
+          "relativeSlot": "7",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "8",
+          "astId": 7972,
+          "label": "acceptedAt",
+          "offset": 0,
+          "relativeSlot": "8",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "9",
+          "astId": 7974,
+          "label": "paidAt",
+          "offset": 0,
+          "relativeSlot": "9",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "10",
+          "astId": 7976,
+          "label": "completedAt",
+          "offset": 0,
+          "relativeSlot": "10",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "11",
+          "astId": 7978,
+          "label": "cancelledAt",
+          "offset": 0,
+          "relativeSlot": "11",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "12",
+          "astId": 7980,
+          "label": "disputeExpiresAt",
+          "offset": 0,
+          "relativeSlot": "12",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "13",
+          "astId": 7983,
+          "label": "disputeStatus",
+          "offset": 0,
+          "relativeSlot": "13",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum DisputeStatus",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(DisputeStatus)7944"
+          }
+        },
+        {
+          "absoluteSlot": "13",
+          "astId": 7985,
+          "label": "disputeResolver",
+          "offset": 1,
+          "relativeSlot": "13",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "13",
+          "astId": 7988,
+          "label": "disputeResult",
+          "offset": 21,
+          "relativeSlot": "13",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum DisputeResult",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(DisputeResult)7948"
+          }
+        },
+        {
+          "absoluteSlot": "14",
+          "astId": 7991,
+          "label": "assignedMerchants",
+          "offset": 0,
+          "relativeSlot": "14",
+          "type": {
+            "base": "address",
+            "encoding": "dynamic_array",
+            "label": "address[]",
+            "numberOfBytes": "32",
+            "typeId": "t_array(t_address)dyn_storage"
+          }
+        },
+        {
+          "absoluteSlot": "15",
+          "astId": 7993,
+          "label": "riskReleased",
+          "offset": 0,
+          "relativeSlot": "15",
+          "type": {
+            "encoding": "inplace",
+            "label": "bool",
+            "numberOfBytes": "1",
+            "typeId": "t_bool"
+          }
+        }
+      ],
+      "numberOfBytes": "512",
+      "slotCount": 16,
+      "typeId": "t_struct(Order)7994_storage"
+    },
+    {
+      "label": "struct PaymentChannel",
+      "members": [
+        {
+          "absoluteSlot": "0",
+          "astId": 8025,
+          "label": "channelId",
+          "offset": 0,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "bytes32",
+            "numberOfBytes": "32",
+            "typeId": "t_bytes32"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 8027,
+          "label": "merchant",
+          "offset": 0,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "2",
+          "astId": 8029,
+          "label": "bankName",
+          "offset": 0,
+          "relativeSlot": "2",
+          "type": {
+            "encoding": "bytes",
+            "label": "string",
+            "numberOfBytes": "32",
+            "typeId": "t_string_storage"
+          }
+        },
+        {
+          "absoluteSlot": "3",
+          "astId": 8031,
+          "label": "accountLast4",
+          "offset": 0,
+          "relativeSlot": "3",
+          "type": {
+            "encoding": "bytes",
+            "label": "string",
+            "numberOfBytes": "32",
+            "typeId": "t_string_storage"
+          }
+        },
+        {
+          "absoluteSlot": "4",
+          "astId": 8033,
+          "label": "upiId",
+          "offset": 0,
+          "relativeSlot": "4",
+          "type": {
+            "encoding": "bytes",
+            "label": "string",
+            "numberOfBytes": "32",
+            "typeId": "t_string_storage"
+          }
+        },
+        {
+          "absoluteSlot": "5",
+          "astId": 8035,
+          "label": "label",
+          "offset": 0,
+          "relativeSlot": "5",
+          "type": {
+            "encoding": "bytes",
+            "label": "string",
+            "numberOfBytes": "32",
+            "typeId": "t_string_storage"
+          }
+        },
+        {
+          "absoluteSlot": "6",
+          "astId": 8038,
+          "label": "status",
+          "offset": 0,
+          "relativeSlot": "6",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum ChannelStatus",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(ChannelStatus)7926"
+          }
+        },
+        {
+          "absoluteSlot": "6",
+          "astId": 8041,
+          "label": "availability",
+          "offset": 1,
+          "relativeSlot": "6",
+          "type": {
+            "encoding": "inplace",
+            "label": "enum ChannelAvailability",
+            "numberOfBytes": "1",
+            "typeId": "t_enum(ChannelAvailability)7930"
+          }
+        },
+        {
+          "absoluteSlot": "7",
+          "astId": 8043,
+          "label": "fiatBalance",
+          "offset": 0,
+          "relativeSlot": "7",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "8",
+          "astId": 8045,
+          "label": "appliedAt",
+          "offset": 0,
+          "relativeSlot": "8",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "9",
+          "astId": 8047,
+          "label": "reviewedAt",
+          "offset": 0,
+          "relativeSlot": "9",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "10",
+          "astId": 8050,
+          "label": "__deprecated_dailyLimitUsdc",
+          "offset": 0,
+          "relativeSlot": "10",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "11",
+          "astId": 8052,
+          "label": "__deprecated_monthlyLimitUsdc",
+          "offset": 0,
+          "relativeSlot": "11",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "12",
+          "astId": 8055,
+          "label": "dailyVolumeUsed",
+          "offset": 0,
+          "relativeSlot": "12",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "13",
+          "astId": 8057,
+          "label": "dailyWindowStart",
+          "offset": 0,
+          "relativeSlot": "13",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "14",
+          "astId": 8059,
+          "label": "monthlyVolumeUsed",
+          "offset": 0,
+          "relativeSlot": "14",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "15",
+          "astId": 8061,
+          "label": "monthlyWindowStart",
+          "offset": 0,
+          "relativeSlot": "15",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "16",
+          "astId": 8064,
+          "label": "reservedFiat",
+          "offset": 0,
+          "relativeSlot": "16",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        }
+      ],
+      "numberOfBytes": "544",
+      "slotCount": 17,
+      "typeId": "t_struct(PaymentChannel)8065_storage"
+    },
+    {
+      "label": "struct PlatformConfig",
+      "members": [
+        {
+          "absoluteSlot": "0",
+          "astId": 8068,
+          "label": "admin",
+          "offset": 0,
+          "relativeSlot": "0",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 8070,
+          "label": "usdcToken",
+          "offset": 0,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "address",
+            "numberOfBytes": "20",
+            "typeId": "t_address"
+          }
+        },
+        {
+          "absoluteSlot": "1",
+          "astId": 8072,
+          "label": "paused",
+          "offset": 20,
+          "relativeSlot": "1",
+          "type": {
+            "encoding": "inplace",
+            "label": "bool",
+            "numberOfBytes": "1",
+            "typeId": "t_bool"
+          }
+        },
+        {
+          "absoluteSlot": "2",
+          "astId": 8074,
+          "label": "minMerchantStakeUsdc",
+          "offset": 0,
+          "relativeSlot": "2",
+          "type": {
+            "encoding": "inplace",
+            "label": "uint256",
+            "numberOfBytes": "32",
+            "typeId": "t_uint256"
+          }
+        },
+        {
+          "absoluteSlot": "3",
+          "astId": 8077,
+          "label": "initialized",
+          "offset": 0,
+          "relativeSlot": "3",
+          "type": {
+            "encoding": "inplace",
+            "label": "bool",
+            "numberOfBytes": "1",
+            "typeId": "t_bool"
+          }
+        }
+      ],
+      "numberOfBytes": "128",
+      "slotCount": 4,
+      "typeId": "t_struct(PlatformConfig)8078_storage"
+    }
+  ],
+  "ok": true,
+  "schemaVersion": 1
+}

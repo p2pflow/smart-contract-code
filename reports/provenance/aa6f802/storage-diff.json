@@ -1,0 +1,26 @@
+{
+  "baseline": {
+    "id": "aa6f802",
+    "reportHash": "0x440548e196b9c9c9b07bf2d8d9b19aa97533702e45467bb6809ab478a094a1fd"
+  },
+  "comparison": {
+    "addedEnums": [],
+    "addedRoots": [],
+    "addedStructs": [],
+    "baselineFinalSlot": "21",
+    "currentFinalSlot": "21",
+    "finalSlotDelta": "0",
+    "ok": true,
+    "transactionDisabled": true,
+    "violations": []
+  },
+  "current": {
+    "baselineAttestation": "not-requested",
+    "buildInfoId": "9d6dd9e2d3ebbfcd8fe2a7fb5657c07c",
+    "reportHash": "0xc35c0adbdb7dc59ed94d0d5944dfd8ef6639e848178efdd85cbcf34ca5299b30"
+  },
+  "kind": "p2pflow-storage-layout-diff",
+  "ok": true,
+  "schemaVersion": 1,
+  "transactionDisabled": true
+}
