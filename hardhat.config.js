@@ -13,6 +13,19 @@ module.exports = {
         enabled: true,
         runs: 200,
       },
+      outputSelection: {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata",
+            "storageLayout",
+          ],
+          "": ["ast"],
+        },
+      },
     },
   },
   networks: {
