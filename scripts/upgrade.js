@@ -7,8 +7,8 @@
 //
 // Supported facet names: DiamondCutFacet, DiamondLoupeFacet, OwnershipFacet, ConfigFacet, MerchantFacet
 
-require("dotenv").config();
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const { assertCouncilLocalSimulation } = require("./councilGate");
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -31,6 +31,7 @@ const SUPPORTED_FACETS = [
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  assertCouncilLocalSimulation(network.name, "Diamond upgrade");
   // --- resolve env vars ---
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) {

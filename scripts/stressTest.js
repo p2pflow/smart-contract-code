@@ -1,16 +1,16 @@
 // scripts/stressTest.js
 //
-// Full local order-engine stress runner. Spawns a local anvil node, deploys
+// Full local order-engine stress runner. Spawns an owned Hardhat node, deploys
 // the whole Diamond + facets against it, then runs 100+ scenarios covering
 // numeric edge cases, lifecycle bugs, access control, reservation math,
 // fiat-scale rounding, dispute windows and concurrency.
 //
 // Run one of:
-//   npm run stress         # spawns anvil, runs tests, kills anvil
+//   npm run stress         # spawns the node, runs tests, kills the node
 //   node scripts/stressTest.js
 //
-// If an anvil is already listening on ANVIL_PORT (default 8545) we reuse it
-// so you can rerun quickly with `anvil` in a separate terminal.
+// The runner always owns a fresh loopback-only dev chain. It never accepts a
+// host, port, mnemonic, or binary override and never reuses a listener.
 //
 // Actors (deterministic anvil accounts):
 //   deployer, m1, m2, m3, u1..u10, keeper
@@ -18,17 +18,17 @@
 const { spawn } = require("child_process");
 const net = require("net");
 const path = require("path");
-const os = require("os");
 const { existsSync } = require("fs");
 const { ethers } = require("ethers");
 
 // ── Config ────────────────────────────────────────────────────────────────
 
-const ANVIL_PORT = Number(process.env.ANVIL_PORT || 8545);
-const ANVIL_HOST = process.env.ANVIL_HOST || "127.0.0.1";
-const RPC_URL = `http://${ANVIL_HOST}:${ANVIL_PORT}`;
-const ANVIL_BIN = process.env.ANVIL_BIN || path.join(os.homedir(), ".foundry", "bin", "anvil");
-const SILENT = process.env.STRESS_VERBOSE ? false : true;
+const ANVIL_HOST = "127.0.0.1";
+const HARDHAT_BIN = path.join(__dirname, "..", "node_modules", ".bin", "hardhat");
+const EXPECTED_CHAIN_ID = "0x7a69";
+const EXPECTED_FIRST_ACCOUNT = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+let anvilPort = null;
+let rpcUrl = null;
 
 // Anvil's deterministic mnemonic derives 10 default accounts. That's exactly
 // what we need: 1 deployer + 3 merchants + 5 users + 1 keeper.
@@ -49,29 +49,51 @@ const DisputeResult = { NONE: 0, USER_WINS: 1, MERCHANT_WINS: 2 };
 
 // ── Anvil lifecycle ───────────────────────────────────────────────────────
 
-function isPortInUse(port, host) {
-    return new Promise((resolve) => {
-        const s = net.createConnection({ port, host }, () => {
-            s.end();
-            resolve(true);
+function allocateLoopbackPort() {
+    return new Promise((resolve, reject) => {
+        const server = net.createServer();
+        server.unref();
+        server.on("error", reject);
+        server.listen({ host: ANVIL_HOST, port: 0, exclusive: true }, () => {
+            const address = server.address();
+            if (!address || typeof address === "string") {
+                server.close(() => reject(new Error("could not allocate an owned loopback port")));
+                return;
+            }
+            const port = address.port;
+            server.close((error) => (error ? reject(error) : resolve(port)));
         });
-        s.on("error", () => resolve(false));
     });
+}
+
+async function rpc(method, params = []) {
+    const res = await fetch(rpcUrl, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
+    });
+    if (!res.ok) throw new Error(`owned dev chain returned HTTP ${res.status}`);
+    const payload = await res.json();
+    if (payload.error || payload.result === undefined) {
+        throw new Error(`owned dev chain returned no result for ${method}`);
+    }
+    return payload.result;
 }
 
 async function waitForRpc(url, timeoutMs = 15_000) {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
         try {
-            const res = await fetch(url, {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ jsonrpc: "2.0", method: "eth_chainId", params: [], id: 1 }),
-            });
-            if (res.ok) {
-                const j = await res.json();
-                if (j.result) return true;
+            const chainId = await rpc("eth_chainId");
+            const accounts = await rpc("eth_accounts");
+            if (
+                chainId === EXPECTED_CHAIN_ID &&
+                Array.isArray(accounts) &&
+                String(accounts[0] || "").toLowerCase() === EXPECTED_FIRST_ACCOUNT
+            ) {
+                return true;
             }
+            throw new Error("listener does not match the owned deterministic dev-chain identity");
         } catch {
             /* not up yet */
         }
@@ -82,30 +104,32 @@ async function waitForRpc(url, timeoutMs = 15_000) {
 
 let anvilProc = null;
 async function ensureAnvil() {
-    if (await isPortInUse(ANVIL_PORT, ANVIL_HOST)) {
-        console.log(`↳ reusing anvil already listening on ${ANVIL_HOST}:${ANVIL_PORT}`);
-        return null;
+    if (anvilProc !== null || anvilPort !== null || rpcUrl !== null) {
+        throw new Error("stress runner attempted to allocate its dev chain more than once");
     }
-    if (!existsSync(ANVIL_BIN)) {
-        throw new Error(`anvil binary not found at ${ANVIL_BIN}. Install foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup`);
+    if (!existsSync(HARDHAT_BIN)) {
+        throw new Error(`local Hardhat binary not found at ${HARDHAT_BIN}; run npm ci first`);
     }
-    console.log(`↳ spawning anvil on ${ANVIL_HOST}:${ANVIL_PORT}`);
+    anvilPort = await allocateLoopbackPort();
+    rpcUrl = `http://${ANVIL_HOST}:${anvilPort}`;
+    console.log(`↳ spawning owned Hardhat dev chain on ${ANVIL_HOST}:${anvilPort}`);
     anvilProc = spawn(
-        ANVIL_BIN,
+        HARDHAT_BIN,
         [
-            "--host", ANVIL_HOST,
-            "--port", String(ANVIL_PORT),
-            "--mnemonic", DEFAULT_MNEMONIC,
-            "--accounts", "10",
-            "--balance", "10000",
+            "node",
+            "--hostname", ANVIL_HOST,
+            "--port", String(anvilPort),
         ],
-        { stdio: SILENT ? "ignore" : "inherit" },
+        {
+            stdio: "ignore",
+            env: { PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin" },
+        },
     );
     anvilProc.on("exit", (code) => {
         if (code && code !== 0) console.error(`anvil exited with code ${code}`);
     });
-    const up = await waitForRpc(RPC_URL);
-    if (!up) throw new Error("anvil did not become ready within 15s");
+    const up = await waitForRpc(rpcUrl);
+    if (!up) throw new Error("owned Hardhat dev chain did not become ready within 15s");
     return anvilProc;
 }
 
@@ -156,7 +180,10 @@ async function deployStack() {
     // "nonce too low" (client keeps re-signing with nonce=0). `staticNetwork`
     // skips the chain-id round-trip on every call. `batchMaxCount: 1`
     // disables JSON-RPC batching so each request fires immediately.
-    const provider = new ethers.JsonRpcProvider(RPC_URL, undefined, {
+    if (rpcUrl === null || anvilProc === null) {
+        throw new Error("owned Hardhat dev chain was not initialized");
+    }
+    const provider = new ethers.JsonRpcProvider(rpcUrl, undefined, {
         staticNetwork: true,
         batchMaxCount: 1,
         cacheTimeout: -1,

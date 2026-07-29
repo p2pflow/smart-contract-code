@@ -8,10 +8,11 @@
 //   DAILY_USDC=600 MONTHLY_USDC=6200 \
 //     npx hardhat run scripts/setChannelDefaults.js --network sepolia
 
-require("dotenv").config();
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
+  assertCouncilLocalSimulation(network.name, "channel-default mutation");
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set in .env");
 

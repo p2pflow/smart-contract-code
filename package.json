@@ -16,12 +16,12 @@
     "provenance:custody": "node scripts/provenance/custody-reconcile.js",
     "stress": "hardhat compile && node scripts/stressTest.js",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
-    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
-    "deploy:base-sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
-    "deploy:mock-usdc:base-sepolia": "hardhat run scripts/deployMockUsdc.js --network baseSepolia",
+    "deploy:sepolia": "node scripts/councilGate.js deploy:sepolia",
+    "deploy:base-sepolia": "node scripts/councilGate.js deploy:base-sepolia",
+    "deploy:mock-usdc:base-sepolia": "node scripts/councilGate.js deploy:mock-usdc:base-sepolia",
     "upgrade:local": "hardhat run scripts/upgrade.js --network localhost",
-    "upgrade:sepolia": "hardhat run scripts/upgrade.js --network sepolia",
-    "upgrade:base-sepolia": "hardhat run scripts/upgrade.js --network baseSepolia",
+    "upgrade:sepolia": "node scripts/councilGate.js upgrade:sepolia",
+    "upgrade:base-sepolia": "node scripts/councilGate.js upgrade:base-sepolia",
     "node": "hardhat node"
   },
   "devDependencies": {

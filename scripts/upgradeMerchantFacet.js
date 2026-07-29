@@ -7,10 +7,11 @@
 // Usage:
 //   npx hardhat run scripts/upgradeMerchantFacet.js --network sepolia
 
-require("dotenv").config();
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
+  assertCouncilLocalSimulation(network.name, "MerchantFacet upgrade");
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set");
 

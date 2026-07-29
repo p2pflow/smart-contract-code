@@ -4,6 +4,7 @@
 // Run: npx hardhat run scripts/deploy.js --network localhost
 
 const { ethers, network } = require("hardhat");
+const { assertCouncilLocalSimulation } = require("./councilGate");
 const fs = require("fs");
 const path = require("path");
 
@@ -16,6 +17,7 @@ function getSelectors(contract) {
 }
 
 async function main() {
+  assertCouncilLocalSimulation(network.name, "Diamond deployment");
   const [deployer] = await ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
 

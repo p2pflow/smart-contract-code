@@ -17,6 +17,16 @@ performed. A future council PASS under the same no-critical-objection rule, afte
 every binding amendment and reconsideration gate, is a prerequisite to any
 value-moving work.
 
+The repository enforces that stop in code. `hardhat.config.js` neither loads
+`.env` nor declares a remote network or signer account. Every packaged Sepolia
+deploy/upgrade/mint command exits through `scripts/councilGate.js`, and each
+state-changing Hardhat script checks the network before reading mutation inputs
+or accessing a signer. Only `hardhat`/`localhost` simulations are permitted.
+The stress runner creates, identity-checks, and terminates its own dynamically
+allocated loopback Hardhat chain; it accepts no endpoint, mnemonic, or binary
+override and never reuses a listener. Removing any of these locks requires a
+separate reviewed commit after a future passing bill.
+
 ## Non-negotiable rules
 
 1. Never run the original `DiamondInit` again. The live
