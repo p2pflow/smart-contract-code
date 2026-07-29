@@ -908,13 +908,13 @@ async function runAllTests(fx) {
         const o = await fx.orders.getOrder(orderId);
         assertEq(o.disputeStatus, DisputeStatus.OPEN);
     });
-    await wrap("raiseDispute by merchant works during window", async () => {
+    await wrap("raiseDispute by merchant reverts", async () => {
         const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
         await runBuyLifecycle(fx, fx.u1, fx.m1, chId, 500);
         const { orderId } = await createSell(fx, fx.u2, 5);
         await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
         await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
-        await (await fx.orders.connect(fx.m1).raiseDispute(orderId)).wait();
+        await assertReverts(fx.orders.connect(fx.m1).raiseDispute(orderId), "Only user");
     });
     await wrap("raiseDispute by outsider reverts", async () => {
         const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
@@ -922,7 +922,7 @@ async function runAllTests(fx) {
         const { orderId } = await createSell(fx, fx.u2, 5);
         await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
         await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
-        await assertReverts(fx.orders.connect(fx.u3).raiseDispute(orderId), "Not a party");
+        await assertReverts(fx.orders.connect(fx.u3).raiseDispute(orderId), "Only user");
     });
     await wrap("raiseDispute after window reverts", async () => {
         const chId = await seedMerchant(fx, fx.m1, { stake: 1000 });
@@ -1338,7 +1338,7 @@ async function runAllTests(fx) {
         const { orderId } = await createSell(fx, fx.u2, 5);
         await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
         await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
-        await assertReverts(fx.orders.connect(fx.keeper).raiseDispute(orderId), "Not a party");
+        await assertReverts(fx.orders.connect(fx.keeper).raiseDispute(orderId), "Only user");
     });
 
     // ── 19) Security: illegal state transitions ─────────────────────────
@@ -1429,8 +1429,8 @@ async function runAllTests(fx) {
         await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
         await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
         await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
-        // Second attempt by the merchant (also a party) must fail — dispute already open.
-        await assertReverts(fx.orders.connect(fx.m1).raiseDispute(orderId), "Dispute already exists");
+        // A second attempt by the user must fail because the dispute is already open.
+        await assertReverts(fx.orders.connect(fx.u2).raiseDispute(orderId), "Dispute already exists");
     });
 
     await wrap("SECURITY: cannot raiseDispute after resolveDispute (SETTLED)", async () => {
@@ -1526,7 +1526,7 @@ async function runAllTests(fx) {
         await (await fx.orders.connect(fx.m1).acceptOrder(orderId, chId)).wait();
         await (await fx.orders.connect(fx.m1).markPaymentSent(orderId)).wait();
         const midTotal = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
-        await (await fx.orders.connect(fx.m1).raiseDispute(orderId)).wait();
+        await (await fx.orders.connect(fx.u2).raiseDispute(orderId)).wait();
         await (await fx.orders.connect(fx.deployer).resolveDispute(orderId, DisputeResult.MERCHANT_WINS)).wait();
         const afterTotal = (await fx.orders.getMerchantBalances(fx.m1.address)).totalUsdc;
         assertEq(afterTotal, midTotal); // no slash
