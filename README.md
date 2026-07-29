@@ -672,7 +672,7 @@ Run it:
 cd smart-contracts
 npm install
 npx hardhat node                             # local blockchain
-npx hardhat run scripts/deploy.js --network localhost
+npm run deploy:local
 ```
 
 ---
