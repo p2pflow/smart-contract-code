@@ -1,9 +1,9 @@
 // scripts/deploy.js
 //
 // Deploy Diamond + core EIP-2535 facets + MerchantFacet; init via DiamondInit.
-// Run: npx hardhat run scripts/deploy.js --network localhost
+// Council-safe local simulation only: npm run deploy:local
 
-const { ethers, network } = require("hardhat");
+const { ethers, network, userConfig } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 const fs = require("fs");
 const path = require("path");
@@ -17,7 +17,12 @@ function getSelectors(contract) {
 }
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "Diamond deployment", network.config);
+  assertCouncilLocalSimulation(
+    network.name,
+    "Diamond deployment",
+    network.config,
+    userConfig,
+  );
   const [deployer] = await ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
 
@@ -92,15 +97,11 @@ async function main() {
     },
   ];
 
-  let USDC_ADDRESS = process.env.USDC_ADDRESS;
-  if (!USDC_ADDRESS && network.name !== "baseSepolia") {
-    USDC_ADDRESS = "0x052FA28895F1dd4A8fdF7c373c9dB6F35F1604e9";
-  }
-  if (!USDC_ADDRESS) {
-    throw new Error("USDC_ADDRESS is required for Base Sepolia. Deploy MockERC20 first with npm run deploy:mock-usdc:base-sepolia.");
-  }
-  const MIN_MERCHANT_STAKE = process.env.MIN_MERCHANT_STAKE_USDC || "300000000"; // 1 USDC if 6 decimals
-  // Default per-channel volume ceilings (USDC 6d). Overridable via env; `0` on both
+  const USDC_ADDRESS =
+    process.env.USDC_ADDRESS || "0x052FA28895F1dd4A8fdF7c373c9dB6F35F1604e9";
+  const MIN_MERCHANT_STAKE =
+    process.env.MIN_MERCHANT_STAKE_USDC || "300000000"; // 300 USDC at 6 decimals
+  // Local-simulation per-channel volume ceilings (USDC 6d); `0` on both
   // means unlimited. `600 * 1e6` and `6200 * 1e6`.
   const DEFAULT_CHANNEL_DAILY_LIMIT_USDC =
     process.env.DEFAULT_CHANNEL_DAILY_LIMIT_USDC || "600000000";

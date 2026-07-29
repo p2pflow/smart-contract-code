@@ -1,6 +1,7 @@
 const COUNCIL_VERDICT = "REJECT";
 const COUNCIL_BILL_SHA256 =
   "4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916";
+const { isDeepStrictEqual } = require("node:util");
 
 function blockedMessage(action) {
   return `Council verdict ${COUNCIL_VERDICT} (${COUNCIL_BILL_SHA256}); ${action} is disabled`;
@@ -9,22 +10,82 @@ function blockedMessage(action) {
 const DEFAULT_HARDHAT_MNEMONIC =
   "test test test test test test test test test test test junk";
 
-function assertCouncilLocalSimulation(networkName, action, networkConfig = {}) {
+const DEFAULT_HARDHAT_NETWORK_CONFIG = Object.freeze({
+  hardfork: "osaka",
+  blockGasLimit: 60_000_000,
+  gasPrice: "auto",
+  chainId: 31_337,
+  throwOnTransactionFailures: true,
+  throwOnCallFailures: true,
+  allowUnlimitedContractSize: false,
+  mining: Object.freeze({
+    auto: true,
+    interval: 0,
+    mempool: Object.freeze({ order: "priority" }),
+  }),
+  accounts: Object.freeze({
+    initialIndex: 0,
+    count: 20,
+    path: "m/44'/60'/0'/0",
+    passphrase: "",
+    mnemonic: DEFAULT_HARDHAT_MNEMONIC,
+    accountsBalance: "10000000000000000000000",
+  }),
+  loggingEnabled: false,
+  gasMultiplier: 1,
+  minGasPrice: 0n,
+  chains: "<hardhat-defaults>",
+  gas: 16_777_216,
+  initialDate: "<runtime-generated>",
+  ignition: "<hardhat-defaults>",
+});
+
+function normalizeResolvedHardhatConfig(networkConfig) {
+  if (
+    !networkConfig ||
+    typeof networkConfig !== "object" ||
+    Array.isArray(networkConfig) ||
+    typeof networkConfig.initialDate !== "string" ||
+    Number.isNaN(Date.parse(networkConfig.initialDate)) ||
+    new Date(networkConfig.initialDate).toISOString() !== networkConfig.initialDate
+  ) {
+    return null;
+  }
+  if (!(networkConfig.chains instanceof Map) || !networkConfig.ignition) {
+    return null;
+  }
+
+  return {
+    ...networkConfig,
+    chains: "<hardhat-defaults>",
+    initialDate: "<runtime-generated>",
+    ignition: "<hardhat-defaults>",
+  };
+}
+
+function assertCouncilLocalSimulation(
+  networkName,
+  action,
+  networkConfig,
+  userConfig,
+) {
   if (networkName !== "hardhat") {
     throw new Error(blockedMessage(`${action} on network ${networkName || "unknown"}`));
   }
-  if (networkConfig.forking && (networkConfig.forking.enabled || networkConfig.forking.url)) {
-    throw new Error(blockedMessage(`${action} on a forked Hardhat network`));
-  }
-  if (Array.isArray(networkConfig.accounts)) {
-    throw new Error(blockedMessage(`${action} with explicit signer accounts`));
-  }
+
   if (
-    networkConfig.accounts &&
-    networkConfig.accounts.mnemonic &&
-    networkConfig.accounts.mnemonic !== DEFAULT_HARDHAT_MNEMONIC
+    !userConfig ||
+    typeof userConfig !== "object" ||
+    Array.isArray(userConfig) ||
+    Object.prototype.hasOwnProperty.call(userConfig.networks || {}, "hardhat") ||
+    Object.prototype.hasOwnProperty.call(userConfig, "ignition")
   ) {
-    throw new Error(blockedMessage(`${action} with a non-development mnemonic`));
+    throw new Error(blockedMessage(`${action} with a configured Hardhat network`));
+  }
+
+  const normalizedConfig = normalizeResolvedHardhatConfig(networkConfig);
+  if (!isDeepStrictEqual(normalizedConfig, DEFAULT_HARDHAT_NETWORK_CONFIG)) {
+    throw new Error(blockedMessage(`${action} with non-default Hardhat settings`));
   }
 }
 

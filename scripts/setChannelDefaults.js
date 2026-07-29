@@ -1,20 +1,20 @@
 // scripts/setChannelDefaults.js
 //
-// One-off: after `upgrade.js` cuts in the new ConfigFacet, seed the platform-wide
-// default channel volume limits. Reads DIAMOND_ADDRESS from .env; deployer must be
-// the platform admin (i.e. the account that ran DiamondInit).
-//
-// Usage:
-//   DAILY_USDC=600 MONTHLY_USDC=6200 \
-//     npx hardhat run scripts/setChannelDefaults.js --network sepolia
+// Local simulation helper: after `upgrade.js` cuts in the new ConfigFacet, seed
+// platform-wide default channel volume limits. External networks are rejected.
 
-const { ethers, network } = require("hardhat");
+const { ethers, network, userConfig } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "channel-default mutation", network.config);
+  assertCouncilLocalSimulation(
+    network.name,
+    "channel-default mutation",
+    network.config,
+    userConfig,
+  );
   const diamondAddress = process.env.DIAMOND_ADDRESS;
-  if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set in .env");
+  if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set for the local simulation");
 
   const dailyHuman = process.env.DAILY_USDC || "600";
   const monthlyHuman = process.env.MONTHLY_USDC || "6200";

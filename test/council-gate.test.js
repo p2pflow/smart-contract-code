@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { network } = require("hardhat");
+const { network, userConfig } = require("hardhat");
 
 const root = path.join(__dirname, "..");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
@@ -18,23 +18,85 @@ describe("council safety gate", function () {
     expect(COUNCIL_BILL_SHA256).to.equal(
       "4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916",
     );
-    expect(() => assertCouncilLocalSimulation("hardhat", "test", {})).not.to.throw();
     expect(() =>
-      assertCouncilLocalSimulation(network.name, "resolved-config test", network.config),
+      assertCouncilLocalSimulation(
+        network.name,
+        "resolved-config test",
+        network.config,
+        userConfig,
+      ),
     ).not.to.throw();
-    expect(() => assertCouncilLocalSimulation("localhost", "test", {})).to.throw(
-      /Council verdict REJECT/,
-    );
-    expect(() => assertCouncilLocalSimulation("baseSepolia", "test")).to.throw(
-      /Council verdict REJECT/,
-    );
     expect(() =>
-      assertCouncilLocalSimulation("hardhat", "test", {
-        forking: { enabled: true, url: "https://example.invalid" },
-      }),
+      assertCouncilLocalSimulation("localhost", "test", network.config, userConfig),
     ).to.throw(/Council verdict REJECT/);
     expect(() =>
-      assertCouncilLocalSimulation("hardhat", "test", { accounts: ["0xdead"] }),
+      assertCouncilLocalSimulation("baseSepolia", "test", network.config, userConfig),
+    ).to.throw(/Council verdict REJECT/);
+    expect(() =>
+      assertCouncilLocalSimulation("hardhat", "test", {
+        ...network.config,
+        forking: { enabled: true, url: "https://example.invalid" },
+      }, userConfig),
+    ).to.throw(/Council verdict REJECT/);
+    expect(() =>
+      assertCouncilLocalSimulation(
+        "hardhat",
+        "test",
+        { ...network.config, accounts: ["0xdead"] },
+        userConfig,
+      ),
+    ).to.throw(/Council verdict REJECT/);
+  });
+
+  it("rejects every customized in-process Hardhat setting", function () {
+    const customConfigs = [
+      { ...network.config, chainId: 84532 },
+      { ...network.config, hardfork: "cancun" },
+      { ...network.config, gas: 21_000_000 },
+      {
+        ...network.config,
+        mining: { ...network.config.mining, interval: 1 },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, path: "m/44'/60'/1'/0" },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, initialIndex: 1 },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, count: 1 },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, accountsBalance: "1" },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, passphrase: "custom" },
+      },
+      {
+        ...network.config,
+        accounts: { ...network.config.accounts, mnemonic: "not the default mnemonic" },
+      },
+    ];
+
+    for (const customConfig of customConfigs) {
+      expect(() =>
+        assertCouncilLocalSimulation("hardhat", "test", customConfig, userConfig),
+      ).to.throw(/Council verdict REJECT/);
+    }
+
+    expect(() =>
+      assertCouncilLocalSimulation("hardhat", "test", network.config),
+    ).to.throw(/Council verdict REJECT/);
+    expect(() =>
+      assertCouncilLocalSimulation("hardhat", "test", network.config, {
+        ...userConfig,
+        networks: { ...(userConfig.networks || {}), hardhat: {} },
+      }),
     ).to.throw(/Council verdict REJECT/);
   });
 
@@ -59,6 +121,7 @@ describe("council safety gate", function () {
       "RPC_URL",
       "sepolia:",
       "baseSepolia:",
+      "localhost:",
       "accounts:",
     ]) {
       expect(config).not.to.include(forbidden);
@@ -95,6 +158,7 @@ describe("council safety gate", function () {
       expect(gate, `${relative} gates too late`).to.be.lessThan(signer);
       expect(source).not.to.include('require("dotenv").config()');
       expect(source).to.include("network.config");
+      expect(source).to.include("userConfig");
     }
   });
 

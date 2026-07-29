@@ -1,17 +1,21 @@
 // scripts/upgradeMerchantFacet.js
 //
-// Upgrade MerchantFacet on the live diamond: Replace 24 existing selectors from
+// Simulate a MerchantFacet upgrade locally: replace existing selectors from
 // the new facet, and REMOVE the now-deleted `setChannelLimits(bytes32,uint256,uint256)`
 // selector so no one can call it anymore. Stock `upgrade.js` doesn't handle removal.
 //
-// Usage:
-//   npx hardhat run scripts/upgradeMerchantFacet.js --network sepolia
+// External networks are rejected by the council gate before signer access.
 
-const { ethers, network } = require("hardhat");
+const { ethers, network, userConfig } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "MerchantFacet upgrade", network.config);
+  assertCouncilLocalSimulation(
+    network.name,
+    "MerchantFacet upgrade",
+    network.config,
+    userConfig,
+  );
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) throw new Error("DIAMOND_ADDRESS is not set");
 

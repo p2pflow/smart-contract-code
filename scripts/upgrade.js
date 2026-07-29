@@ -1,13 +1,11 @@
 // scripts/upgrade.js
 //
-// Redeploy and re-attach only the facets listed in REPLACE_FACETS env var.
-// Usage:
-//   REPLACE_FACETS=MerchantFacet,ConfigFacet npx hardhat run scripts/upgrade.js --network sepolia
-//   (or set REPLACE_FACETS in your .env)
+// Redeploy and re-attach only facets selected for an in-process local simulation.
+// Council-safe usage: REPLACE_FACETS=MerchantFacet,ConfigFacet npm run upgrade:local
 //
 // Supported facet names: DiamondCutFacet, DiamondLoupeFacet, OwnershipFacet, ConfigFacet, MerchantFacet
 
-const { ethers, network } = require("hardhat");
+const { ethers, network, userConfig } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -31,11 +29,16 @@ const SUPPORTED_FACETS = [
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  assertCouncilLocalSimulation(network.name, "Diamond upgrade", network.config);
+  assertCouncilLocalSimulation(
+    network.name,
+    "Diamond upgrade",
+    network.config,
+    userConfig,
+  );
   // --- resolve env vars ---
   const diamondAddress = process.env.DIAMOND_ADDRESS;
   if (!diamondAddress) {
-    throw new Error("DIAMOND_ADDRESS is not set in .env");
+    throw new Error("DIAMOND_ADDRESS is not set for the local simulation");
   }
 
   const replaceFacetsRaw = process.env.REPLACE_FACETS || "";

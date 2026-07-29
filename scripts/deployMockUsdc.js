@@ -1,4 +1,4 @@
-const { ethers, network } = require("hardhat");
+const { ethers, network, userConfig } = require("hardhat");
 const { assertCouncilLocalSimulation } = require("./councilGate");
 const fs = require("fs");
 const path = require("path");
@@ -8,6 +8,7 @@ async function main() {
     network.name,
     "mock USDC deployment or mint",
     network.config,
+    userConfig,
   );
   const [deployer] = await ethers.getSigners();
   console.log("Deploying Mock USDC with account:", deployer.address);

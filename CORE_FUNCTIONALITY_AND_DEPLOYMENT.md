@@ -1,6 +1,6 @@
 # P2PFlow Smart Contract Core Guide
 
-This document explains the current smart-contract system as it exists today, how the Diamond is structured, how merchants/orders/payment channels flow, how matching works, what time-based actions can and cannot do on-chain, and what must be done before deploying to Base Sepolia with a mock USDC/faucet and subgraph.
+This document explains the current smart-contract system as it exists today, how the Diamond is structured, how merchants/orders/payment channels flow, how matching works, and what time-based actions can and cannot do on-chain. Its former deployment appendix is retained only as a quarantined historical record; it is not an operational runbook.
 
 Use this as the single reference before requesting contract changes.
 
@@ -1401,32 +1401,24 @@ The contract can enforce deadlines, but it cannot wake itself up. A keeper or us
 
 ---
 
-## 10. Current Base Sepolia Deployment Status
+## 10. Historical Base Sepolia Notes — Non-Operational
 
-Base Sepolia is not fully configured yet.
+> **Council safety boundary:** the council verdict is `REJECT`, bill SHA-256
+> `4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916`.
+> Sections 10–15 are historical design context only. They do not authorize or
+> instruct a deployment. Private keys, signing, broadcasts, token funding or
+> minting, Diamond cuts, migrations, subgraph deployment, faucet updates, and
+> any testnet/mainnet writes are prohibited. The repository deliberately has no
+> remote Hardhat network or credential configuration, and all packaged external
+> mutation commands fail before environment, RPC, or signer access.
 
-Current `hardhat.config.js` has:
+The only allowed executable contract paths are offline compilation/tests and
+in-process simulations on Hardhat's exact default ephemeral network. The
+canonical Base Sepolia Diamond and mock-token addresses may be used for
+read-only provenance checks only; they are documented in the council-gated
+runbook.
 
-- `localhost`
-- `sepolia`
-
-Missing:
-
-- `baseSepolia` or `base-sepolia` network config.
-- Base Sepolia deploy script command.
-- Base Sepolia mock USDC deployment script.
-- Subgraph Base Sepolia config.
-
-Base Sepolia values:
-
-- Chain ID: `84532`.
-- Network name used by many tooling systems: `base-sepolia`.
-- Typical RPC env variable to add: `BASE_SEPOLIA_RPC_URL`.
-- Block explorer: BaseScan Sepolia.
-
----
-
-## 11. Mock USDC And Faucet Plan
+## 11. Historical Mock USDC/Faucet Design — Prohibited
 
 Current mock token:
 
@@ -1440,104 +1432,43 @@ contract MockERC20 is ERC20 {
 }
 ```
 
-This mock is already a faucet-style token because `mint` is open to anyone.
-
-For Base Sepolia testing, simplest plan:
-
-1. Deploy `MockERC20("Mock USDC", "mUSDC", 6)` to Base Sepolia.
-2. Use that address as `USDC_ADDRESS` when deploying the Diamond.
-3. Let users/merchants mint test USDC using `mint(address,uint256)`.
+The mock exposes an open `mint` method for local tests. No remote deployment,
+mint, wallet funding, or faucet operation is authorized by this document.
 
 Security note:
 
-- Open mint is fine for Base Sepolia testnet.
-- Do not use open mint token on production/mainnet.
+- Open mint is restricted to disposable local simulation in the current release.
+- It must not be invoked on any remote network under the rejected council bill.
 
-Optional improvement:
-
-- Add a `scripts/deployMockUsdc.js` script that deploys mock USDC and writes address to `deployed-addresses.json` or separate `deployments/base-sepolia.json`.
-- Add a small faucet UI or script:
-
-```text
-npx hardhat run scripts/mintMockUsdc.js --network baseSepolia
-```
+The former live deployment and faucet command examples were removed. Any future
+proposal requires a new reviewed bill, immutable provenance, and an independently
+approved execution runbook.
 
 ---
 
-## 12. Base Sepolia Contract Deployment Plan
+## 12. Historical Contract Deployment Design — Prohibited
 
 ### 12.1 Required Code/Config Changes
 
-Add to `hardhat.config.js`:
-
-```js
-baseSepolia: {
-  url: process.env.BASE_SEPOLIA_RPC_URL || "",
-  accounts: (process.env.DEPLOYER_PRIVATE_KEY || process.env.PRIVATE_KEY)
-    ? [process.env.DEPLOYER_PRIVATE_KEY || process.env.PRIVATE_KEY]
-    : [],
-}
-```
-
-Add package scripts:
-
-```json
-"deploy:base-sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
-"upgrade:base-sepolia": "hardhat run scripts/upgrade.js --network baseSepolia"
-```
-
-Optional mock USDC script:
-
-```json
-"deploy:mock-usdc:base-sepolia": "hardhat run scripts/deployMockUsdc.js --network baseSepolia"
-```
+Remote network, account, deployment, upgrade, and mock-token command examples
+were removed. `hardhat.config.js` must remain free of remote RPC and account
+configuration while this bill is rejected.
 
 ### 12.2 Env Variables
 
-Required:
-
-```env
-BASE_SEPOLIA_RPC_URL=https://base-sepolia.infura.io/v3/YOUR_KEY
-DEPLOYER_PRIVATE_KEY=...
-USDC_ADDRESS=0x...mockUsdcOnBaseSepolia
-```
-
-Optional:
-
-```env
-MIN_MERCHANT_STAKE_USDC=300000000
-DEFAULT_CHANNEL_DAILY_LIMIT_USDC=600000000
-DEFAULT_CHANNEL_MONTHLY_LIMIT_USDC=6200000000
-BUY_PRICE_INR_PER_USDC=95
-SELL_PRICE_INR_PER_USDC=90
-DISPUTE_WINDOW_SECONDS=600
-```
+No credential, RPC, signer, or remote contract environment variable is accepted
+by the current Hardhat configuration. `.env.example` intentionally contains no
+live variable template.
 
 ### 12.3 Deployment Steps
 
-```text
-1. Deploy mock USDC on Base Sepolia.
-2. Set USDC_ADDRESS to mock USDC address.
-3. Deploy Diamond using deploy.js on baseSepolia.
-4. Record Diamond address and deployment block.
-5. Update subgraph config for Base Sepolia.
-6. Deploy subgraph.
-7. Update UIs env vars:
-   - VITE_DIAMOND_ADDRESS
-   - VITE_SEPOLIA_USDC_TOKEN_ADDRESS or rename to generic Base Sepolia USDC var later
-   - VITE_SUBGRAPH_URL
-   - VITE_ALCHEMY_RPC_URL can point to Base Sepolia RPC if code chain config is updated
-```
-
-Important UI note:
-
-- Current UI config still defines Sepolia chain id in multiple places.
-- Moving UI to Base Sepolia also requires changing chain config from Sepolia `11155111` to Base Sepolia `84532`.
-- Do not only change RPC URL if the chain id remains Sepolia.
+There is no deployment sequence in this release. UI work is restricted to
+read-only canonical-address configuration and transaction-disabled capability
+gates.
 
 ---
 
-## 13. Subgraph Deployment Plan For Base Sepolia
+## 13. Historical Subgraph Deployment Design — Prohibited
 
 Current subgraph:
 
@@ -1546,42 +1477,19 @@ Current subgraph:
 - Address: `0x456850ff3Eb1bA5c3312fA97A47307992103855E`
 - Start block: `11081997`
 
-Current gap:
-
-- `package.json` references `networks/sepolia.yaml`, but `networks/` folder does not exist.
+The subgraph repository is built and tested offline. Authentication, manifest
+preparation that mutates release state, and deployment are council-gated and
+must fail before reading credentials or invoking a deployment CLI.
 
 ### 13.1 Recommended Network Config Layout
 
-Create:
-
-```text
-p2pflow-subgraph/networks/sepolia.yaml
-p2pflow-subgraph/networks/base-sepolia.yaml
-```
-
-`networks/base-sepolia.yaml` should be same as `subgraph.yaml` except:
-
-```yaml
-network: base-sepolia
-source:
-  address: "<BASE_SEPOLIA_DIAMOND_ADDRESS>"
-  startBlock: <BASE_SEPOLIA_DIAMOND_DEPLOYMENT_BLOCK>
-```
+No network-manifest generation procedure is released while the council verdict
+is `REJECT`.
 
 ### 13.2 Start Block
 
-Use the Diamond deployment block.
-
-Options:
-
-- Read deployment transaction receipt block number.
-- Use `scripts/findStartBlock.js` with `DIAMOND_ADDRESS` after deployment.
-
-Example:
-
-```bash
-DIAMOND_ADDRESS=0x... npx hardhat run scripts/findStartBlock.js --network baseSepolia
-```
+Only already-reviewed, immutable historical provenance may supply a start block.
+No deployment transaction or remote discovery command is authorized.
 
 ### 13.3 ABI
 
@@ -1633,28 +1541,9 @@ Especially important events:
 
 ### 13.4 Goldsky Deployment
 
-Current script:
-
-```json
-"deploy:goldsky": "goldsky subgraph deploy p2pflow-diamond/1.0.0 --path ."
-```
-
-For Base Sepolia, recommended:
-
-```json
-"prepare:goldsky:base-sepolia": "cp networks/base-sepolia.yaml subgraph.yaml",
-"deploy:goldsky:base-sepolia": "goldsky subgraph deploy p2pflow-diamond/base-sepolia --path ."
-```
-
-Actual deployment sequence:
-
-```bash
-cd p2pflow-subgraph
-npm run prepare:goldsky:base-sepolia
-npm run codegen
-npm run build
-npm run deploy:goldsky:base-sepolia
-```
+All former Goldsky authentication and deployment commands were removed from
+this guide. Offline code generation and build validation do not authorize a
+publish.
 
 ---
 
@@ -1721,19 +1610,11 @@ Decision needed:
 - Should volume limits block accepts/completions now?
 - Should they apply to BUY, SELL, or both?
 
-### 14.5 Base Sepolia Variable Names
+### 14.5 Historical UI Variable Naming
 
-Current UI env names still say Sepolia/Alchemy in places.
-
-Decision needed:
-
-- Keep old names temporarily and point to Base Sepolia values?
-- Or rename to generic names like:
-  - `VITE_CHAIN_ID`
-  - `VITE_RPC_URL`
-  - `VITE_USDC_TOKEN_ADDRESS`
-
-Renaming is cleaner but touches all UIs and Jenkins envs.
+The reviewed UIs hard-pin canonical public addresses and use an explicit public
+environment allowlist. No secret-bearing or address-override variable is part of
+the release contract.
 
 ---
 
@@ -1745,13 +1626,9 @@ Do this in order:
 2. Decide exact timeout/cancel behavior.
 3. Implement timeout storage and `cancelExpiredOrder` keeper function.
 4. Add/adjust tests for timeout cancellation.
-5. Add Base Sepolia network config to Hardhat.
-6. Add mock USDC deploy/mint scripts.
-7. Deploy mock USDC to Base Sepolia.
-8. Deploy Diamond to Base Sepolia using mock USDC address.
-9. Create Base Sepolia subgraph network config with address/start block.
-10. Build/deploy subgraph.
-11. Update UI envs and chain configs for Base Sepolia.
+5. Resolve all council, accounting, fairness, migration, and independent-audit blockers.
+6. Draft a new immutable release bill; do not reuse the rejected bill.
+7. Keep every remote deployment, funding, minting, cut, migration, and publish path disabled unless that new bill passes.
 
 ---
 
