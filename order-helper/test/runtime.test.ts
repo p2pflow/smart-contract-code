@@ -25,7 +25,11 @@ function config(): HelperConfig {
       enabled: false,
       blockers: ["test"],
     },
-    kmsKeyReference: "kms://test",
+    council: {
+      verdict: "REJECT",
+      billSha256:
+        "4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916",
+    },
     databaseSecretReference: "secret://postgres",
     redisSecretReference: "secret://redis",
     helperBuildVersion: "test",
@@ -88,9 +92,21 @@ test("runtime starts and stops injected components with healthy readiness", asyn
   assert.equal(components.started, true);
   assert.equal((await runtime.health.readiness()).status, "pass");
   assert.match(lines[0] ?? "", /"transactionSending":"disabled"/);
+  assert.match(
+    runtime.metrics.render(),
+    /p2pflow_order_helper_up\{mode="shadow"\} 1/,
+  );
+  assert.match(
+    runtime.metrics.render(),
+    /p2pflow_order_helper_transaction_sending_enabled\{mode="shadow"\} 0/,
+  );
 
   await runtime.stop();
   assert.equal(components.stopped, true);
+  assert.match(
+    runtime.metrics.render(),
+    /p2pflow_order_helper_up\{mode="shadow"\} 0/,
+  );
   await runtime.stop();
 });
 

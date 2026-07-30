@@ -127,6 +127,7 @@ export interface AuthoritativeEligibilityRequest {
   readonly order: OrderSnapshot;
   readonly merchant: Address;
   readonly channelId: Bytes32;
+  readonly minimumRequired: bigint;
 }
 
 export interface AuthoritativeEligibilityAdapter {

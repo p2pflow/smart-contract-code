@@ -4,7 +4,9 @@ import {
   ChainLogFilter,
   FinalizedChainSource,
   chainLogId,
-  validateLog,
+  validateBlockHeader,
+  validateLogAgainstFilter,
+  validateLogFilter,
 } from "./chain-events";
 
 export interface BlockCheckpoint {
@@ -73,12 +75,16 @@ export class FinalizedEventScanner {
     private readonly filter: ChainLogFilter,
     private readonly options: FinalizedScannerOptions,
   ) {
+    validateLogFilter(filter);
     validateOptions(options);
   }
 
   public async scanOnce(): Promise<ScanResult> {
     const chainId = this.filter.chainId;
     const head = await this.source.latestBlockNumber(chainId);
+    if (head < 0n) {
+      throw new RangeError("Latest block number must be non-negative");
+    }
     const finalizedHead = head - this.options.confirmationDepth;
     let cursor = await this.store.loadCursor(chainId);
     let rewindFrom: bigint | null = null;
@@ -114,7 +120,7 @@ export class FinalizedEventScanner {
       nextBlock,
       toBlock,
     )].sort(compareLogs);
-    validateBatchLogs(logs, headers, chainId, nextBlock, toBlock);
+    validateBatchLogs(logs, headers, this.filter, nextBlock, toBlock);
 
     const retained = [
       ...(cursor?.checkpoints ?? []),
@@ -167,6 +173,7 @@ export class FinalizedEventScanner {
           `Canonical header ${checkpoint.blockNumber} is unavailable`,
         );
       }
+      validateBlockHeader(current, checkpoint.blockNumber);
       if (current.hash.toLowerCase() !== checkpoint.blockHash.toLowerCase()) {
         firstMismatch ??= checkpoint.blockNumber;
       } else if (firstMismatch === null) {
@@ -214,11 +221,7 @@ export class FinalizedEventScanner {
       if (header === null) {
         throw new Error(`Finalized block ${blockNumber} is unavailable`);
       }
-      if (header.number !== blockNumber) {
-        throw new Error(
-          `Requested block ${blockNumber} but received ${header.number}`,
-        );
-      }
+      validateBlockHeader(header, blockNumber);
       headers.push(header);
     }
     return headers;
@@ -341,7 +344,7 @@ function validateHeaderChain(
 function validateBatchLogs(
   logs: readonly ChainLog[],
   headers: readonly BlockHeader[],
-  chainId: number,
+  filter: ChainLogFilter,
   fromBlock: bigint,
   toBlock: bigint,
 ): void {
@@ -350,7 +353,7 @@ function validateBatchLogs(
   );
   const ids = new Set<string>();
   for (const log of logs) {
-    validateLog(log, chainId);
+    validateLogAgainstFilter(log, filter);
     if (log.removed) {
       throw new Error("Finalized log source returned a removed log");
     }

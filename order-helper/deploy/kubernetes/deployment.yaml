@@ -44,8 +44,10 @@ spec:
               value: shadow
             - name: ENABLE_TRANSACTION_SENDING
               value: "false"
-            - name: COUNCIL_SCOPE_PASS
-              value: "false"
+            - name: COUNCIL_VERDICT
+              value: REJECT
+            - name: COUNCIL_BILL_SHA256
+              value: 4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916
             - name: CONTRACT_INTERFACE_VERIFIED
               value: "false"
             - name: BASE_SEPOLIA_DEPLOYMENT_VERIFIED
@@ -66,11 +68,6 @@ spec:
                 secretKeyRef:
                   name: order-helper-runtime-secrets
                   key: fallback-rpc-url
-            - name: KMS_KEY_REFERENCE
-              valueFrom:
-                secretKeyRef:
-                  name: order-helper-runtime-secrets
-                  key: kms-key-reference
             - name: DATABASE_SECRET_REFERENCE
               valueFrom:
                 secretKeyRef:

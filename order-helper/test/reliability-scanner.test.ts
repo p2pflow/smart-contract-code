@@ -14,9 +14,11 @@ import {
 
 const CHAIN_ID = 84_532;
 const CONTRACT = `0x${"aa".repeat(20)}` as Hex;
+const TOPIC = hex32(777n);
 const FILTER: ChainLogFilter = {
   chainId: CHAIN_ID,
   address: CONTRACT,
+  topics: [TOPIC],
 };
 
 class MutableChainSource implements FinalizedChainSource {
@@ -138,6 +140,74 @@ test("scanner fails closed when an RPC log hash disagrees with its header", asyn
   assert.equal(await store.loadCursor(CHAIN_ID), null);
 });
 
+test("scanner fails closed when RPC logs do not match its filter", async () => {
+  const source = new MutableChainSource();
+  installLinearHeaders(source, [[1n, hex32(1n), hex32(0n)]]);
+  source.chainLogs = [
+    {
+      ...makeLog(1n, hex32(1n), hex32(100n)),
+      topics: [hex32(778n)],
+    },
+  ];
+  source.head = 1n;
+  const store = new InMemoryFinalizedScanStore();
+
+  await assert.rejects(
+    new FinalizedEventScanner(source, store, FILTER, {
+      confirmationDepth: 0n,
+      startBlock: 1n,
+      batchSize: 10n,
+      checkpointRetention: 16,
+    }).scanOnce(),
+    /topic predicate 0/,
+  );
+  assert.equal(await store.loadCursor(CHAIN_ID), null);
+});
+
+test("scanner rejects malformed external block headers before checkpointing", async () => {
+  const malformedHeaders: readonly BlockHeader[] = [
+    {
+      number: -1n,
+      hash: hex32(1n),
+      parentHash: hex32(0n),
+      timestamp: 1n,
+    },
+    {
+      number: 1n,
+      hash: hex32(1n),
+      parentHash: hex32(0n),
+      timestamp: -1n,
+    },
+    {
+      number: 1n,
+      hash: "0x1234",
+      parentHash: hex32(0n),
+      timestamp: 1n,
+    },
+    {
+      number: 1n,
+      hash: hex32(1n),
+      parentHash: "0x1234",
+      timestamp: 1n,
+    },
+  ];
+  for (const header of malformedHeaders) {
+    const source = new MutableChainSource();
+    source.headers.set(1n, header);
+    source.head = 1n;
+    const store = new InMemoryFinalizedScanStore();
+    await assert.rejects(
+      new FinalizedEventScanner(source, store, FILTER, {
+        confirmationDepth: 0n,
+        startBlock: 1n,
+        batchSize: 1n,
+        checkpointRetention: 1,
+      }).scanOnce(),
+    );
+    assert.equal(await store.loadCursor(CHAIN_ID), null);
+  }
+});
+
 function scanner(
   source: FinalizedChainSource,
   store: InMemoryFinalizedScanStore,
@@ -176,7 +246,7 @@ function makeLog(
   return {
     chainId: CHAIN_ID,
     address: CONTRACT,
-    topics: [hex32(777n)],
+    topics: [TOPIC],
     data: "0x",
     blockNumber,
     blockHash,

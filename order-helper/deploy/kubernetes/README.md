@@ -15,17 +15,20 @@ Before rendering the example:
    It exposes only these keys to the pod:
    - `primary-rpc-url`
    - `fallback-rpc-url`
-   - `kms-key-reference`
    - `database-secret-reference`
    - `redis-secret-reference`
-4. Keep the five explicit live/canary gates in `deployment.yaml` false. A
-   separate reviewed canary manifest is required after every gate in
-   `docs/runbook.md` has evidence.
-5. Add provider-specific workload identity outside this generic example. Do
-   not mount a private key or place one in a Kubernetes Secret.
-6. Add an environment-specific egress policy for DNS and the approved
-   read-only shadow dependencies. This example does not guess provider IPs or
-   open unrestricted egress rules.
+4. Keep the pinned REJECT and live/send/verified/canary values exactly as shown.
+   No canary manifest is authorized. A distinct later implementation requires
+   all 14 ordered reconsideration gates and a new Council PASS.
+5. Use provider-specific workload identity only for approved read-only
+   dependencies. Do not mount a private key, inject a KMS signing reference,
+   or place either in a Kubernetes Secret.
+6. Keep the checked-in deny-all egress policy with this exact scaffold. The
+   shipped runtime wires no RPC, subgraph, database, Redis, mailbox, signer,
+   or broadcaster adapter, so it requires no outbound network access. A later
+   environment-specific read-only integration must replace the deny-all rule
+   with narrowly reviewed DNS and dependency destinations; this manifest does
+   not guess provider IPs or open unrestricted egress.
 7. Label only the approved monitoring pods with
    `p2pflow.network/operations-monitor=true`.
 
@@ -33,6 +36,6 @@ Before rendering the example:
 multi-writer broadcaster has been approved. Horizontal scaling requires tested
 fencing and queue/nonce ownership.
 
-The expected runtime entrypoint is `dist/src/main.js`. It must wire concrete
-adapters and start in shadow mode; the image is not operational until that
-integration exists and readiness checks pass.
+The entrypoint is `dist/src/main.js`; it is intentionally unready and wires no
+external adapters. A distinct read-only integration must be built and reviewed
+before readiness can pass.

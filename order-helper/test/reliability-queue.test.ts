@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { ManualClock } from "../src/reliability/clock";
 import {
+  type DurableWorkPayload,
   InMemoryIdempotentQueue,
   QueueConflictError,
   StaleLeaseError,
@@ -9,12 +10,36 @@ import {
 } from "../src/reliability/idempotent-queue";
 
 const ORDER_ID = `0x${"11".repeat(32)}` as const;
+const SUBJECT_ID = `0x${"22".repeat(32)}` as const;
+const CONTEXT_ID = `0x${"33".repeat(32)}` as const;
+const ALTERNATE_CONTEXT_ID = `0x${"44".repeat(32)}` as const;
+const WORKER_A = `0x${"51".repeat(32)}` as const;
+const WORKER_B = `0x${"52".repeat(32)}` as const;
+const LEASE_TOKEN_A = `0x${"61".repeat(32)}` as const;
+const LEASE_TOKEN_B = `0x${"62".repeat(32)}` as const;
+const LEASE_TOKEN_C = `0x${"63".repeat(32)}` as const;
+
+type MutableDurableWorkPayload = {
+  -readonly [Key in keyof DurableWorkPayload]: DurableWorkPayload[Key];
+};
+
+function durablePayload(
+  kind: DurableWorkPayload["kind"] = "order-evaluation",
+  contextId: DurableWorkPayload["contextId"] = CONTEXT_ID,
+): MutableDurableWorkPayload {
+  return {
+    schema: "order-helper.durable-work.v1",
+    kind,
+    subjectId: SUBJECT_ID,
+    contextId,
+  };
+}
 
 test("queue keys deduplicate identical deliveries and reject collisions", async () => {
   const clock = new ManualClock(1_000);
-  const queue = new InMemoryIdempotentQueue<{ readonly source: string }>(
+  const queue = new InMemoryIdempotentQueue<DurableWorkPayload>(
     clock,
-    () => "lease-1",
+    () => LEASE_TOKEN_A,
   );
   const identity = { chainId: 84_532, orderId: ORDER_ID, round: 3n };
 
@@ -22,37 +47,37 @@ test("queue keys deduplicate identical deliveries and reject collisions", async 
     orderJobKey(identity),
     `84532:${ORDER_ID}:3`,
   );
-  const first = await queue.enqueue(identity, { source: "scanner" });
-  const duplicate = await queue.enqueue(identity, { source: "scanner" });
+  const first = await queue.enqueue(identity, durablePayload());
+  const duplicate = await queue.enqueue(identity, durablePayload());
 
   assert.equal(first.inserted, true);
   assert.equal(duplicate.inserted, false);
   assert.equal((await queue.depth()).scheduled, 1);
   await assert.rejects(
-    queue.enqueue(identity, { source: "listener" }),
+    queue.enqueue(identity, durablePayload("order-expiry")),
     QueueConflictError,
   );
 });
 
 test("expired leases fall back to another worker with fencing", async () => {
   const clock = new ManualClock(10_000);
-  const tokens = ["worker-a-token", "worker-b-token", "worker-b-retry"];
-  const queue = new InMemoryIdempotentQueue<{ readonly order: string }>(
+  const tokens = [LEASE_TOKEN_A, LEASE_TOKEN_B, LEASE_TOKEN_C];
+  const queue = new InMemoryIdempotentQueue<DurableWorkPayload>(
     clock,
-    () => tokens.shift() ?? "unexpected-token",
+    () => tokens.shift() ?? LEASE_TOKEN_C,
   );
   await queue.enqueue(
     { chainId: 84_532, orderId: ORDER_ID, round: 1n },
-    { order: ORDER_ID },
+    durablePayload("order-expiry"),
     { maxAttempts: 3 },
   );
 
-  const first = await queue.leaseNext("worker-a", 100);
+  const first = await queue.leaseNext(WORKER_A, 100);
   assert.ok(first);
   assert.equal(first.job.attempts, 1);
   clock.advance(100);
 
-  const fallback = await queue.leaseNext("worker-b", 100);
+  const fallback = await queue.leaseNext(WORKER_B, 100);
   assert.ok(fallback);
   assert.equal(fallback.job.attempts, 2);
   assert.notEqual(fallback.token, first.token);
@@ -62,9 +87,9 @@ test("expired leases fall back to another worker with fencing", async () => {
     availableAtMs: 10_500,
     errorCode: "RPC_UNAVAILABLE",
   });
-  assert.equal(await queue.leaseNext("worker-b", 100), null);
+  assert.equal(await queue.leaseNext(WORKER_B, 100), null);
   clock.set(10_500);
-  const retry = await queue.leaseNext("worker-b", 100);
+  const retry = await queue.leaseNext(WORKER_B, 100);
   assert.ok(retry);
   assert.equal(retry.job.attempts, 3);
   const completed = await queue.complete(retry);
@@ -79,35 +104,68 @@ test("expired leases fall back to another worker with fencing", async () => {
 
 test("retry exhaustion moves a job to the dead-letter state", async () => {
   const clock = new ManualClock(0);
-  const queue = new InMemoryIdempotentQueue<null>(
+  const queue = new InMemoryIdempotentQueue<DurableWorkPayload>(
     clock,
-    () => "single-token",
+    () => LEASE_TOKEN_A,
   );
   await queue.enqueue(
     { chainId: 1, orderId: ORDER_ID, round: 0n },
-    null,
+    durablePayload("order-evaluation", null),
     { maxAttempts: 1 },
   );
-  const lease = await queue.leaseNext("worker", 10);
+  const lease = await queue.leaseNext(WORKER_A, 10);
   assert.ok(lease);
   const result = await queue.retry(lease, {
     availableAtMs: 20,
-    errorCode: "PERMANENT",
+    errorCode: "PROCESSING_FAILED",
   });
   assert.equal(result.status, "dead-letter");
 });
 
 test("an abandoned final lease is dead-lettered after expiry", async () => {
   const clock = new ManualClock(0);
-  const queue = new InMemoryIdempotentQueue<null>(
+  const queue = new InMemoryIdempotentQueue<DurableWorkPayload>(
     clock,
-    () => "abandoned-token",
+    () => LEASE_TOKEN_A,
   );
   const identity = { chainId: 1, orderId: ORDER_ID, round: 9n };
-  await queue.enqueue(identity, null, { maxAttempts: 1 });
-  assert.ok(await queue.leaseNext("worker", 10));
+  await queue.enqueue(
+    identity,
+    durablePayload("order-expiry"),
+    { maxAttempts: 1 },
+  );
+  assert.ok(await queue.leaseNext(WORKER_A, 10));
 
   clock.set(10);
-  assert.equal(await queue.leaseNext("fallback", 10), null);
+  assert.equal(await queue.leaseNext(WORKER_B, 10), null);
   assert.equal((await queue.get(orderJobKey(identity)))?.status, "dead-letter");
+});
+
+test("queue isolates reference payloads and fences reused lease tokens", async () => {
+  const clock = new ManualClock(0);
+  const queue = new InMemoryIdempotentQueue<MutableDurableWorkPayload>(
+    clock,
+    () => LEASE_TOKEN_A,
+  );
+  const identity = { chainId: 1, orderId: ORDER_ID, round: 11n };
+  const payload = durablePayload();
+  const inserted = await queue.enqueue(identity, payload, { maxAttempts: 3 });
+
+  payload.contextId = ALTERNATE_CONTEXT_ID;
+  inserted.job.payload.contextId = ALTERNATE_CONTEXT_ID;
+  assert.equal(
+    (await queue.get(orderJobKey(identity)))?.payload.contextId,
+    CONTEXT_ID,
+  );
+
+  const first = await queue.leaseNext(WORKER_A, 10);
+  assert.ok(first);
+  first.job.payload.contextId = ALTERNATE_CONTEXT_ID;
+  clock.set(10);
+  const fallback = await queue.leaseNext(WORKER_A, 10);
+  assert.ok(fallback);
+  assert.equal(fallback.token, first.token);
+  assert.equal(fallback.generation, first.generation + 1n);
+  assert.equal(fallback.job.payload.contextId, CONTEXT_ID);
+  await assert.rejects(queue.complete(first), StaleLeaseError);
 });

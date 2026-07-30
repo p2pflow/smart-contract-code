@@ -128,6 +128,16 @@ export class ServiceHealth {
     const checks = await Promise.all(
       this.checks.map((check) => this.runCheck(check)),
     );
+    if (this.checks.length === 0) {
+      checks.push({
+        name: "readiness_configuration",
+        required: true,
+        status: "fail",
+        code: "NO_READINESS_CHECKS",
+        latencyMs: 0,
+      });
+    }
+
     if (this.mode === "live" && !this.sendGateEnabled) {
       checks.push({
         name: "transaction_send_gate",

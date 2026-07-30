@@ -1,82 +1,51 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  InMemoryTransactionPersistence,
+  NonceLease,
+  NonceScope,
+  PrepareInitialAttemptInput,
+  TransactionPersistenceConflictError,
+} from "../src/persistence/transaction-store";
 import { ManualClock } from "../src/reliability/clock";
 import {
-  FeeParameters,
-  InMemoryNonceOwnershipStore,
-  InMemoryTransactionAttemptStore,
-  NonceScope,
-  UnsignedTransaction,
-} from "../src/persistence/transaction-store";
-import {
-  BroadcastAuthorizationGate,
-  DenyAllBroadcastGate,
-  FeeProvider,
+  OfflineTransactionEvidenceRecorder,
+  ReceiptHashMismatchError,
   SimulationResult,
-  TransactionBroadcaster,
   TransactionChainState,
   TransactionIntent,
   TransactionManager,
   TransactionReceipt,
-  TransactionSigner,
+  TransactionReconciler,
   TransactionSimulator,
 } from "../src/reliability/transaction-manager";
 
 const SIGNER = `0x${"11".repeat(20)}` as const;
 const DIAMOND = `0x${"22".repeat(20)}` as const;
+const OTHER_DIAMOND = `0x${"23".repeat(20)}` as const;
 const HASH_ONE = `0x${"31".repeat(32)}` as const;
 const HASH_TWO = `0x${"32".repeat(32)}` as const;
-const BLOCK_HASH = `0x${"41".repeat(32)}` as const;
+const BLOCK_HASH_ONE = `0x${"41".repeat(32)}` as const;
+const BLOCK_HASH_TWO = `0x${"42".repeat(32)}` as const;
+const SCOPE: NonceScope = { chainId: 84_532, signer: SIGNER };
 
 class FixedSimulator implements TransactionSimulator {
+  public calls = 0;
   public result: SimulationResult = {
     success: true,
     gasEstimate: 200_000n,
   };
 
   public async simulate(): Promise<SimulationResult> {
+    this.calls += 1;
     return this.result;
   }
 }
 
-class FakeSigner implements TransactionSigner {
-  public signCalls = 0;
-  public readonly transactions: UnsignedTransaction[] = [];
-
-  public async address(): Promise<typeof SIGNER> {
-    return SIGNER;
-  }
-
-  public async signTransaction(
-    transaction: UnsignedTransaction,
-  ): Promise<`0x${string}`> {
-    this.signCalls += 1;
-    this.transactions.push(transaction);
-    return "0x1234";
-  }
-}
-
-class FakeBroadcaster implements TransactionBroadcaster {
-  public calls = 0;
-  public readonly hashes = [HASH_ONE, HASH_TWO];
-
-  public async broadcast(): Promise<`0x${string}`> {
-    this.calls += 1;
-    const hash = this.hashes.shift();
-    if (hash === undefined) throw new Error("No fake hash configured");
-    return hash;
-  }
-}
-
-class FakeChainState implements TransactionChainState {
-  public pending = 7n;
+class FakeReadOnlyChainState implements TransactionChainState {
   public head = 0n;
-  public receiptValue: TransactionReceipt | null = null;
-  public readonly hashes = new Map<bigint, `0x${string}`>();
-
-  public async pendingNonce(_scope: NonceScope): Promise<bigint> {
-    return this.pending;
-  }
+  public readonly receipts = new Map<string, TransactionReceipt>();
+  public readonly blockHashes = new Map<bigint, `0x${string}`>();
 
   public async latestBlockNumber(): Promise<bigint> {
     return this.head;
@@ -86,187 +55,256 @@ class FakeChainState implements TransactionChainState {
     _chainId: number,
     blockNumber: bigint,
   ): Promise<`0x${string}` | null> {
-    return this.hashes.get(blockNumber) ?? null;
+    return this.blockHashes.get(blockNumber) ?? null;
   }
 
-  public async receipt(): Promise<TransactionReceipt | null> {
-    return this.receiptValue;
-  }
-}
-
-class FixedFeeProvider implements FeeProvider {
-  public async initialFees(): Promise<FeeParameters> {
-    return {
-      maxFeePerGas: 100n,
-      maxPriorityFeePerGas: 10n,
-    };
-  }
-
-  public async replacementFees(): Promise<FeeParameters> {
-    return {
-      maxFeePerGas: 120n,
-      maxPriorityFeePerGas: 12n,
-    };
+  public async receipt(
+    _chainId: number,
+    transactionHash: `0x${string}`,
+  ): Promise<TransactionReceipt | null> {
+    return this.receipts.get(transactionHash.toLowerCase()) ?? null;
   }
 }
 
-const allowGate: BroadcastAuthorizationGate = {
-  authorize: async () => ({ authorized: true, blockers: [] }),
-};
+test("public manager hard-blocks action requests before simulation", async () => {
+  const simulator = new FixedSimulator();
+  const manager = new TransactionManager(simulator, SIGNER);
 
-test("shadow execution and deny-all gate cannot reach signing or broadcast", async () => {
-  const clock = new ManualClock(1_000);
-  const signer = new FakeSigner();
-  const broadcaster = new FakeBroadcaster();
-  const manager = makeManager(
-    new DenyAllBroadcastGate(),
-    signer,
-    broadcaster,
-    new FakeChainState(),
-    new InMemoryNonceOwnershipStore(clock, () => "nonce-token"),
-    new InMemoryTransactionAttemptStore(),
-    clock,
-  );
+  const blocked = await manager.execute(intent("blocked"), true);
+  assert.equal(blocked.kind, "blocked");
+  assert.equal(blocked.capability, "TRANSACTION_DISABLED_SHADOW_ONLY");
+  assert.equal(simulator.calls, 0);
 
   const shadow = await manager.execute(intent("shadow"), false);
   assert.equal(shadow.kind, "simulated");
-  const blocked = await manager.execute(intent("blocked"), true);
-  assert.equal(blocked.kind, "blocked");
-  assert.equal(signer.signCalls, 0);
-  assert.equal(broadcaster.calls, 0);
+  assert.equal(simulator.calls, 1);
 });
 
-test("nonce ownership uses expiring fencing leases", async () => {
+test("nonce leases use monotonic generation and exact expiry fencing", async () => {
   const clock = new ManualClock(0);
-  const tokens = ["owner-a-token", "owner-b-token"];
-  const store = new InMemoryNonceOwnershipStore(
-    clock,
-    () => tokens.shift() ?? "unexpected-token",
-  );
-  const scope = { chainId: 84_532, signer: SIGNER };
-  const ownerA = await store.acquire(scope, "owner-a", 5n, 10);
-  assert.ok(ownerA);
-  assert.equal(await store.reserve(ownerA), 5n);
-  assert.equal(await store.acquire(scope, "owner-b", 5n, 10), null);
+  const store = new InMemoryTransactionPersistence(clock, () => "same-token");
+  const first = await requiredLease(store, "owner-a", 7n, 10);
+  const renewed = await requiredLease(store, "owner-a", 7n, 10);
+
+  assert.equal(renewed.token, first.token);
+  assert.equal(renewed.generation, first.generation + 1n);
+  await assert.rejects(store.assertNonceOwned(first), /not owned/);
+  await store.assertNonceOwned(renewed);
 
   clock.set(10);
-  const ownerB = await store.acquire(scope, "owner-b", 5n, 10);
-  assert.ok(ownerB);
-  await assert.rejects(store.reserve(ownerA), /not owned/);
-  assert.equal(await store.reserve(ownerB), 6n);
+  await assert.rejects(store.assertNonceOwned(renewed), /not owned/);
+  const fallback = await requiredLease(store, "owner-b", 7n, 10);
+  assert.equal(fallback.generation, renewed.generation + 1n);
 });
 
-test("replacement keeps the nonce, bumps fees, and reconciles finality", async () => {
-  const clock = new ManualClock(2_000);
-  const signer = new FakeSigner();
-  const broadcaster = new FakeBroadcaster();
-  const chain = new FakeChainState();
-  const nonceStore = new InMemoryNonceOwnershipStore(
-    clock,
-    () => "nonce-owner-token",
-  );
-  const attempts = new InMemoryTransactionAttemptStore();
-  const manager = makeManager(
-    allowGate,
-    signer,
-    broadcaster,
-    chain,
-    nonceStore,
-    attempts,
-    clock,
-  );
+test("semantic intent and nonce reservation are one atomic idempotent write", async () => {
+  const clock = new ManualClock(1_000);
+  const store = new InMemoryTransactionPersistence(clock, () => "lease-token");
+  const lease = await requiredLease(store, "worker", 7n, 1_000);
 
-  const first = await manager.execute(intent("decision-1"), true);
-  if (first.kind !== "submitted") {
-    throw new Error(`Expected submitted, received ${first.kind}`);
-  }
+  const first = await store.prepareInitialAttempt(
+    lease,
+    initialAttempt("attempt-1", "intent-1", "worker", 1_000),
+  );
+  assert.equal(first.inserted, true);
   assert.equal(first.attempt.unsignedTransaction.nonce, 7n);
-  assert.equal(first.attempt.transactionHash, HASH_ONE);
 
-  const replacement = await manager.replace(first.attempt.attemptId);
-  if (replacement.kind !== "submitted") {
-    throw new Error(`Expected replacement submit, received ${replacement.kind}`);
-  }
-  assert.equal(replacement.attempt.unsignedTransaction.nonce, 7n);
-  assert.deepEqual(replacement.attempt.unsignedTransaction.fees, {
-    maxFeePerGas: 120n,
-    maxPriorityFeePerGas: 12n,
+  const duplicate = await store.prepareInitialAttempt(lease, {
+    ...initialAttempt("ignored-attempt", "intent-1", "worker", 1_001),
+    gasLimit: 999_999n,
   });
-  assert.equal(
-    (await attempts.get(first.attempt.attemptId))?.status,
-    "replaced",
+  assert.equal(duplicate.inserted, false);
+  assert.equal(duplicate.attempt.attemptId, "attempt-1");
+  assert.equal(duplicate.attempt.unsignedTransaction.nonce, 7n);
+
+  await assert.rejects(
+    store.prepareInitialAttempt(lease, {
+      ...initialAttempt("collision", "intent-1", "worker", 1_002),
+      to: OTHER_DIAMOND,
+    }),
+    TransactionPersistenceConflictError,
   );
-  assert.equal(
-    (await attempts.listByNonce(
-      { chainId: 84_532, signer: SIGNER },
-      7n,
-    )).length,
-    2,
+  await assert.rejects(
+    store.prepareInitialAttempt(lease, {
+      ...initialAttempt("invalid", "intent-2", "worker", 1_003),
+      gasLimit: 0n,
+    }),
+    /numeric values are invalid/,
   );
 
-  chain.receiptValue = {
-    transactionHash: HASH_TWO,
-    blockNumber: 10n,
-    blockHash: BLOCK_HASH,
-    success: true,
-  };
-  chain.hashes.set(10n, BLOCK_HASH);
-  chain.head = 10n;
-  const provisional = await manager.reconcile(
-    replacement.attempt.attemptId,
-    2,
+  const second = await store.prepareInitialAttempt(
+    lease,
+    initialAttempt("attempt-2", "intent-2", "worker", 1_004),
   );
-  assert.equal(provisional.status, "submitted");
-  assert.equal(provisional.receiptBlockNumber, 10n);
-
-  chain.head = 11n;
-  const confirmed = await manager.reconcile(
-    replacement.attempt.attemptId,
-    2,
-  );
-  assert.equal(confirmed.status, "confirmed");
-  assert.equal(signer.signCalls, 2);
-  assert.equal(broadcaster.calls, 2);
+  assert.equal(second.attempt.unsignedTransaction.nonce, 8n);
 });
 
-function makeManager(
-  gate: BroadcastAuthorizationGate,
-  signer: TransactionSigner,
-  broadcaster: TransactionBroadcaster,
-  chain: TransactionChainState,
-  nonceStore: InMemoryNonceOwnershipStore,
-  attempts: InMemoryTransactionAttemptStore,
-  clock: ManualClock,
-): TransactionManager {
-  let attemptNumber = 0;
-  return new TransactionManager(
-    new FixedSimulator(),
-    gate,
-    signer,
-    broadcaster,
-    chain,
-    new FixedFeeProvider(),
-    nonceStore,
-    attempts,
-    {
-      ownerId: "transaction-worker",
-      nonceLeaseMs: 1_000,
-      minimumReplacementBumpBps: 1_000,
-    },
-    clock,
-    () => {
-      attemptNumber += 1;
-      return `attempt-${attemptNumber}`;
-    },
+test("derived hash is durable before imported submission evidence", async () => {
+  const clock = new ManualClock(2_000);
+  const store = new InMemoryTransactionPersistence(clock, () => "lease-token");
+  const lease = await requiredLease(store, "worker", 3n, 1_000);
+  await store.prepareInitialAttempt(
+    lease,
+    initialAttempt("attempt-1", "intent-1", "worker", 2_000),
   );
+  const recorder = new OfflineTransactionEvidenceRecorder(store, clock);
+
+  await assert.rejects(
+    recorder.recordSubmissionObservation("attempt-1", "observed"),
+    /hash must be durable/,
+  );
+  const hashed = await recorder.recordDerivedHash("attempt-1", HASH_ONE);
+  assert.equal(hashed.status, "hash-recorded");
+  assert.equal(hashed.transactionHash, HASH_ONE);
+
+  clock.advance(1);
+  const uncertain = await recorder.recordSubmissionObservation(
+    "attempt-1",
+    "outcome-unknown",
+  );
+  assert.equal(uncertain.status, "broadcast-unknown");
+  assert.equal(uncertain.transactionHash, HASH_ONE);
+});
+
+test("nonce-family reconciliation lets the original win after a reorg", async () => {
+  const clock = new ManualClock(3_000);
+  const store = new InMemoryTransactionPersistence(clock, () => "lease-token");
+  const lease = await requiredLease(store, "worker", 7n, 10_000);
+  const first = await store.prepareInitialAttempt(
+    lease,
+    initialAttempt("attempt-1", "intent-1", "worker", 3_000),
+  );
+  const replacement = await store.prepareReplacementAttempt(lease, {
+    attemptId: "attempt-2",
+    operationKey: "replace:intent-1:1",
+    ownerId: "worker",
+    previousAttemptId: first.attempt.attemptId,
+    gasLimit: 210_000n,
+    fees: { maxFeePerGas: 120n, maxPriorityFeePerGas: 12n },
+    createdAtMs: 3_001,
+  });
+  const duplicate = await store.prepareReplacementAttempt(lease, {
+    attemptId: "attempt-2",
+    operationKey: "replace:intent-1:1",
+    ownerId: "worker",
+    previousAttemptId: first.attempt.attemptId,
+    gasLimit: 210_000n,
+    fees: { maxFeePerGas: 120n, maxPriorityFeePerGas: 12n },
+    createdAtMs: 3_001,
+  });
+  assert.equal(duplicate.inserted, false);
+  assert.equal(replacement.attempt.unsignedTransaction.nonce, 7n);
+
+  clock.set(3_001);
+  const recorder = new OfflineTransactionEvidenceRecorder(store, clock);
+  await recorder.recordDerivedHash("attempt-1", HASH_ONE);
+  await recorder.recordSubmissionObservation("attempt-1", "observed");
+  await recorder.recordDerivedHash("attempt-2", HASH_TWO);
+  await recorder.recordSubmissionObservation("attempt-2", "observed");
+
+  const chain = new FakeReadOnlyChainState();
+  chain.receipts.set(HASH_TWO, receipt(HASH_TWO, 10n, BLOCK_HASH_ONE));
+  chain.blockHashes.set(10n, BLOCK_HASH_ONE);
+  chain.head = 11n;
+  const reconciler = new TransactionReconciler(store, chain, clock);
+  const replacementWins = await reconciler.reconcileNonceFamily(
+    SCOPE,
+    7n,
+    2,
+  );
+  assert.equal(replacementWins.finalAttemptId, "attempt-2");
+  assert.deepEqual(
+    replacementWins.attempts.map((attempt) => attempt.status),
+    ["replaced", "confirmed"],
+  );
+
+  chain.receipts.delete(HASH_TWO);
+  chain.blockHashes.set(10n, BLOCK_HASH_TWO);
+  chain.receipts.set(HASH_ONE, receipt(HASH_ONE, 12n, BLOCK_HASH_ONE));
+  chain.blockHashes.set(12n, BLOCK_HASH_ONE);
+  chain.head = 13n;
+  clock.advance(1);
+  const originalWins = await reconciler.reconcileNonceFamily(SCOPE, 7n, 2);
+  assert.equal(originalWins.finalAttemptId, "attempt-1");
+  assert.deepEqual(
+    originalWins.attempts.map((attempt) => attempt.status),
+    ["confirmed", "replaced"],
+  );
+});
+
+test("receipt identity is checked before reconciliation mutates records", async () => {
+  const clock = new ManualClock(4_000);
+  const store = new InMemoryTransactionPersistence(clock, () => "lease-token");
+  const lease = await requiredLease(store, "worker", 1n, 1_000);
+  await store.prepareInitialAttempt(
+    lease,
+    initialAttempt("attempt-1", "intent-1", "worker", 4_000),
+  );
+  const recorder = new OfflineTransactionEvidenceRecorder(store, clock);
+  await recorder.recordDerivedHash("attempt-1", HASH_ONE);
+  await recorder.recordSubmissionObservation("attempt-1", "observed");
+
+  const chain = new FakeReadOnlyChainState();
+  chain.receipts.set(HASH_ONE, receipt(HASH_TWO, 1n, BLOCK_HASH_ONE));
+  const reconciler = new TransactionReconciler(store, chain, clock);
+  await assert.rejects(
+    reconciler.reconcileNonceFamily(SCOPE, 1n, 1),
+    ReceiptHashMismatchError,
+  );
+  assert.equal((await store.getAttempt("attempt-1"))?.status, "submitted");
+});
+
+async function requiredLease(
+  store: InMemoryTransactionPersistence,
+  ownerId: string,
+  networkPendingNonce: bigint,
+  leaseMs: number,
+): Promise<NonceLease> {
+  const lease = await store.acquireNonce(
+    SCOPE,
+    ownerId,
+    networkPendingNonce,
+    leaseMs,
+  );
+  if (lease === null) throw new Error("Expected nonce lease");
+  return lease;
+}
+
+function initialAttempt(
+  attemptId: string,
+  intentKey: string,
+  ownerId: string,
+  createdAtMs: number,
+): PrepareInitialAttemptInput {
+  return {
+    attemptId,
+    intentKey,
+    ownerId,
+    chainId: SCOPE.chainId,
+    signer: SCOPE.signer,
+    to: DIAMOND,
+    data: "0xabcdef",
+    value: 0n,
+    gasLimit: 200_000n,
+    fees: { maxFeePerGas: 100n, maxPriorityFeePerGas: 10n },
+    createdAtMs,
+  };
 }
 
 function intent(idempotencyKey: string): TransactionIntent {
   return {
     idempotencyKey,
-    chainId: 84_532,
+    chainId: SCOPE.chainId,
     to: DIAMOND,
     data: "0xabcdef",
     value: 0n,
   };
+}
+
+function receipt(
+  transactionHash: `0x${string}`,
+  blockNumber: bigint,
+  blockHash: `0x${string}`,
+): TransactionReceipt {
+  return { transactionHash, blockNumber, blockHash, success: true };
 }

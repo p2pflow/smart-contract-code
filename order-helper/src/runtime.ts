@@ -60,6 +60,21 @@ export async function startRuntime(
   options: RuntimeOptions,
 ): Promise<RunningRuntime> {
   const metrics = new MetricsRegistry();
+  const metricLabels = { mode: options.config.mode } as const;
+  const upMetric = metrics.gauge({
+    name: "p2pflow_order_helper_up",
+    help: "Whether the order helper runtime is running.",
+    labelNames: ["mode"],
+  });
+  const sendingMetric = metrics.gauge({
+    name: "p2pflow_order_helper_transaction_sending_enabled",
+    help: "Whether transaction sending is enabled for this runtime.",
+    labelNames: ["mode"],
+  });
+  upMetric.set(0, metricLabels);
+  // The generic runtime is intentionally deny-all. A future reviewed runtime
+  // must register its own evidence-backed authorization state.
+  sendingMetric.set(0, metricLabels);
   const health = new ServiceHealth({
     mode: options.config.mode,
     // Concrete deployments must derive an authorizing gate from reviewed
@@ -74,9 +89,28 @@ export async function startRuntime(
     port: options.port,
   });
 
-  await options.components.start();
-  const address = await operationsServer.start();
+  let componentsStarted = false;
+  let address: { readonly host: string; readonly port: number };
+  try {
+    await options.components.start();
+    componentsStarted = true;
+    address = await operationsServer.start();
+  } catch (startupError: unknown) {
+    health.markStopping();
+    upMetric.set(0, metricLabels);
+    if (!componentsStarted) throw startupError;
+    try {
+      await options.components.stop();
+    } catch (cleanupError: unknown) {
+      throw new AggregateError(
+        [startupError, cleanupError],
+        "Runtime startup failed and component rollback also failed",
+      );
+    }
+    throw startupError;
+  }
   health.markRunning();
+  upMetric.set(1, metricLabels);
   options.logger.info("runtime_started", {
     mode: options.config.mode,
     transactionSending: "disabled",
@@ -87,21 +121,36 @@ export async function startRuntime(
     operationsPort: address.port,
   });
 
-  let stopped = false;
+  let stopPromise: Promise<void> | null = null;
+  const stopOnce = async (): Promise<void> => {
+    health.markStopping();
+    upMetric.set(0, metricLabels);
+    const failures: unknown[] = [];
+    try {
+      await options.components.stop();
+    } catch (error: unknown) {
+      failures.push(error);
+    }
+    try {
+      await operationsServer.stop();
+    } catch (error: unknown) {
+      failures.push(error);
+    }
+    options.logger.info("runtime_stopped", {
+      mode: options.config.mode,
+      transactionSending: "disabled",
+    });
+    if (failures.length > 0) {
+      throw new AggregateError(failures, "Runtime shutdown failed");
+    }
+  };
   return {
     health,
     metrics,
     operationsServer,
     stop: async () => {
-      if (stopped) return;
-      stopped = true;
-      health.markStopping();
-      await options.components.stop();
-      await operationsServer.stop();
-      options.logger.info("runtime_stopped", {
-        mode: options.config.mode,
-        transactionSending: "disabled",
-      });
+      stopPromise ??= stopOnce();
+      await stopPromise;
     },
   };
 }

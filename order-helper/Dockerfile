@@ -7,6 +7,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 COPY tsconfig.json ./
+COPY scripts ./scripts
 COPY src ./src
 RUN npm run build
 
@@ -30,6 +31,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:8080/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 
-# The integration entrypoint must inject concrete adapters. It remains
-# shadow-only while contract verification and canary gates are closed.
+# The shipped entrypoint wires no external adapter and therefore remains
+# intentionally unready. The pinned Council REJECT and absent signer/broadcaster
+# make it transaction-incapable; contract verification alone cannot open it.
 CMD ["node", "dist/src/main.js"]

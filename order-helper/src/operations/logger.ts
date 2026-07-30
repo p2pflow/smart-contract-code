@@ -136,9 +136,13 @@ class JsonStructuredLogger implements StructuredLogger {
     try {
       this.sink.write(`${JSON.stringify(record)}\n`);
     } catch {
-      this.sink.write(
-        '{"level":"error","service":"order-helper","event":"log_serialization_failed"}\n',
-      );
+      try {
+        this.sink.write(
+          '{"level":"error","service":"order-helper","event":"log_serialization_failed"}\n',
+        );
+      } catch {
+        // Logging is diagnostic and must not change business control flow.
+      }
     }
   }
 }

@@ -1,9 +1,31 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { Clock, SystemClock, assertTimestamp } from "./clock";
 
 export type ScheduledWorkStatus = "active" | "leased" | "completed" | "dead";
 export type SweepReason = "expiry" | "retry";
+export type OpaqueId = `0x${string}`;
+export type DurableWorkKind =
+  | "order-evaluation"
+  | "order-expiry"
+  | "transaction-reconciliation";
+export type SweepErrorCode =
+  | "LEASE_EXHAUSTED"
+  | "POLICY_REJECTED"
+  | "PROCESSOR_FAILED"
+  | "ROUND_EXPIRED"
+  | "RPC_UNAVAILABLE";
+
+/**
+ * Sweeper rows contain only typed references to state held by an authoritative
+ * adapter. Free-form application payloads are deliberately not durable.
+ */
+export interface DurableWorkPayload {
+  readonly schema: "order-helper.durable-work.v1";
+  readonly kind: DurableWorkKind;
+  readonly subjectId: OpaqueId;
+  readonly contextId: OpaqueId | null;
+}
 
 export interface ScheduledWork<T> {
   readonly id: string;
@@ -17,7 +39,8 @@ export interface ScheduledWork<T> {
   readonly leaseOwner: string | null;
   readonly leaseToken: string | null;
   readonly leaseUntilMs: number | null;
-  readonly lastErrorCode: string | null;
+  readonly leaseGeneration: bigint;
+  readonly lastErrorCode: SweepErrorCode | null;
   readonly createdAtMs: number;
   readonly updatedAtMs: number;
   readonly sequence: number;
@@ -36,6 +59,7 @@ export interface SweepLease<T> {
   readonly reason: SweepReason;
   readonly owner: string;
   readonly token: string;
+  readonly generation: bigint;
   readonly expiresAtMs: number;
 }
 
@@ -44,9 +68,9 @@ export type SweepAction =
   | {
       readonly kind: "retry";
       readonly retryAtMs: number;
-      readonly errorCode: string;
+      readonly errorCode: SweepErrorCode;
     }
-  | { readonly kind: "dead"; readonly errorCode: string };
+  | { readonly kind: "dead"; readonly errorCode: SweepErrorCode };
 
 export interface ScheduledWorkStore<T> {
   schedule(
@@ -60,11 +84,11 @@ export interface ScheduledWorkStore<T> {
   retry(
     lease: SweepLease<T>,
     retryAtMs: number,
-    errorCode: string,
+    errorCode: SweepErrorCode,
   ): Promise<ScheduledWork<T>>;
   dead(
     lease: SweepLease<T>,
-    errorCode: string,
+    errorCode: SweepErrorCode,
   ): Promise<ScheduledWork<T>>;
   get(id: string): Promise<ScheduledWork<T> | null>;
 }
@@ -100,23 +124,26 @@ implements ScheduledWorkStore<T> {
 
   public constructor(
     private readonly clock: Clock = new SystemClock(),
-    private readonly tokenFactory: () => string = randomUUID,
+    private readonly tokenFactory: () => string = randomOpaqueId,
   ) {}
 
   public async schedule(
     input: ScheduledWorkInput<T>,
   ): Promise<{ readonly inserted: boolean; readonly work: ScheduledWork<T> }> {
     validateInput(input);
-    const existing = this.work.get(input.id);
+    validateDurablePayload(input.payload);
+    const canonicalId = canonicalOpaqueId(input.id);
+    const isolatedPayload = canonicalizeDurablePayload(input.payload);
+    const existing = this.work.get(canonicalId);
     if (existing !== undefined) {
       const same =
-        isDeepStrictEqual(existing.payload, input.payload) &&
+        isDeepStrictEqual(existing.payload, isolatedPayload) &&
         existing.expiresAtMs === input.expiresAtMs &&
         existing.retryAtMs === input.retryAtMs &&
         existing.maxAttempts === input.maxAttempts;
       if (!same) {
         throw new Error(
-          `Scheduled work ${input.id} already exists with different data`,
+          `Scheduled work ${canonicalId} already exists with different data`,
         );
       }
       return { inserted: false, work: cloneWork(existing) };
@@ -124,19 +151,22 @@ implements ScheduledWorkStore<T> {
     const nowMs = this.clock.nowMs();
     const scheduled: ScheduledWork<T> = {
       ...input,
+      id: canonicalId,
+      payload: isolatedPayload,
       status: "active",
       expiryHandled: false,
       attempts: 0,
       leaseOwner: null,
       leaseToken: null,
       leaseUntilMs: null,
+      leaseGeneration: 0n,
       lastErrorCode: null,
       createdAtMs: nowMs,
       updatedAtMs: nowMs,
       sequence: this.nextSequence,
     };
     this.nextSequence += 1;
-    this.work.set(input.id, scheduled);
+    this.work.set(canonicalId, scheduled);
     return { inserted: true, work: cloneWork(scheduled) };
   }
 
@@ -144,9 +174,8 @@ implements ScheduledWorkStore<T> {
     owner: string,
     leaseMs: number,
   ): Promise<SweepLease<T> | null> {
-    if (owner.trim().length === 0) {
-      throw new TypeError("owner must not be empty");
-    }
+    assertOpaqueId(owner, "owner");
+    const canonicalOwner = canonicalOpaqueId(owner);
     if (!Number.isSafeInteger(leaseMs) || leaseMs <= 0) {
       throw new RangeError("leaseMs must be a positive safe integer");
     }
@@ -166,25 +195,26 @@ implements ScheduledWorkStore<T> {
     if (due === undefined) return null;
 
     const token = this.tokenFactory();
-    if (token.length === 0) {
-      throw new Error("tokenFactory returned an empty sweep token");
-    }
+    assertOpaqueId(token, "sweep token");
+    const canonicalToken = canonicalOpaqueId(token);
     const leaseUntilMs = nowMs + leaseMs;
     const leased: ScheduledWork<T> = {
       ...due.work,
       status: "leased",
       attempts: due.work.attempts + 1,
-      leaseOwner: owner,
-      leaseToken: token,
+      leaseOwner: canonicalOwner,
+      leaseToken: canonicalToken,
       leaseUntilMs,
+      leaseGeneration: due.work.leaseGeneration + 1n,
       updatedAtMs: nowMs,
     };
     this.work.set(leased.id, leased);
     return {
       work: cloneWork(leased),
       reason: due.reason,
-      owner,
-      token,
+      owner: canonicalOwner,
+      token: canonicalToken,
+      generation: leased.leaseGeneration,
       expiresAtMs: leaseUntilMs,
     };
   }
@@ -203,7 +233,7 @@ implements ScheduledWorkStore<T> {
   public async retry(
     lease: SweepLease<T>,
     retryAtMs: number,
-    errorCode: string,
+    errorCode: SweepErrorCode,
   ): Promise<ScheduledWork<T>> {
     assertTimestamp(retryAtMs, "retryAtMs");
     validateErrorCode(errorCode);
@@ -224,7 +254,7 @@ implements ScheduledWorkStore<T> {
 
   public async dead(
     lease: SweepLease<T>,
-    errorCode: string,
+    errorCode: SweepErrorCode,
   ): Promise<ScheduledWork<T>> {
     validateErrorCode(errorCode);
     const current = this.requireLease(lease);
@@ -236,7 +266,8 @@ implements ScheduledWorkStore<T> {
   }
 
   public async get(id: string): Promise<ScheduledWork<T> | null> {
-    const current = this.work.get(id);
+    assertOpaqueId(id, "Scheduled work id");
+    const current = this.work.get(canonicalOpaqueId(id));
     return current === undefined ? null : cloneWork(current);
   }
 
@@ -248,7 +279,11 @@ implements ScheduledWorkStore<T> {
       current.status !== "leased" ||
       current.leaseOwner !== lease.owner ||
       current.leaseToken !== lease.token ||
+      current.leaseGeneration !== lease.generation ||
       current.leaseUntilMs === null ||
+      current.leaseUntilMs !== lease.expiresAtMs ||
+      lease.work.leaseGeneration !== lease.generation ||
+      lease.work.leaseUntilMs !== lease.expiresAtMs ||
       current.leaseUntilMs <= nowMs
     ) {
       throw new SweepLeaseError(lease.work.id);
@@ -404,9 +439,7 @@ function compareDue<T>(
 }
 
 function validateInput<T>(input: ScheduledWorkInput<T>): void {
-  if (input.id.trim().length === 0) {
-    throw new TypeError("Scheduled work id must not be empty");
-  }
+  assertOpaqueId(input.id, "Scheduled work id");
   if (input.expiresAtMs !== null) {
     assertTimestamp(input.expiresAtMs, "expiresAtMs");
   }
@@ -419,9 +452,7 @@ function validateInput<T>(input: ScheduledWorkInput<T>): void {
 }
 
 function validateSweeperOptions(options: ExpiryRetrySweeperOptions): void {
-  if (options.owner.trim().length === 0) {
-    throw new TypeError("owner must not be empty");
-  }
+  assertOpaqueId(options.owner, "owner");
   if (
     !Number.isSafeInteger(options.leaseMs) ||
     options.leaseMs <= 0 ||
@@ -435,11 +466,95 @@ function validateSweeperOptions(options: ExpiryRetrySweeperOptions): void {
 }
 
 function validateErrorCode(errorCode: string): void {
-  if (errorCode.trim().length === 0) {
-    throw new TypeError("errorCode must not be empty");
+  if (!SWEEP_ERROR_CODES.has(errorCode)) {
+    throw new TypeError("errorCode must be a supported sweep error category");
   }
 }
 
 function cloneWork<T>(work: ScheduledWork<T>): ScheduledWork<T> {
-  return { ...work };
+  return { ...work, payload: clonePayload(work.payload) };
+}
+
+function clonePayload<T>(payload: T): T {
+  return structuredClone(payload);
+}
+
+function canonicalizeDurablePayload<T>(payload: T): T {
+  const durable = payload as unknown as DurableWorkPayload;
+  return {
+    ...durable,
+    subjectId: canonicalOpaqueId(durable.subjectId) as OpaqueId,
+    contextId:
+      durable.contextId === null
+        ? null
+        : canonicalOpaqueId(durable.contextId) as OpaqueId,
+  } as unknown as T;
+}
+
+const DURABLE_PAYLOAD_KEYS = [
+  "contextId",
+  "kind",
+  "schema",
+  "subjectId",
+] as const;
+
+const DURABLE_WORK_KINDS: ReadonlySet<string> = new Set([
+  "order-evaluation",
+  "order-expiry",
+  "transaction-reconciliation",
+]);
+
+const SWEEP_ERROR_CODES: ReadonlySet<string> = new Set([
+  "LEASE_EXHAUSTED",
+  "POLICY_REJECTED",
+  "PROCESSOR_FAILED",
+  "ROUND_EXPIRED",
+  "RPC_UNAVAILABLE",
+]);
+
+function validateDurablePayload(
+  payload: unknown,
+): asserts payload is DurableWorkPayload {
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    Array.isArray(payload) ||
+    Object.getPrototypeOf(payload) !== Object.prototype ||
+    Object.getOwnPropertySymbols(payload).length !== 0
+  ) {
+    throw new TypeError("payload must use the durable-work reference schema");
+  }
+  const record = payload as Readonly<Record<string, unknown>>;
+  if (
+    Object.keys(record).sort().join(",") !==
+      [...DURABLE_PAYLOAD_KEYS].sort().join(",") ||
+    record.schema !== "order-helper.durable-work.v1" ||
+    typeof record.kind !== "string" ||
+    !DURABLE_WORK_KINDS.has(record.kind) ||
+    typeof record.subjectId !== "string" ||
+    (
+      record.contextId !== null &&
+      typeof record.contextId !== "string"
+    )
+  ) {
+    throw new TypeError("payload must use the durable-work reference schema");
+  }
+  assertOpaqueId(record.subjectId, "payload.subjectId");
+  if (record.contextId !== null) {
+    assertOpaqueId(record.contextId, "payload.contextId");
+  }
+}
+
+function assertOpaqueId(value: string, name: string): void {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) {
+    throw new TypeError(`${name} must be an opaque 32-byte identifier`);
+  }
+}
+
+function canonicalOpaqueId(value: string): string {
+  return `0x${value.slice(2).toLowerCase()}`;
+}
+
+function randomOpaqueId(): string {
+  return `0x${randomBytes(32).toString("hex")}`;
 }

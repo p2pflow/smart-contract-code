@@ -4,10 +4,20 @@ import {
   HelperMode,
   SelectionPolicy,
 } from "./domain/types";
+import { isCanonicalVersionIdentifier } from "./domain/validation";
+import {
+  BASE_SEPOLIA_CHAIN_ID,
+  BASE_SEPOLIA_DIAMOND_ADDRESS,
+  COUNCIL_BILL_SHA256,
+} from "./authority";
 
-const BASE_SEPOLIA_CHAIN_ID = 84_532;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ZERO_BYTES32 = `0x${"00".repeat(32)}`;
+export {
+  BASE_SEPOLIA_CHAIN_ID,
+  BASE_SEPOLIA_DIAMOND_ADDRESS,
+  COUNCIL_BILL_SHA256,
+} from "./authority";
 
 export interface SendGateStatus {
   readonly requested: boolean;
@@ -24,7 +34,10 @@ export interface HelperConfig {
   readonly finalityConfirmations: number;
   readonly mode: HelperMode;
   readonly sendGate: SendGateStatus;
-  readonly kmsKeyReference: string;
+  readonly council: {
+    readonly verdict: "REJECT";
+    readonly billSha256: string;
+  };
   readonly databaseSecretReference: string;
   readonly redisSecretReference: string;
   readonly helperBuildVersion: string;
@@ -112,7 +125,14 @@ function makeReader(environment: Environment): Reader {
       const raw = required(name);
       try {
         const result = new URL(raw);
-        if (result.protocol !== "https:" && result.protocol !== "http:") {
+        const loopback =
+          result.hostname === "localhost" ||
+          result.hostname === "127.0.0.1" ||
+          result.hostname === "[::1]";
+        if (
+          result.protocol !== "https:" &&
+          !(result.protocol === "http:" && loopback)
+        ) {
           throw new Error("unsupported protocol");
         }
         return result;
@@ -155,7 +175,8 @@ export function loadConfig(environment: Environment): HelperConfig {
   const mode: HelperMode = modeRaw === "live" ? "live" : "shadow";
 
   const sendRequested = reader.boolean("ENABLE_TRANSACTION_SENDING", false);
-  const councilPass = reader.boolean("COUNCIL_SCOPE_PASS", false);
+  const councilVerdict = reader.required("COUNCIL_VERDICT");
+  const councilBillSha256 = reader.required("COUNCIL_BILL_SHA256");
   const interfaceVerified = reader.boolean("CONTRACT_INTERFACE_VERIFIED", false);
   const deploymentVerified = reader.boolean(
     "BASE_SEPOLIA_DEPLOYMENT_VERIFIED",
@@ -163,10 +184,14 @@ export function loadConfig(environment: Environment): HelperConfig {
   );
   const canaryApproved = reader.boolean("CANARY_APPROVED", false);
 
-  const kmsKeyReference = reader.required("KMS_KEY_REFERENCE");
   const databaseSecretReference = reader.required("DATABASE_SECRET_REFERENCE");
   const redisSecretReference = reader.required("REDIS_SECRET_REFERENCE");
   const helperBuildVersion = reader.required("HELPER_BUILD_VERSION");
+  if (!isCanonicalVersionIdentifier(helperBuildVersion)) {
+    reader.errors.push("HELPER_BUILD_VERSION");
+  }
+  const policyVersion = reader.required("POLICY_VERSION");
+  if (!isCanonicalVersionIdentifier(policyVersion)) reader.errors.push("POLICY_VERSION");
 
   const candidateCount = reader.positiveInteger("CANDIDATE_COUNT");
   if (candidateCount !== 4) reader.errors.push("CANDIDATE_COUNT");
@@ -196,7 +221,7 @@ export function loadConfig(environment: Environment): HelperConfig {
   }
 
   const policy: SelectionPolicy = {
-    version: reader.required("POLICY_VERSION"),
+    version: policyVersion,
     policyHash: reader.bytes32("POLICY_HASH"),
     candidateCount: 4,
     assignmentTtlSeconds: reader.positiveInteger("ASSIGNMENT_TTL_SECONDS"),
@@ -232,9 +257,25 @@ export function loadConfig(environment: Environment): HelperConfig {
   }
 
   if (chainId !== BASE_SEPOLIA_CHAIN_ID) reader.errors.push("CHAIN_ID");
-  if (diamondAddress === ZERO_ADDRESS) reader.errors.push("DIAMOND_ADDRESS");
+  if (mode !== "shadow") reader.errors.push("HELPER_MODE");
+  if (sendRequested) reader.errors.push("ENABLE_TRANSACTION_SENDING");
+  if (councilVerdict !== "REJECT") reader.errors.push("COUNCIL_VERDICT");
+  if (councilBillSha256 !== COUNCIL_BILL_SHA256) {
+    reader.errors.push("COUNCIL_BILL_SHA256");
+  }
+  if (interfaceVerified) reader.errors.push("CONTRACT_INTERFACE_VERIFIED");
+  if (deploymentVerified) {
+    reader.errors.push("BASE_SEPOLIA_DEPLOYMENT_VERIFIED");
+  }
+  if (canaryApproved) reader.errors.push("CANARY_APPROVED");
+  if (diamondAddress !== BASE_SEPOLIA_DIAMOND_ADDRESS) {
+    reader.errors.push("DIAMOND_ADDRESS");
+  }
   if (policy.policyHash === ZERO_BYTES32) reader.errors.push("POLICY_HASH");
-  if (primaryRpcUrl.href === fallbackRpcUrl.href) {
+  if (
+    primaryRpcUrl.href === fallbackRpcUrl.href ||
+    primaryRpcUrl.hostname === fallbackRpcUrl.hostname
+  ) {
     reader.errors.push("FALLBACK_RPC_URL");
   }
 
@@ -243,14 +284,9 @@ export function loadConfig(environment: Environment): HelperConfig {
   }
 
   const blockers = [
-    ...(mode !== "live" ? ["HELPER_MODE is not live"] : []),
-    ...(!sendRequested ? ["ENABLE_TRANSACTION_SENDING is false"] : []),
-    ...(!councilPass ? ["COUNCIL_SCOPE_PASS is false"] : []),
-    ...(!interfaceVerified ? ["CONTRACT_INTERFACE_VERIFIED is false"] : []),
-    ...(!deploymentVerified
-      ? ["BASE_SEPOLIA_DEPLOYMENT_VERIFIED is false"]
-      : []),
-    ...(!canaryApproved ? ["CANARY_APPROVED is false"] : []),
+    "council verdict is REJECT",
+    "value-moving helper interface is not deployed and verified",
+    "shipped runtime has no signing or broadcasting adapter",
   ];
 
   return {
@@ -263,10 +299,13 @@ export function loadConfig(environment: Environment): HelperConfig {
     mode,
     sendGate: {
       requested: sendRequested,
-      enabled: blockers.length === 0,
+      enabled: false,
       blockers,
     },
-    kmsKeyReference,
+    council: {
+      verdict: "REJECT",
+      billSha256: councilBillSha256,
+    },
     databaseSecretReference,
     redisSecretReference,
     helperBuildVersion,

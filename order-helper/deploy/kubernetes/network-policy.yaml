@@ -8,6 +8,7 @@ spec:
       app.kubernetes.io/name: order-helper
   policyTypes:
     - Ingress
+    - Egress
   ingress:
     - from:
         - podSelector:
@@ -16,3 +17,7 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+  # The shipped runtime wires no external adapters. Keep every outbound path
+  # closed until a separately reviewed read-only integration replaces this
+  # scaffold under a later Council disposition.
+  egress: []

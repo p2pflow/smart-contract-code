@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  BASE_SEPOLIA_DIAMOND_ADDRESS,
   ConfigurationError,
   loadConfig,
 } from "../src/config";
@@ -8,23 +9,24 @@ import {
 function validEnvironment(): Record<string, string> {
   return {
     CHAIN_ID: "84532",
-    DIAMOND_ADDRESS: "0x1111111111111111111111111111111111111111",
+    DIAMOND_ADDRESS: BASE_SEPOLIA_DIAMOND_ADDRESS,
     PRIMARY_RPC_URL: "https://primary.example.invalid",
     FALLBACK_RPC_URL: "https://fallback.example.invalid",
     START_BLOCK: "1",
     FINALITY_CONFIRMATIONS: "2",
     HELPER_MODE: "shadow",
     ENABLE_TRANSACTION_SENDING: "false",
-    COUNCIL_SCOPE_PASS: "false",
+    COUNCIL_VERDICT: "REJECT",
+    COUNCIL_BILL_SHA256:
+      "4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916",
     CONTRACT_INTERFACE_VERIFIED: "false",
     BASE_SEPOLIA_DEPLOYMENT_VERIFIED: "false",
     CANARY_APPROVED: "false",
-    KMS_KEY_REFERENCE: "kms://test/key",
     DATABASE_SECRET_REFERENCE: "secret://test/postgres",
     REDIS_SECRET_REFERENCE: "secret://test/redis",
     POLICY_VERSION: "wfq-v1",
     POLICY_HASH: `0x${"11".repeat(32)}`,
-    HELPER_BUILD_VERSION: "test-build",
+    HELPER_BUILD_VERSION: "test-build-1",
     CANDIDATE_COUNT: "4",
     ASSIGNMENT_TTL_SECONDS: "90",
     LEASE_STEP_SECONDS: "15",
@@ -48,26 +50,34 @@ test("configuration is shadow-first and transaction sending is blocked", () => {
   const config = loadConfig(validEnvironment());
   assert.equal(config.mode, "shadow");
   assert.equal(config.sendGate.enabled, false);
-  assert.ok(config.sendGate.blockers.includes("HELPER_MODE is not live"));
+  assert.ok(config.sendGate.blockers.includes("council verdict is REJECT"));
+  assert.equal(config.council.verdict, "REJECT");
   assert.equal(config.policy.candidateCount, 4);
 });
 
-test("all explicit canary gates are required before a send gate enables", () => {
+test("the council REJECT posture cannot be overridden by canary booleans", () => {
   const environment = validEnvironment();
   Object.assign(environment, {
     HELPER_MODE: "live",
     ENABLE_TRANSACTION_SENDING: "true",
-    COUNCIL_SCOPE_PASS: "true",
+    COUNCIL_VERDICT: "PASS",
     CONTRACT_INTERFACE_VERIFIED: "true",
     BASE_SEPOLIA_DEPLOYMENT_VERIFIED: "true",
     CANARY_APPROVED: "true",
   });
-  const config = loadConfig(environment);
-  assert.deepEqual(config.sendGate, {
-    requested: true,
-    enabled: true,
-    blockers: [],
-  });
+  assert.throws(
+    () => loadConfig(environment),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.missingOrInvalidNames.includes("HELPER_MODE") &&
+      error.missingOrInvalidNames.includes("ENABLE_TRANSACTION_SENDING") &&
+      error.missingOrInvalidNames.includes("COUNCIL_VERDICT") &&
+      error.missingOrInvalidNames.includes("CONTRACT_INTERFACE_VERIFIED") &&
+      error.missingOrInvalidNames.includes(
+        "BASE_SEPOLIA_DEPLOYMENT_VERIFIED",
+      ) &&
+      error.missingOrInvalidNames.includes("CANARY_APPROVED"),
+  );
 });
 
 test("risk configuration fails closed when missing", () => {
@@ -91,5 +101,40 @@ test("non-testnet and placeholder policy identity are rejected", () => {
       error instanceof ConfigurationError &&
       error.missingOrInvalidNames.includes("CHAIN_ID") &&
       error.missingOrInvalidNames.includes("POLICY_HASH"),
+  );
+});
+
+test("an arbitrary Base Sepolia contract cannot replace the pinned Diamond", () => {
+  const environment = validEnvironment();
+  environment.DIAMOND_ADDRESS =
+    "0x1111111111111111111111111111111111111111";
+  assert.throws(
+    () => loadConfig(environment),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.missingOrInvalidNames.includes("DIAMOND_ADDRESS"),
+  );
+});
+
+test("remote cleartext and same-host fallback RPCs are rejected", () => {
+  const environment = validEnvironment();
+  environment.PRIMARY_RPC_URL = "http://public-rpc.example.invalid";
+  environment.FALLBACK_RPC_URL =
+    "https://public-rpc.example.invalid/another-tenant";
+  assert.throws(
+    () => loadConfig(environment),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.missingOrInvalidNames.includes("PRIMARY_RPC_URL"),
+  );
+
+  const sameHost = validEnvironment();
+  sameHost.FALLBACK_RPC_URL =
+    "https://primary.example.invalid/another-tenant";
+  assert.throws(
+    () => loadConfig(sameHost),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.missingOrInvalidNames.includes("FALLBACK_RPC_URL"),
   );
 });

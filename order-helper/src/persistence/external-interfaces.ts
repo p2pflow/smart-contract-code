@@ -72,7 +72,7 @@ export interface RedisQueueBackend<T> {
 
   /**
    * Must atomically reclaim expired leases, select one due job, increment its
-   * attempt counter, and install a fencing token.
+   * attempt counter, and install a fencing token plus monotonic generation.
    */
   claimDue(
     owner: string,
@@ -82,7 +82,7 @@ export interface RedisQueueBackend<T> {
   ): Promise<QueueLease<T> | null>;
 
   /**
-   * Must compare owner + fencing token + expiry in one Redis script.
+   * Must compare owner + token + generation + exact expiry in one script.
    */
   acknowledge(
     lease: QueueLease<T>,
@@ -107,10 +107,17 @@ export interface SecretReferenceResolver {
   resolve(reference: string): Promise<Readonly<Record<string, unknown>>>;
 }
 
-export interface KmsTransactionSigner {
+/**
+ * Future-reconsideration interface only. The shipped REJECT runtime does not
+ * construct or consume this boundary, and no raw transaction bytes cross it.
+ */
+export interface InactiveFutureKmsSigningBoundary {
   readonly keyReference: string;
   address(): Promise<`0x${string}`>;
-  signTransaction(
+  prepareOpaqueEnvelope(
     transaction: Readonly<Record<string, bigint | number | string>>,
-  ): Promise<`0x${string}`>;
+  ): Promise<{
+    readonly transactionHash: `0x${string}`;
+    readonly opaqueEnvelopeReference: string;
+  }>;
 }

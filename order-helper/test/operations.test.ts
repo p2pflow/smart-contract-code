@@ -93,6 +93,18 @@ test("structured logger emits stable JSON and never emits supplied secrets", () 
   }
 });
 
+test("structured logging cannot fail business control flow", () => {
+  const logger = createLogger({
+    service: "order-helper",
+    sink: {
+      write(): never {
+        throw new Error("sink unavailable");
+      },
+    },
+  });
+  assert.doesNotThrow(() => logger.info("safe_failure"));
+});
+
 test("Prometheus registry renders deterministic counter, gauge, and histogram samples", () => {
   const registry = new MetricsRegistry();
   const counter = registry.counter({
@@ -143,6 +155,12 @@ test("Prometheus registry renders deterministic counter, gauge, and histogram sa
 });
 
 test("readiness fails closed for dependencies and a closed live send gate", async () => {
+  const emptyShadowHealth = new ServiceHealth({ mode: "shadow" });
+  emptyShadowHealth.markRunning();
+  const emptyReadiness = await emptyShadowHealth.readiness();
+  assert.equal(emptyReadiness.status, "fail");
+  assert.equal(emptyReadiness.checks[0]?.code, "NO_READINESS_CHECKS");
+
   const shadowHealth = new ServiceHealth({
     mode: "shadow",
     checkTimeoutMs: 100,

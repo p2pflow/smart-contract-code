@@ -2,19 +2,22 @@
 
 ## Current security posture
 
-This service is shadow-first and Base Sepolia-only. Transaction sending is
-disabled by default and is **not currently available**.
+This service is shadow-only and Base Sepolia-only. Transaction sending is
+invalid configuration and is **not available** under the binding Council
+disposition.
 
-The target Order Helper contract ABI, selector set, storage provenance, runtime
-bytecode, and Base Sepolia deployment have not been recovered and verified.
-The checked-in contract history does not contain the target Order Helper
-interface. Nothing in this service or its deployment examples claims that the
-planned interface is deployed.
+An external report says the legacy baseline at block `44,795,919` was reproduced
+from historical commit `aa6f802…`, including all six facet runtimes and 63
+routed selectors. That baseline has no Order Helper facet, exact-four write
+selector, round/policy commitment, authoritative helper eligibility view, or
+signer-rotation interface. Nothing here claims that the planned interface is
+deployed.
 
-The required council bill was not available at the specified path during this
-implementation. No PASS scope or binding amendment is assumed. The council
-gate remains closed until an auditable PASS record exists and every binding
-amendment is implemented and tested.
+The Council bill adopted 2026-07-29 is a unanimous **REJECT**, SHA-256
+`4295e790fd8f4e96e17fd54e033c4004bce7ed18aafc5a6c5bbda8d6f4931916`.
+It permits only non-signing, transaction-disabled reconstruction, simulation,
+replay, invariant scaffolding, and non-authorizing shadow output. See
+`council-compliance.md`.
 
 The current safe use is deterministic simulation, replay, shadow decisions,
 and injected-adapter testing. Do not use mainnet or production services.
@@ -23,17 +26,17 @@ and injected-adapter testing. Do not use mainnet or production services.
 
 | Boundary | Trusted for | Not trusted for |
 | --- | --- | --- |
-| Diamond contract | Final order state and transaction-time eligibility after the verified upgrade | Off-chain availability, fairness computation, or fiat truth |
-| Order Helper | Deterministic shadow computation, durable processing, and auditable transaction preparation | Custody, bypassing contract checks, or changing admin/revenue state |
-| RPC providers | Transporting reads and a controlled broadcast | Authorization or a single source of chain truth |
+| Future verified helper interface on the Diamond | Final order state and transaction-time eligibility only after a separately reviewed upgrade | Off-chain availability, fairness computation, fiat truth, or current deployment evidence |
+| Order Helper | Deterministic shadow computation and non-authorizing transaction-state evidence | Custody, signing, broadcasting, bypassing contract checks, or changing admin/revenue state |
+| RPC providers | Transporting pinned read-only observations | Authorization, broadcasting, or a single source of chain truth |
 | Subgraph/local projection | Broad discovery and historical views | Final eligibility or ownership |
-| PostgreSQL/Redis | Durable decisions, cursors, leases, and retry coordination | Alternate order ownership or authorization |
-| KMS/HSM/Vault adapter | Signing a narrowly authorized transaction after policy enforcement | Selection policy, nonce selection, or contract administration |
+| Future injected PostgreSQL/Redis adapters | Durable decisions, cursors, leases, and retry coordination after implementation | Alternate order ownership, authorization, or a capability supplied by this package |
+| Future KMS/HSM/Vault boundary | Interface design only; no adapter or key reference is accepted now | Any signing, key use, selection policy, nonce selection, or administration |
 | Operations endpoints | Process and bounded dependency state | Configuration values, endpoint identities, payment data, or key material |
 
-The assigner identity must have only the assignment role and a limited gas
-balance. It must never share Diamond owner, platform admin, dispute resolver,
-or revenue reconciler privileges.
+A future assigner identity would require a new Council authorization and must
+never share Diamond owner, platform admin, dispute resolver, or revenue
+reconciler privileges.
 
 ## Protected data
 
@@ -52,9 +55,15 @@ Decision records may contain the minimum public chain identifiers needed for
 replay. Metrics must never use order IDs, merchant addresses, channel IDs,
 transaction hashes, endpoint strings, or error messages as labels.
 
-Secret-manager **reference names** are injected at runtime. Secret values are
-resolved by their owning adapter and must not enter general configuration
-objects or diagnostics.
+Authoritative adapter prose is discarded before selection evidence is
+canonicalized. Exclusions retain only fixed eligibility codes and bounded
+numeric/block facts. Decision-state events accept only opaque 32-byte
+identifiers and fixed reason codes; there is no arbitrary metadata column or
+free-form detail field in the shadow ledger schema.
+
+Secret-manager **reference names** may be supplied in configuration, but the
+shipped runtime resolves none. A future owning adapter must keep secret values
+out of general configuration objects and diagnostics.
 
 ## Logging and diagnostics
 
@@ -91,10 +100,12 @@ cluster health system and monitoring namespace.
 
 ## KMS/HSM boundary
 
-This repository provides interfaces and injected test doubles only. It does
-not claim a working KMS, HSM, Vault, workload identity, or cloud integration.
+This repository has only an inactive future KMS type. It provides no KMS test
+double, key reference, adapter, HSM, Vault, workload identity, or cloud
+integration.
 
-A future signer adapter must:
+Only after a new Council PASS and a separate reviewed implementation, a future
+signer adapter would have to:
 
 1. return the configured public assigner address without exporting key
    material;
@@ -115,10 +126,11 @@ systems.
 
 ## Live transaction gate
 
-Live sending must fail closed unless all of these are independently evidenced:
+No environment values can enable this build. A distinct later implementation
+must fail closed unless all of these are independently evidenced:
 
-1. The council record is PASS and the implemented scope contains every binding
-   amendment.
+1. A new Council vote supersedes the current REJECT with PASS and the
+   implemented scope contains every binding amendment.
 2. The exact target source, storage layout, ABI, selector manifest, runtime
    bytecode, chain ID, and Base Sepolia address are independently verified.
 3. The Order Helper facet is deployed and verified on Base Sepolia, and
@@ -134,9 +146,12 @@ Live sending must fail closed unless all of these are independently evidenced:
    are enabled for Base Sepolia only.
 
 One false or unknown condition closes the gate. Configuration booleans are not
-evidence by themselves.
+evidence by themselves, and even complete evidence cannot toggle this build
+live.
 
-## Threats and controls
+## Future required controls and current gaps
+
+This table states requirements; it does not claim the controls are deployed.
 
 | Threat or failure | Required control |
 | --- | --- |
@@ -155,7 +170,8 @@ evidence by themselves.
 
 ## Review requirements
 
-Before a canary, obtain independent reviews of:
+The Council bill's complete ordered 14 gates and a new no-critical-objection
+vote control. This non-exhaustive review subset cannot authorize a canary:
 
 - recovered Diamond storage/ABI and upgrade provenance;
 - helper key-management and transaction restrictions;

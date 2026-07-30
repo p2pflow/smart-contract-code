@@ -1,15 +1,21 @@
-import { randomUUID } from "node:crypto";
 import {
   FeeParameters,
-  NonceLease,
-  NonceOwnershipStore,
   NonceScope,
   TransactionAttemptRecord,
-  TransactionAttemptStore,
   TransactionAttemptStatus,
+  TransactionPersistence,
   UnsignedTransaction,
 } from "../persistence/transaction-store";
-import { Clock, SystemClock } from "./clock";
+import { Clock, SystemClock, assertTimestamp } from "./clock";
+
+export const TRANSACTION_DISABLED_CAPABILITY =
+  "TRANSACTION_DISABLED_SHADOW_ONLY" as const;
+
+export const PINNED_COUNCIL_DISPOSITION = {
+  verdict: "REJECT",
+  capability: TRANSACTION_DISABLED_CAPABILITY,
+  adopted: "2026-07-29",
+} as const;
 
 export interface TransactionIntent {
   readonly idempotencyKey: string;
@@ -37,44 +43,113 @@ export interface TransactionSimulator {
   ): Promise<SimulationResult>;
 }
 
-export interface BroadcastAuthorizationContext {
-  readonly intent: TransactionIntent;
-  readonly signer: `0x${string}`;
-  readonly simulation: Extract<SimulationResult, { readonly success: true }>;
-  readonly replacementOf: string | null;
+/**
+ * Future-reconsideration boundary only. No shipped manager consumes this
+ * interface while the pinned council disposition is REJECT.
+ */
+export interface InactiveFutureSigningBoundary {
+  prepareSignature(
+    transaction: UnsignedTransaction,
+  ): Promise<{
+    readonly transactionHash: `0x${string}`;
+    readonly opaqueEnvelopeReference: string;
+  }>;
 }
 
-export interface BroadcastAuthorizationDecision {
-  readonly authorized: boolean;
-  readonly blockers: readonly string[];
+/**
+ * Future-reconsideration boundary only. No implementation is provided and no
+ * shipped manager can call it under the pinned council disposition.
+ */
+export interface InactiveFutureBroadcastBoundary {
+  submitOpaqueEnvelope(reference: string): Promise<void>;
 }
 
-export interface BroadcastAuthorizationGate {
-  authorize(
-    context: BroadcastAuthorizationContext,
-  ): Promise<BroadcastAuthorizationDecision>;
+export interface InactiveFutureFeeProvider {
+  initialFees(chainId: number): Promise<FeeParameters>;
+  replacementFees(
+    chainId: number,
+    previous: FeeParameters,
+  ): Promise<FeeParameters>;
 }
 
-export class DenyAllBroadcastGate implements BroadcastAuthorizationGate {
-  public async authorize(): Promise<BroadcastAuthorizationDecision> {
+export type TransactionExecutionResult =
+  | {
+      readonly kind: "blocked";
+      readonly capability: typeof TRANSACTION_DISABLED_CAPABILITY;
+      readonly blockers: readonly string[];
+    }
+  | {
+      readonly kind: "simulation-failed";
+      readonly capability: typeof TRANSACTION_DISABLED_CAPABILITY;
+      readonly simulation: Extract<
+        SimulationResult,
+        { readonly success: false }
+      >;
+    }
+  | {
+      readonly kind: "simulated";
+      readonly capability: typeof TRANSACTION_DISABLED_CAPABILITY;
+      readonly simulation: Extract<
+        SimulationResult,
+        { readonly success: true }
+      >;
+    };
+
+/**
+ * Public runtime surface for the adopted REJECT bill. It can only simulate.
+ * There is deliberately no injected authorization, signer, fee, nonce, or
+ * broadcaster dependency that could turn a shadow result into an action.
+ */
+export class TransactionManager {
+  public constructor(
+    private readonly simulator: TransactionSimulator,
+    private readonly shadowFrom: `0x${string}`,
+  ) {
+    assertAddress(shadowFrom, "shadowFrom");
+  }
+
+  public async execute(
+    intent: TransactionIntent,
+    requestBroadcast: boolean,
+  ): Promise<TransactionExecutionResult> {
+    validateIntent(intent);
+    if (requestBroadcast) {
+      return {
+        kind: "blocked",
+        capability: TRANSACTION_DISABLED_CAPABILITY,
+        blockers: [
+          "COUNCIL_REJECT prohibits signing, broadcast, and state changes",
+        ],
+      };
+    }
+
+    const simulation = await this.simulator.simulate(
+      intent,
+      this.shadowFrom,
+    );
+    if (!simulation.success) {
+      return {
+        kind: "simulation-failed",
+        capability: TRANSACTION_DISABLED_CAPABILITY,
+        simulation,
+      };
+    }
     return {
-      authorized: false,
-      blockers: ["transaction broadcasting is disabled"],
+      kind: "simulated",
+      capability: TRANSACTION_DISABLED_CAPABILITY,
+      simulation,
     };
   }
 }
 
-export interface TransactionSigner {
-  address(): Promise<`0x${string}`>;
-  signTransaction(transaction: UnsignedTransaction): Promise<`0x${string}`>;
-}
-
-export interface TransactionBroadcaster {
-  broadcast(rawTransaction: `0x${string}`): Promise<`0x${string}`>;
+export interface TransactionReceipt {
+  readonly transactionHash: `0x${string}`;
+  readonly blockNumber: bigint;
+  readonly blockHash: `0x${string}`;
+  readonly success: boolean;
 }
 
 export interface TransactionChainState {
-  pendingNonce(scope: NonceScope): Promise<bigint>;
   latestBlockNumber(chainId: number): Promise<bigint>;
   blockHash(
     chainId: number,
@@ -86,441 +161,348 @@ export interface TransactionChainState {
   ): Promise<TransactionReceipt | null>;
 }
 
-export interface TransactionReceipt {
-  readonly transactionHash: `0x${string}`;
-  readonly blockNumber: bigint;
-  readonly blockHash: `0x${string}`;
-  readonly success: boolean;
-}
+export type SubmissionObservation = "observed" | "outcome-unknown";
 
-export interface FeeProvider {
-  initialFees(chainId: number): Promise<FeeParameters>;
-  replacementFees(
-    chainId: number,
-    previous: FeeParameters,
-  ): Promise<FeeParameters>;
-}
-
-export interface TransactionManagerOptions {
-  readonly ownerId: string;
-  readonly nonceLeaseMs: number;
-  readonly minimumReplacementBumpBps: number;
-}
-
-export type TransactionExecutionResult =
-  | {
-      readonly kind: "simulation-failed";
-      readonly simulation: Extract<
-        SimulationResult,
-        { readonly success: false }
-      >;
-    }
-  | {
-      readonly kind: "simulated";
-      readonly simulation: Extract<
-        SimulationResult,
-        { readonly success: true }
-      >;
-    }
-  | {
-      readonly kind: "blocked";
-      readonly simulation: Extract<
-        SimulationResult,
-        { readonly success: true }
-      >;
-      readonly blockers: readonly string[];
-    }
-  | {
-      readonly kind: "submitted" | "broadcast-unknown" | "signing-failed";
-      readonly simulation: Extract<
-        SimulationResult,
-        { readonly success: true }
-      >;
-      readonly attempt: TransactionAttemptRecord;
-    };
-
-export class TransactionManager {
+/**
+ * Records already-derived hash evidence before future external I/O. It
+ * never accepts, stores, returns, or logs a raw signed transaction.
+ */
+export class OfflineTransactionEvidenceRecorder {
   public constructor(
-    private readonly simulator: TransactionSimulator,
-    private readonly authorizationGate: BroadcastAuthorizationGate,
-    private readonly signer: TransactionSigner,
-    private readonly broadcaster: TransactionBroadcaster,
-    private readonly chainState: TransactionChainState,
-    private readonly feeProvider: FeeProvider,
-    private readonly nonceStore: NonceOwnershipStore,
-    private readonly attemptStore: TransactionAttemptStore,
-    private readonly options: TransactionManagerOptions,
+    private readonly persistence: TransactionPersistence,
     private readonly clock: Clock = new SystemClock(),
-    private readonly attemptIdFactory: () => string = randomUUID,
-  ) {
-    validateManagerOptions(options);
-  }
+  ) {}
 
-  public async execute(
-    intent: TransactionIntent,
-    requestBroadcast: boolean,
-  ): Promise<TransactionExecutionResult> {
-    validateIntent(intent);
-    const signer = await this.signer.address();
-    assertAddress(signer, "signer");
-    const simulation = await this.simulator.simulate(intent, signer);
-    if (!simulation.success) {
-      return { kind: "simulation-failed", simulation };
-    }
-    if (!requestBroadcast) {
-      return { kind: "simulated", simulation };
-    }
-
-    const authorization = await this.authorizationGate.authorize({
-      intent,
-      signer,
-      simulation,
-      replacementOf: null,
-    });
-    if (!authorization.authorized) {
-      return {
-        kind: "blocked",
-        simulation,
-        blockers:
-          authorization.blockers.length === 0
-            ? ["authorization gate denied broadcasting"]
-            : [...authorization.blockers],
-      };
-    }
-
-    const scope = { chainId: intent.chainId, signer } as const;
-    const lease = await this.acquireNonceLease(scope);
-    if (lease === null) {
-      return {
-        kind: "blocked",
-        simulation,
-        blockers: ["nonce scope is owned by another worker"],
-      };
-    }
-    const nonce = await this.nonceStore.reserve(lease);
-    const fees = await this.feeProvider.initialFees(intent.chainId);
-    validateFees(fees);
-    const unsignedTransaction: UnsignedTransaction = {
-      chainId: intent.chainId,
-      from: signer,
-      to: intent.to,
-      nonce,
-      data: intent.data,
-      value: intent.value,
-      gasLimit: simulation.gasEstimate,
-      fees,
-    };
-    const attempt = await this.appendPreparedAttempt(
-      intent.idempotencyKey,
-      unsignedTransaction,
-      null,
-    );
-    return this.signAndBroadcast(attempt, simulation);
-  }
-
-  public async replace(
+  public async recordDerivedHash(
     attemptId: string,
-  ): Promise<TransactionExecutionResult> {
-    const previous = await this.attemptStore.get(attemptId);
-    if (previous === null) {
-      throw new Error(`Transaction attempt ${attemptId} does not exist`);
-    }
-    if (
-      previous.status !== "submitted" &&
-      previous.status !== "broadcast-unknown" &&
-      previous.status !== "reorged" &&
-      previous.status !== "signing-failed"
-    ) {
-      throw new Error(
-        `Transaction attempt ${attemptId} cannot be replaced from ${previous.status}`,
-      );
-    }
-
-    const transaction = previous.unsignedTransaction;
-    const intent: TransactionIntent = {
-      idempotencyKey: previous.idempotencyKey,
-      chainId: transaction.chainId,
-      to: transaction.to,
-      data: transaction.data,
-      value: transaction.value,
-    };
-    const signer = await this.signer.address();
-    if (signer.toLowerCase() !== transaction.from.toLowerCase()) {
-      throw new Error("Configured signer does not own the original nonce");
-    }
-    const simulation = await this.simulator.simulate(intent, signer);
-    if (!simulation.success) {
-      return { kind: "simulation-failed", simulation };
-    }
-    const authorization = await this.authorizationGate.authorize({
-      intent,
-      signer,
-      simulation,
-      replacementOf: previous.attemptId,
-    });
-    if (!authorization.authorized) {
-      return {
-        kind: "blocked",
-        simulation,
-        blockers:
-          authorization.blockers.length === 0
-            ? ["authorization gate denied replacement"]
-            : [...authorization.blockers],
-      };
-    }
-
-    const scope = { chainId: transaction.chainId, signer } as const;
-    const networkPendingNonce = await this.chainState.pendingNonce(scope);
-    if (networkPendingNonce > transaction.nonce) {
-      return {
-        kind: "blocked",
-        simulation,
-        blockers: ["nonce is already consumed; reconcile receipts first"],
-      };
-    }
-    const lease = await this.nonceStore.acquire(
-      scope,
-      this.options.ownerId,
-      networkPendingNonce,
-      this.options.nonceLeaseMs,
-    );
-    if (lease === null) {
-      return {
-        kind: "blocked",
-        simulation,
-        blockers: ["nonce scope is owned by another worker"],
-      };
-    }
-    await this.nonceStore.assertOwned(lease);
-
-    const fees = await this.feeProvider.replacementFees(
-      transaction.chainId,
-      transaction.fees,
-    );
-    validateReplacementFees(
-      transaction.fees,
-      fees,
-      this.options.minimumReplacementBumpBps,
-    );
-    const replacement = await this.appendPreparedAttempt(
-      previous.idempotencyKey,
-      {
-        ...transaction,
-        gasLimit: simulation.gasEstimate,
-        fees,
-      },
-      previous.attemptId,
-    );
-    const result = await this.signAndBroadcast(replacement, simulation);
-    if (result.kind === "submitted") {
-      await this.transitionAttempt(previous, "replaced", {
-        transactionHash: previous.transactionHash,
-        receiptBlockNumber: previous.receiptBlockNumber,
-        receiptBlockHash: previous.receiptBlockHash,
-        failureCode: null,
-      });
-    }
-    return result;
-  }
-
-  public async reconcile(
-    attemptId: string,
-    requiredConfirmations: number,
+    transactionHash: `0x${string}`,
   ): Promise<TransactionAttemptRecord> {
-    if (
-      !Number.isSafeInteger(requiredConfirmations) ||
-      requiredConfirmations <= 0
-    ) {
-      throw new RangeError(
-        "requiredConfirmations must be a positive safe integer",
-      );
-    }
-    const attempt = await this.attemptStore.get(attemptId);
-    if (attempt === null) {
-      throw new Error(`Transaction attempt ${attemptId} does not exist`);
-    }
-    if (
-      attempt.status === "confirmed" ||
-      attempt.status === "reverted" ||
-      attempt.status === "replaced"
-    ) {
-      return attempt;
-    }
-    if (attempt.transactionHash === null) return attempt;
-
-    const receipt = await this.chainState.receipt(
-      attempt.unsignedTransaction.chainId,
-      attempt.transactionHash,
-    );
-    if (receipt === null) return attempt;
-
-    const canonicalHash = await this.chainState.blockHash(
-      attempt.unsignedTransaction.chainId,
-      receipt.blockNumber,
-    );
-    if (
-      canonicalHash === null ||
-      canonicalHash.toLowerCase() !== receipt.blockHash.toLowerCase()
-    ) {
-      return this.transitionAttempt(attempt, "reorged", {
-        transactionHash: attempt.transactionHash,
-        receiptBlockNumber: receipt.blockNumber,
-        receiptBlockHash: receipt.blockHash,
-        failureCode: "RECEIPT_BLOCK_REORGED",
-      });
-    }
-
-    const head = await this.chainState.latestBlockNumber(
-      attempt.unsignedTransaction.chainId,
-    );
-    const confirmations =
-      head >= receipt.blockNumber ? head - receipt.blockNumber + 1n : 0n;
-    if (confirmations < BigInt(requiredConfirmations)) {
+    assertBytes32(transactionHash, "transactionHash");
+    const attempt = await this.requireAttempt(attemptId);
+    if (attempt.status !== "prepared") {
       if (
-        attempt.receiptBlockNumber === receipt.blockNumber &&
-        attempt.receiptBlockHash?.toLowerCase() ===
-          receipt.blockHash.toLowerCase()
+        attempt.transactionHash?.toLowerCase() ===
+        transactionHash.toLowerCase()
       ) {
         return attempt;
       }
-      return this.transitionAttempt(attempt, attempt.status, {
-        transactionHash: attempt.transactionHash,
-        receiptBlockNumber: receipt.blockNumber,
-        receiptBlockHash: receipt.blockHash,
-        failureCode: null,
-      });
+      throw new Error(
+        `Attempt ${attemptId} cannot record a hash from ${attempt.status}`,
+      );
     }
-
-    return this.transitionAttempt(
-      attempt,
-      receipt.success ? "confirmed" : "reverted",
+    return this.persistence.transitionAttempt(
+      attempt.attemptId,
+      attempt.version,
       {
-        transactionHash: attempt.transactionHash,
-        receiptBlockNumber: receipt.blockNumber,
-        receiptBlockHash: receipt.blockHash,
-        failureCode: receipt.success ? null : "TRANSACTION_REVERTED",
-      },
-    );
-  }
-
-  private async acquireNonceLease(
-    scope: NonceScope,
-  ): Promise<NonceLease | null> {
-    const networkPendingNonce = await this.chainState.pendingNonce(scope);
-    return this.nonceStore.acquire(
-      scope,
-      this.options.ownerId,
-      networkPendingNonce,
-      this.options.nonceLeaseMs,
-    );
-  }
-
-  private async appendPreparedAttempt(
-    idempotencyKey: string,
-    unsignedTransaction: UnsignedTransaction,
-    replacesAttemptId: string | null,
-  ): Promise<TransactionAttemptRecord> {
-    const nowMs = this.clock.nowMs();
-    return this.attemptStore.append({
-      attemptId: this.attemptIdFactory(),
-      idempotencyKey,
-      ownerId: this.options.ownerId,
-      unsignedTransaction,
-      status: "prepared",
-      transactionHash: null,
-      replacesAttemptId,
-      receiptBlockNumber: null,
-      receiptBlockHash: null,
-      failureCode: null,
-      createdAtMs: nowMs,
-      updatedAtMs: nowMs,
-    });
-  }
-
-  private async signAndBroadcast(
-    attempt: TransactionAttemptRecord,
-    simulation: Extract<SimulationResult, { readonly success: true }>,
-  ): Promise<TransactionExecutionResult> {
-    let rawTransaction: `0x${string}`;
-    try {
-      rawTransaction = await this.signer.signTransaction(
-        attempt.unsignedTransaction,
-      );
-      assertHex(rawTransaction, "rawTransaction");
-    } catch {
-      const failed = await this.transitionAttempt(
-        attempt,
-        "signing-failed",
-        {
-          transactionHash: null,
-          receiptBlockNumber: null,
-          receiptBlockHash: null,
-          failureCode: "SIGNING_FAILED",
-        },
-      );
-      return { kind: "signing-failed", simulation, attempt: failed };
-    }
-
-    try {
-      const transactionHash = await this.broadcaster.broadcast(rawTransaction);
-      assertBytes32(transactionHash, "transactionHash");
-      const submitted = await this.transitionAttempt(attempt, "submitted", {
+        status: "hash-recorded",
         transactionHash,
         receiptBlockNumber: null,
         receiptBlockHash: null,
         failureCode: null,
-      });
-      return { kind: "submitted", simulation, attempt: submitted };
-    } catch {
-      const unknown = await this.transitionAttempt(
-        attempt,
-        "broadcast-unknown",
-        {
-          transactionHash: null,
-          receiptBlockNumber: null,
-          receiptBlockHash: null,
-          failureCode: "BROADCAST_OUTCOME_UNKNOWN",
-        },
-      );
-      return { kind: "broadcast-unknown", simulation, attempt: unknown };
-    }
+        updatedAtMs: this.clock.nowMs(),
+      },
+    );
   }
 
-  private async transitionAttempt(
-    current: TransactionAttemptRecord,
-    status: TransactionAttemptStatus,
-    mutable: Pick<
-      TransactionAttemptRecord,
-      | "transactionHash"
-      | "receiptBlockNumber"
-      | "receiptBlockHash"
-      | "failureCode"
-    >,
+  public async recordSubmissionObservation(
+    attemptId: string,
+    observation: SubmissionObservation,
   ): Promise<TransactionAttemptRecord> {
-    return this.attemptStore.replace(current.version, {
-      ...current,
-      ...mutable,
-      status,
-      updatedAtMs: this.clock.nowMs(),
-      version: current.version + 1,
-    });
+    const attempt = await this.requireAttempt(attemptId);
+    if (attempt.transactionHash === null) {
+      throw new Error(
+        "Transaction hash must be durable before submission evidence",
+      );
+    }
+    const status: TransactionAttemptStatus =
+      observation === "observed" ? "submitted" : "broadcast-unknown";
+    return this.persistence.transitionAttempt(
+      attempt.attemptId,
+      attempt.version,
+      {
+        status,
+        transactionHash: attempt.transactionHash,
+        receiptBlockNumber: attempt.receiptBlockNumber,
+        receiptBlockHash: attempt.receiptBlockHash,
+        failureCode:
+          observation === "observed"
+            ? null
+            : "BROADCAST_OUTCOME_UNKNOWN",
+        updatedAtMs: this.clock.nowMs(),
+      },
+    );
+  }
+
+  private async requireAttempt(
+    attemptId: string,
+  ): Promise<TransactionAttemptRecord> {
+    const attempt = await this.persistence.getAttempt(attemptId);
+    if (attempt === null) {
+      throw new Error(`Transaction attempt ${attemptId} does not exist`);
+    }
+    return attempt;
   }
 }
 
-function validateManagerOptions(options: TransactionManagerOptions): void {
-  if (options.ownerId.trim().length === 0) {
-    throw new TypeError("ownerId must not be empty");
+export interface NonceFamilyReconciliation {
+  readonly scope: NonceScope;
+  readonly nonce: bigint;
+  readonly attempts: readonly TransactionAttemptRecord[];
+  readonly finalAttemptId: string | null;
+}
+
+export class ReceiptHashMismatchError extends Error {
+  public constructor(expected: string, received: string) {
+    super(`Receipt hash mismatch: expected ${expected}, received ${received}`);
+    this.name = "ReceiptHashMismatchError";
   }
-  if (
-    !Number.isSafeInteger(options.nonceLeaseMs) ||
-    options.nonceLeaseMs <= 0 ||
-    !Number.isSafeInteger(options.minimumReplacementBumpBps) ||
-    options.minimumReplacementBumpBps <= 0
-  ) {
-    throw new RangeError(
-      "nonceLeaseMs and minimumReplacementBumpBps must be positive integers",
+}
+
+export class NonceFamilyConflictError extends Error {
+  public constructor(scope: NonceScope, nonce: bigint) {
+    super(
+      `Multiple canonical receipts for ${scope.chainId}:${scope.signer}:${nonce}`,
+    );
+    this.name = "NonceFamilyConflictError";
+  }
+}
+
+interface ReceiptObservation {
+  readonly attempt: TransactionAttemptRecord;
+  readonly receipt: TransactionReceipt | null;
+}
+
+interface PlannedUpdate {
+  readonly attempt: TransactionAttemptRecord;
+  readonly update: {
+    readonly status: TransactionAttemptStatus;
+    readonly transactionHash: `0x${string}`;
+    readonly receiptBlockNumber: bigint | null;
+    readonly receiptBlockHash: `0x${string}` | null;
+    readonly failureCode: string | null;
+  } | null;
+  readonly finalReceipt: TransactionReceipt | null;
+}
+
+/**
+ * Read-only chain reconciliation. It considers the whole nonce family so a
+ * transaction previously labelled replaced can still become the canonical
+ * winner, and confirmed attempts are rechecked for deep reorgs.
+ */
+export class TransactionReconciler {
+  public constructor(
+    private readonly persistence: TransactionPersistence,
+    private readonly chainState: TransactionChainState,
+    private readonly clock: Clock = new SystemClock(),
+  ) {}
+
+  public async reconcileNonceFamily(
+    scope: NonceScope,
+    nonce: bigint,
+    requiredConfirmations: number,
+  ): Promise<NonceFamilyReconciliation> {
+    validateRequiredConfirmations(requiredConfirmations);
+    if (nonce < 0n) throw new RangeError("nonce must be non-negative");
+    const attempts = await this.persistence.listByNonce(scope, nonce);
+    const observations: ReceiptObservation[] = [];
+
+    for (const attempt of attempts) {
+      const transactionHash = attempt.transactionHash;
+      if (transactionHash === null) {
+        observations.push({ attempt, receipt: null });
+        continue;
+      }
+      const receipt = await this.chainState.receipt(
+        scope.chainId,
+        transactionHash,
+      );
+      if (
+        receipt !== null &&
+        receipt.transactionHash.toLowerCase() !==
+          transactionHash.toLowerCase()
+      ) {
+        throw new ReceiptHashMismatchError(
+          transactionHash,
+          receipt.transactionHash,
+        );
+      }
+      observations.push({ attempt, receipt });
+    }
+
+    const head = await this.chainState.latestBlockNumber(scope.chainId);
+    const plans: PlannedUpdate[] = [];
+    for (const observation of observations) {
+      plans.push(
+        await this.planObservation(
+          scope.chainId,
+          head,
+          requiredConfirmations,
+          observation,
+        ),
+      );
+    }
+
+    const finals = plans.filter((plan) => plan.finalReceipt !== null);
+    if (finals.length > 1) {
+      throw new NonceFamilyConflictError(scope, nonce);
+    }
+
+    const final = finals[0] ?? null;
+    const updated: TransactionAttemptRecord[] = [];
+    for (const plan of plans) {
+      let update = plan.update;
+      if (final !== null) {
+        if (plan.attempt.attemptId === final.attempt.attemptId) {
+          const receipt = final.finalReceipt;
+          if (receipt === null) {
+            throw new Error("Final receipt disappeared during planning");
+          }
+          update = {
+            status: receipt.success ? "confirmed" : "reverted",
+            transactionHash: plan.attempt.transactionHash as `0x${string}`,
+            receiptBlockNumber: receipt.blockNumber,
+            receiptBlockHash: receipt.blockHash,
+            failureCode: receipt.success ? null : "TRANSACTION_REVERTED",
+          };
+        } else if (plan.attempt.transactionHash !== null) {
+          update = {
+            status: "replaced",
+            transactionHash: plan.attempt.transactionHash,
+            receiptBlockNumber: plan.attempt.receiptBlockNumber,
+            receiptBlockHash: plan.attempt.receiptBlockHash,
+            failureCode: "NONCE_CONSUMED_BY_FAMILY_MEMBER",
+          };
+        }
+      }
+      updated.push(await this.applyPlan(plan.attempt, update));
+    }
+
+    return {
+      scope: { ...scope },
+      nonce,
+      attempts: updated,
+      finalAttemptId: final?.attempt.attemptId ?? null,
+    };
+  }
+
+  private async planObservation(
+    chainId: number,
+    head: bigint,
+    requiredConfirmations: number,
+    observation: ReceiptObservation,
+  ): Promise<PlannedUpdate> {
+    const { attempt, receipt } = observation;
+    if (attempt.transactionHash === null) {
+      return { attempt, update: null, finalReceipt: null };
+    }
+
+    if (receipt === null) {
+      if (
+        attempt.receiptBlockNumber === null ||
+        attempt.receiptBlockHash === null
+      ) {
+        return { attempt, update: null, finalReceipt: null };
+      }
+      const currentHash = await this.chainState.blockHash(
+        chainId,
+        attempt.receiptBlockNumber,
+      );
+      if (currentHash === null) {
+        throw new Error(
+          `Canonical block ${attempt.receiptBlockNumber} is unavailable`,
+        );
+      }
+      if (
+        currentHash.toLowerCase() !==
+        attempt.receiptBlockHash.toLowerCase()
+      ) {
+        return {
+          attempt,
+          update: {
+            status: "reorged",
+            transactionHash: attempt.transactionHash,
+            receiptBlockNumber: attempt.receiptBlockNumber,
+            receiptBlockHash: attempt.receiptBlockHash,
+            failureCode: "RECEIPT_BLOCK_REORGED",
+          },
+          finalReceipt: null,
+        };
+      }
+      return { attempt, update: null, finalReceipt: null };
+    }
+
+    validateReceipt(receipt);
+    const canonicalHash = await this.chainState.blockHash(
+      chainId,
+      receipt.blockNumber,
+    );
+    if (canonicalHash === null) {
+      throw new Error(`Canonical block ${receipt.blockNumber} is unavailable`);
+    }
+    if (
+      canonicalHash.toLowerCase() !== receipt.blockHash.toLowerCase()
+    ) {
+      return {
+        attempt,
+        update: {
+          status: "reorged",
+          transactionHash: attempt.transactionHash,
+          receiptBlockNumber: receipt.blockNumber,
+          receiptBlockHash: receipt.blockHash,
+          failureCode: "RECEIPT_BLOCK_REORGED",
+        },
+        finalReceipt: null,
+      };
+    }
+
+    const confirmations =
+      head >= receipt.blockNumber ? head - receipt.blockNumber + 1n : 0n;
+    if (confirmations >= BigInt(requiredConfirmations)) {
+      return { attempt, update: null, finalReceipt: receipt };
+    }
+    return {
+      attempt,
+      update: {
+        status: "submitted",
+        transactionHash: attempt.transactionHash,
+        receiptBlockNumber: receipt.blockNumber,
+        receiptBlockHash: receipt.blockHash,
+        failureCode: null,
+      },
+      finalReceipt: null,
+    };
+  }
+
+  private async applyPlan(
+    attempt: TransactionAttemptRecord,
+    update: PlannedUpdate["update"],
+  ): Promise<TransactionAttemptRecord> {
+    if (update === null || sameMutableAttemptFields(attempt, update)) {
+      return attempt;
+    }
+    const updatedAtMs = this.clock.nowMs();
+    assertTimestamp(updatedAtMs, "updatedAtMs");
+    return this.persistence.transitionAttempt(
+      attempt.attemptId,
+      attempt.version,
+      { ...update, updatedAtMs },
     );
   }
+}
+
+function sameMutableAttemptFields(
+  attempt: TransactionAttemptRecord,
+  update: NonNullable<PlannedUpdate["update"]>,
+): boolean {
+  return (
+    attempt.status === update.status &&
+    attempt.transactionHash?.toLowerCase() ===
+      update.transactionHash.toLowerCase() &&
+    attempt.receiptBlockNumber === update.receiptBlockNumber &&
+    attempt.receiptBlockHash?.toLowerCase() ===
+      update.receiptBlockHash?.toLowerCase() &&
+    attempt.failureCode === update.failureCode
+  );
 }
 
 function validateIntent(intent: TransactionIntent): void {
@@ -536,39 +518,19 @@ function validateIntent(intent: TransactionIntent): void {
   assertHex(intent.data, "data");
 }
 
-function validateFees(fees: FeeParameters): void {
-  if (
-    fees.maxFeePerGas <= 0n ||
-    fees.maxPriorityFeePerGas < 0n ||
-    fees.maxFeePerGas < fees.maxPriorityFeePerGas
-  ) {
-    throw new RangeError("Fee parameters are invalid");
+function validateRequiredConfirmations(value: number): void {
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new RangeError(
+      "requiredConfirmations must be a positive safe integer",
+    );
   }
 }
 
-function validateReplacementFees(
-  previous: FeeParameters,
-  replacement: FeeParameters,
-  minimumBumpBps: number,
-): void {
-  validateFees(replacement);
-  const denominator = 10_000n;
-  const numerator = denominator + BigInt(minimumBumpBps);
-  const minimumMaxFee =
-    (previous.maxFeePerGas * numerator + denominator - 1n) / denominator;
-  const minimumPriority =
-    previous.maxPriorityFeePerGas === 0n
-      ? 0n
-      : (
-          previous.maxPriorityFeePerGas * numerator +
-          denominator -
-          1n
-        ) / denominator;
-  if (
-    replacement.maxFeePerGas < minimumMaxFee ||
-    replacement.maxPriorityFeePerGas < minimumPriority
-  ) {
-    throw new RangeError("Replacement fees do not satisfy the minimum bump");
+function validateReceipt(receipt: TransactionReceipt): void {
+  assertBytes32(receipt.transactionHash, "receipt.transactionHash");
+  assertBytes32(receipt.blockHash, "receipt.blockHash");
+  if (receipt.blockNumber < 0n) {
+    throw new RangeError("receipt.blockNumber must be non-negative");
   }
 }
 

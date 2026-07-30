@@ -5,43 +5,50 @@
 Current state:
 
 - Shadow mode is the default and only approved operating posture.
-- Live transaction sending is unavailable.
-- The target contract ABI/deployment on Base Sepolia is unverified.
-- The required council bill was absent at the stated path during
-  implementation, so the council gate is not PASS.
+- Live transaction sending is rejected at configuration and unavailable.
+- An external report reproduced and pinned the legacy Diamond baseline, but no
+  Order Helper facet/interface is deployed or verified by this package.
+- The Council bill adopted 2026-07-29 is unanimous REJECT. It authorizes only
+  transaction-disabled, non-signing, read-only/offline shadow work.
 - No mainnet or production endpoint, account, key, database, queue, subgraph,
   or deployment is provided or implied.
 
-The Docker/Kubernetes files are examples. The runtime entrypoint starts
-shadow/health behavior only until verified chain, persistence, queue, and
-signer adapters are explicitly injected.
+The Docker/Kubernetes files are examples. Shipped `main.ts` always uses
+`UnconfiguredShadowComponents`: it starts health endpoints, keeps `/readyz` at
+503, and runs no scanner, queue, or processor. No environment injection makes
+this image operational. A separately built read-only integration would have to
+wire those adapters in code. No signer adapter or key reference may be injected
+under the current disposition.
 
 ## Service states
 
 | State | `/healthz` | `/readyz` | Meaning |
 | --- | --- | --- | --- |
 | Starting | 503 | 503 | Process exists but initialization is incomplete |
-| Shadow ready | 200 | 200 | Required shadow dependencies are usable; sending remains disabled |
-| Shadow degraded | 200 | 200 | Optional dependency degraded; authoritative shadow path still works |
+| Future integrated shadow ready | 200 | 200 | Separately implemented read-only dependencies are usable; sending remains impossible |
+| Future integrated shadow degraded | 200 | 200 | Optional dependency degraded; authoritative shadow path still works |
 | Required dependency failed | 200 | 503 | Process is alive but must not receive work |
-| Live mode with send gate closed | 200 | 503 | Invalid live posture; no send is permitted |
+| Live configuration | N/A | N/A | Startup rejects it before any dependency or worker starts |
 | Stopping | 503 | 503 | Drain is in progress |
 
 `/metrics` uses Prometheus text format. Restrict all three endpoints to health
 and monitoring callers. They intentionally contain no configuration or secret
 values.
 
-## Shadow startup
+## Future read-only integration startup
+
+These steps apply only to a separately built read-only integration. They do not
+describe capabilities of the shipped entrypoint.
 
 1. Confirm the environment is an isolated Base Sepolia test environment.
 2. Confirm transaction sending is false and helper mode is shadow.
 3. Inject reviewed configuration by name. Never print values or run commands
    that dump the process environment.
-4. Inject test or real read-only adapters for the scanner, projection,
-   authoritative RPC reads, decision ledger, and queue.
-5. Do not inject a signing adapter for routine shadow operation.
-6. Start the process and wait for `/healthz` to pass.
-7. Check `/readyz`. A failing required check is a hard stop; use its stable code
+4. Wire reviewed read-only adapters for scanner, projection, authoritative RPC
+   reads, decision ledger, and queue into distinct code.
+5. Do not add a signing adapter.
+6. Start that integration and wait for `/healthz` to pass.
+7. Check `/readyz`; a failing required check is a hard stop. Use its stable code
    to select the procedure below.
 8. Confirm `/metrics` is scrapeable only from the approved monitoring path.
 9. Verify the scanner cursor advances at finalized blocks and decisions are
@@ -50,9 +57,10 @@ values.
 Never use `.env` inspection as a diagnostic step. The checked-in
 `.env.example` contains names and deliberately invalid examples only.
 
-## Recommended readiness checks
+## Future custom-integration readiness checks
 
-Inject checks with stable names and bounded codes:
+These checks are design guidance, not shipped integrations. A future read-only
+integration should expose stable names and bounded codes:
 
 - `database`: migrations current and a read/write lease probe succeeds;
 - `queue`: idempotency store and lease ownership are usable;
@@ -63,15 +71,18 @@ Inject checks with stable names and bounded codes:
   complete;
 - `decision_ledger`: append/read verification succeeds;
 - `policy_identity`: reviewed policy/build identity is loaded;
-- `contract_interface`: disabled/failing until the target ABI/deployment is
-  verified;
-- `signer`: omitted in shadow, required only after all live gates pass.
+- `contract_interface`: disabled/failing; later verification is necessary but
+  cannot enable this build;
+- `signer`: prohibited in this build; later value-moving code requires all 14
+  ordered gates and a new Council PASS.
 
 Checks return codes, not raw provider errors or endpoints.
 
-## Recommended metrics
+## Future custom-integration metrics
 
-Use low-cardinality labels only:
+The current runtime registers only process-up and transaction-sending-disabled
+gauges. The following are design requirements for a separately implemented
+read-only integration, using low-cardinality labels only:
 
 - scanner finalized height and lag;
 - queue ready/delayed/leased depth;
@@ -101,8 +112,8 @@ public identifiers in the access-controlled decision ledger.
 6. Reconcile each pending transaction by nonce, hash, receipt block hash, and
    canonical block membership before doing further nonce work.
 7. Record provider class, timing, and error category only.
-8. Resume shadow decisions after cursor and block-hash reconciliation. Live
-   resume requires the full canary authorization again.
+8. Resume shadow decisions after cursor and block-hash reconciliation. Any
+   future live design requires distinct code, all gates, and a new PASS.
 
 Never broadcast the same nonce blindly to multiple providers.
 
@@ -160,9 +171,10 @@ Restart procedure:
 ## Nonce and replacement incident
 
 This repository models nonce and transaction behavior through interfaces and
-test doubles. It does not provide or claim a live broadcaster.
+unsigned/hash/receipt fixtures. It has no signer or broadcaster implementation.
 
-Once a verified broadcaster exists:
+Only in distinct code after all ordered gates and a new Council PASS, once a
+verified broadcaster exists:
 
 1. One fenced nonce owner serializes assignment writes for the signer.
 2. Before allocating a nonce, reconcile confirmed, pending, replaced, dropped,
@@ -178,10 +190,14 @@ Once a verified broadcaster exists:
    the expected event.
 7. Never send two different semantic transactions with one nonce.
 
-All replacement drills before contract verification must use injected
-in-memory signers/providers and must produce no network write.
+Current tests use unsigned requests, derived-hash evidence, and receipt
+fixtures only. They include no signer/broadcaster and produce no network
+write.
 
-## KMS/HSM unavailable
+## Future-only KMS/HSM unavailable
+
+Tabletop design only: the current build has no KMS reference, adapter, key, or
+signer check. This procedure requires distinct code and a new Council PASS.
 
 1. Keep or return the service to shadow mode.
 2. Fail the signer readiness check; do not load a file/CI/browser key as a
@@ -192,7 +208,10 @@ in-memory signers/providers and must produce no network write.
    procedure after operator review.
 5. Reconcile nonce and pending-attempt state before using a new signer.
 
-## Suspected key or workload compromise
+## Future-only suspected key or workload compromise
+
+Tabletop design only: the current build has no helper key, assigner role, KMS
+workload, or deployed helper facet.
 
 1. Contain the workload and prevent further signing/broadcast.
 2. Pause helper-managed assignment through the separately secured authorized
@@ -209,10 +228,10 @@ in-memory signers/providers and must produce no network write.
 9. Resume shadow mode only after containment review. A live canary requires
    fresh approval and all gates.
 
-The helper key cannot authorize upgrades, admin changes, disputes, revenue
-actions, custody transfers, or arbitrary calls.
+Any future helper key must not authorize upgrades, admin changes, disputes,
+revenue actions, custody transfers, or arbitrary calls.
 
-## Incident containment priorities
+## Future-only incident containment priorities
 
 1. Stop new writes.
 2. Preserve user cancellation/refund and accepted-order resolution paths.
@@ -225,12 +244,12 @@ actions, custody transfers, or arbitrary calls.
 Do not rerun an initializer, reset a nonce ledger, delete decision history, or
 zero mappings as a rollback technique.
 
-## Key rotation and revocation drill
+## Future-only key rotation and revocation tabletop
 
-The drill is simulation-only until the target contract interface is deployed
-and verified.
+No signer test doubles are shipped. Current tests cover only nonce/receipt
+state. A later authorized implementation must build this tabletop explicitly.
 
-1. Inject primary and standby signer test doubles with public identifiers only.
+1. A future harness injects primary/standby public identifiers only.
 2. Stop job intake and reconcile pending attempts.
 3. Simulate proposal of standby, acceptance by standby, address verification,
    and revocation of primary.
@@ -242,9 +261,14 @@ and verified.
 
 ## Canary gates
 
-Do not change the current shadow posture until every item is documented:
+The bill's complete ordered 14 gates and a new no-critical-objection vote are
+mandatory. This checklist is non-exhaustive, cannot authorize a canary, and
+cannot toggle this build live even if every item is complete.
 
-- council PASS evidence and implementation/tests for all binding amendments;
+A distinct later implementation must include at least:
+
+- a new Council PASS superseding the unanimous REJECT, with implementation and
+  tests for all binding amendments;
 - exact deployed source/storage provenance and independent review;
 - verified Base Sepolia ABI, selectors, bytecode, address, and start block;
 - verified assignment/revoke/pause behavior and chain-side eligibility;
@@ -257,20 +281,23 @@ Do not change the current shadow posture until every item is documented:
 - dashboards/alerts and user cancellation/refund validation;
 - explicit time-bounded canary approval.
 
-Set configuration gates only after the evidence exists. A true boolean must not
-be used to manufacture evidence.
+No configuration gate exists in this build. Future code may expose gates only
+after the evidence and new PASS exist; a true boolean must never manufacture
+evidence.
 
 ## Deployment and rollback
 
 Use an immutable image digest, non-root/read-only filesystem, dropped Linux
 capabilities, disabled service-account token mounting, restricted monitoring
-ingress, and environment-specific egress policy. Kubernetes Secret and
-ConfigMap objects are supplied outside this repository; manifests reference
-names and keys only.
+ingress, and the checked-in deny-all egress policy for this exact no-adapter
+scaffold. A future reviewed read-only integration needs a narrowly scoped
+environment-specific replacement. Kubernetes Secret and ConfigMap objects are
+supplied outside this repository; manifests reference names and keys only.
 
-Rollback means deploy the previous reviewed helper image in shadow mode and
-replay from the durable canonical checkpoint. It does not mean reversing chain
-storage or deleting decisions. If new on-chain storage has been written, use a
+No previous operational helper image or on-chain helper write exists today. In
+a future authorized deployment, rollback means deploy the previous reviewed
+image in shadow mode and replay from a durable canonical checkpoint. It never
+means reversing chain storage or deleting decisions; any on-chain write needs a
 reviewed forward fix after fork verification.
 
 ## Evidence to attach to an incident or drill

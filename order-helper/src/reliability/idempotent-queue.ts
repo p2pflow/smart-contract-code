@@ -1,8 +1,30 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { Clock, SystemClock, assertTimestamp } from "./clock";
 
 export type JobKey = `${number}:0x${string}:${bigint}`;
+export type OpaqueId = `0x${string}`;
+export type DurableWorkKind =
+  | "order-evaluation"
+  | "order-expiry"
+  | "transaction-reconciliation";
+export type QueueErrorCode =
+  | "LEASE_EXHAUSTED"
+  | "POLICY_REJECTED"
+  | "PROCESSING_FAILED"
+  | "RPC_UNAVAILABLE";
+
+/**
+ * The queue stores references, never arbitrary application objects. This
+ * exact schema keeps civil identity, bank, UPI, Telegram, and free-form text
+ * out of every durable queue adapter.
+ */
+export interface DurableWorkPayload {
+  readonly schema: "order-helper.durable-work.v1";
+  readonly kind: DurableWorkKind;
+  readonly subjectId: OpaqueId;
+  readonly contextId: OpaqueId | null;
+}
 export type QueueJobStatus =
   | "scheduled"
   | "leased"
@@ -31,7 +53,8 @@ export interface QueueJob<T> {
   readonly leaseOwner: string | null;
   readonly leaseToken: string | null;
   readonly leaseUntilMs: number | null;
-  readonly lastErrorCode: string | null;
+  readonly leaseGeneration: bigint;
+  readonly lastErrorCode: QueueErrorCode | null;
   readonly createdAtMs: number;
   readonly updatedAtMs: number;
   readonly sequence: number;
@@ -41,12 +64,13 @@ export interface QueueLease<T> {
   readonly job: QueueJob<T>;
   readonly owner: string;
   readonly token: string;
+  readonly generation: bigint;
   readonly expiresAtMs: number;
 }
 
 export interface RetryInstruction {
   readonly availableAtMs: number;
-  readonly errorCode: string;
+  readonly errorCode: QueueErrorCode;
   readonly terminal?: boolean;
 }
 
@@ -103,7 +127,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
 
   public constructor(
     private readonly clock: Clock = new SystemClock(),
-    private readonly tokenFactory: () => string = randomUUID,
+    private readonly tokenFactory: () => string = randomOpaqueId,
   ) {}
 
   public async enqueue(
@@ -119,10 +143,12 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
       throw new RangeError("maxAttempts must be a positive safe integer");
     }
 
+    validateDurablePayload(payload);
+    const isolatedPayload = clonePayload(payload);
     const existing = this.jobs.get(key);
     if (existing !== undefined) {
       if (
-        !isDeepStrictEqual(existing.payload, payload) ||
+        !isDeepStrictEqual(existing.payload, isolatedPayload) ||
         existing.maxAttempts !== maxAttempts
       ) {
         throw new QueueConflictError(key);
@@ -138,7 +164,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
         orderId: identity.orderId.toLowerCase() as `0x${string}`,
         round: identity.round,
       },
-      payload,
+      payload: isolatedPayload,
       status: "scheduled",
       attempts: 0,
       maxAttempts,
@@ -146,6 +172,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
       leaseOwner: null,
       leaseToken: null,
       leaseUntilMs: null,
+      leaseGeneration: 0n,
       lastErrorCode: null,
       createdAtMs: nowMs,
       updatedAtMs: nowMs,
@@ -165,9 +192,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
     owner: string,
     leaseMs: number,
   ): Promise<QueueLease<T> | null> {
-    if (owner.trim().length === 0) {
-      throw new TypeError("owner must not be empty");
-    }
+    assertOpaqueId(owner, "owner");
     if (!Number.isSafeInteger(leaseMs) || leaseMs <= 0) {
       throw new RangeError("leaseMs must be a positive safe integer");
     }
@@ -179,9 +204,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
     if (claimable === undefined) return null;
 
     const token = this.tokenFactory();
-    if (token.length === 0) {
-      throw new Error("tokenFactory returned an empty lease token");
-    }
+    assertOpaqueId(token, "lease token");
     const expiresAtMs = nowMs + leaseMs;
     const leased: QueueJob<T> = {
       ...claimable,
@@ -190,6 +213,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
       leaseOwner: owner,
       leaseToken: token,
       leaseUntilMs: expiresAtMs,
+      leaseGeneration: claimable.leaseGeneration + 1n,
       updatedAtMs: nowMs,
     };
     this.jobs.set(claimable.key, leased);
@@ -197,6 +221,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
       job: cloneJob(leased),
       owner,
       token,
+      generation: leased.leaseGeneration,
       expiresAtMs,
     };
   }
@@ -220,9 +245,7 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
     instruction: RetryInstruction,
   ): Promise<QueueJob<T>> {
     assertTimestamp(instruction.availableAtMs, "availableAtMs");
-    if (instruction.errorCode.trim().length === 0) {
-      throw new TypeError("errorCode must not be empty");
-    }
+    validateQueueErrorCode(instruction.errorCode);
     const current = this.requireCurrentLease(lease);
     const terminal =
       instruction.terminal === true ||
@@ -262,7 +285,11 @@ export class InMemoryIdempotentQueue<T> implements IdempotentQueue<T> {
       current.status !== "leased" ||
       current.leaseOwner !== lease.owner ||
       current.leaseToken !== lease.token ||
+      current.leaseGeneration !== lease.generation ||
       current.leaseUntilMs === null ||
+      current.leaseUntilMs !== lease.expiresAtMs ||
+      lease.job.leaseGeneration !== lease.generation ||
+      lease.job.leaseUntilMs !== lease.expiresAtMs ||
       current.leaseUntilMs <= nowMs
     ) {
       throw new StaleLeaseError(lease.job.key);
@@ -318,5 +345,79 @@ function cloneJob<T>(job: QueueJob<T>): QueueJob<T> {
   return {
     ...job,
     identity: { ...job.identity },
+    payload: clonePayload(job.payload),
   };
+}
+
+function clonePayload<T>(payload: T): T {
+  return structuredClone(payload);
+}
+
+const DURABLE_PAYLOAD_KEYS = [
+  "contextId",
+  "kind",
+  "schema",
+  "subjectId",
+] as const;
+
+const DURABLE_WORK_KINDS: ReadonlySet<string> = new Set([
+  "order-evaluation",
+  "order-expiry",
+  "transaction-reconciliation",
+]);
+
+const QUEUE_ERROR_CODES: ReadonlySet<string> = new Set([
+  "LEASE_EXHAUSTED",
+  "POLICY_REJECTED",
+  "PROCESSING_FAILED",
+  "RPC_UNAVAILABLE",
+]);
+
+function validateDurablePayload(
+  payload: unknown,
+): asserts payload is DurableWorkPayload {
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    Array.isArray(payload) ||
+    Object.getPrototypeOf(payload) !== Object.prototype ||
+    Object.getOwnPropertySymbols(payload).length !== 0
+  ) {
+    throw new TypeError("payload must use the durable-work reference schema");
+  }
+  const record = payload as Readonly<Record<string, unknown>>;
+  if (
+    Object.keys(record).sort().join(",") !==
+      [...DURABLE_PAYLOAD_KEYS].sort().join(",") ||
+    record.schema !== "order-helper.durable-work.v1" ||
+    typeof record.kind !== "string" ||
+    !DURABLE_WORK_KINDS.has(record.kind) ||
+    typeof record.subjectId !== "string" ||
+    (
+      record.contextId !== null &&
+      typeof record.contextId !== "string"
+    )
+  ) {
+    throw new TypeError("payload must use the durable-work reference schema");
+  }
+  assertOpaqueId(record.subjectId, "payload.subjectId");
+  if (record.contextId !== null) {
+    assertOpaqueId(record.contextId, "payload.contextId");
+  }
+}
+
+function validateQueueErrorCode(errorCode: string): void {
+  if (!QUEUE_ERROR_CODES.has(errorCode)) {
+    throw new TypeError("errorCode must be a supported queue error category");
+  }
+}
+
+function assertOpaqueId(value: string, name: string): void {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) {
+    throw new TypeError(`${name} must be an opaque 32-byte identifier`);
+  }
+}
+
+function randomOpaqueId(): string {
+  return `0x${randomBytes(32).toString("hex")}`;
 }

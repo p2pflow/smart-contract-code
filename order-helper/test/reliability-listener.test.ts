@@ -10,9 +10,11 @@ import {
   LiveChainListener,
 } from "../src/reliability/chain-events";
 
+const TOPIC = `0x${"44".repeat(32)}` as const;
 const FILTER: ChainLogFilter = {
   chainId: 84_532,
   address: `0x${"11".repeat(20)}`,
+  topics: [TOPIC],
 };
 
 class FakeSubscriber implements ChainLogSubscriber {
@@ -90,11 +92,36 @@ test("live listener rejects cross-chain subscription data", async () => {
   assert.equal(hints.length, 0);
 });
 
+test("live listener rejects address and topic filter mismatches", async () => {
+  const subscriber = new FakeSubscriber();
+  const listener = new LiveChainListener(
+    subscriber,
+    FILTER,
+    { recordHint: async () => undefined },
+    async () => undefined,
+  );
+  await listener.start();
+  await assert.rejects(
+    subscriber.emit({
+      ...logForChain(84_532),
+      address: `0x${"12".repeat(20)}`,
+    }),
+    /configured contract address/,
+  );
+  await assert.rejects(
+    subscriber.emit({
+      ...logForChain(84_532),
+      topics: [`0x${"45".repeat(32)}`],
+    }),
+    /topic predicate 0/,
+  );
+});
+
 function logForChain(chainId: number): ChainLog {
   return {
     chainId,
     address: FILTER.address,
-    topics: [],
+    topics: [TOPIC],
     data: "0x",
     blockNumber: 10n,
     blockHash: `0x${"22".repeat(32)}`,
