@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "1.0.0",
+  "protocolVersion": "0.1.0-local.2",
+  "kind": "local-test-fixture",
+  "safeForSharedEnvironment": false,
+  "chainId": 84532,
+  "network": "base-sepolia-local-test-fixture",
+  "createdAt": "1970-01-01T00:00:00.000Z",
+  "diamond": {
+    "address": "0x000000000000000000000000000000000000f201",
+    "deploymentTransactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "deploymentBlock": 0,
+    "startBlock": 0
+  },
+  "usdc": {
+    "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "decimals": 6
+  },
+  "facets": [
+    {
+      "name": "ConfigFacet",
+      "address": "0x000000000000000000000000000000000000f202",
+      "codeHash": "0x39b2016d474d2eb9a907ac8267799b611fb560ac68ffe6387d80c2a141456f7a",
+      "functionSelectors": [
+        "0x09ec0f24",
+        "0x1a9ba7eb",
+        "0x2f583d4b",
+        "0x332226d0",
+        "0x3397d9a2",
+        "0x3551ac6c",
+        "0x64ec2ceb",
+        "0x6a96f84d",
+        "0x6b78c29b",
+        "0x892b8a9c",
+        "0x903eadc0",
+        "0xab211bd9",
+        "0xbf284d84",
+        "0xc3f909d4",
+        "0xf7260e6e"
+      ]
+    },
+    {
+      "name": "DiamondCutFacet",
+      "address": "0x000000000000000000000000000000000000f203",
+      "codeHash": "0x8f3d1f8f969498f8db867de7069f2c6e071c1697aaa5d2045fcc2a71078662b2",
+      "functionSelectors": [
+        "0x1f931c1c"
+      ]
+    },
+    {
+      "name": "DiamondLoupeFacet",
+      "address": "0x000000000000000000000000000000000000f204",
+      "codeHash": "0x7fbe2d6918d93cd98f8797ae2f8199dded475a6605220f1dbb4a5efddc37b9b9",
+      "functionSelectors": [
+        "0x01ffc9a7",
+        "0x52ef6b2c",
+        "0x7a0ed627",
+        "0xadfca15e",
+        "0xcdffacc6"
+      ]
+    },
+    {
+      "name": "MerchantFacet",
+      "address": "0x000000000000000000000000000000000000f205",
+      "codeHash": "0x63be5a347276e61020373d31a0d90cef7c220c7f4ed7d93304f44a62b1c7dcd4",
+      "functionSelectors": [
+        "0x0586296c",
+        "0x1dcad144",
+        "0x1fee2a96",
+        "0x21527e50",
+        "0x30321dcc",
+        "0x38a9f5df",
+        "0x3d58ff4a",
+        "0x5b020623",
+        "0x66d3b61c",
+        "0x6e5b676b",
+        "0x8307d08b",
+        "0x831c2b82",
+        "0x8ce2df51",
+        "0x8e0540de",
+        "0xa6485ccd",
+        "0xae180328",
+        "0xb00c52b0",
+        "0xb2734eaf",
+        "0xb4de411c",
+        "0xb7889c93",
+        "0xbb634d55",
+        "0xbed9d861",
+        "0xcb82cc8f",
+        "0xd91b0a8d"
+      ]
+    },
+    {
+      "name": "OrderFacet",
+      "address": "0x000000000000000000000000000000000000f206",
+      "codeHash": "0x759486cbd66a78d02fdeda993e6e29cbc7e9954488a474247a6d8248cb41f90d",
+      "functionSelectors": [
+        "0x1e3e148d",
+        "0x3611d088",
+        "0x3af1b286",
+        "0x3c81c4b8",
+        "0x49085d8c",
+        "0x4ebac543",
+        "0x5778472a",
+        "0x63c69f08",
+        "0x7372f2f1",
+        "0x7489ec23",
+        "0x84ce1bfc",
+        "0x9e0acf8f",
+        "0xb641237c",
+        "0xd6039a61",
+        "0xe14f5b7d",
+        "0xeb0817c5"
+      ]
+    },
+    {
+      "name": "OwnershipFacet",
+      "address": "0x000000000000000000000000000000000000f207",
+      "codeHash": "0x582bf706bbd8b58d1c373226f4ca960d2f7a763498113074508efc17c1d8ee55",
+      "functionSelectors": [
+        "0x8da5cb5b",
+        "0xf2fde38b"
+      ]
+    }
+  ],
+  "roles": {
+    "DEFAULT_ADMIN_ROLE": {
+      "id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "expectedAddress": "0x000000000000000000000000000000000000f214"
+    },
+    "OPERATOR_ROLE": {
+      "id": "0x97667070c54ef182b0f5858b034beac1b6f3089aa2d3188bb1e8929f4fa9b929",
+      "expectedAddress": "0x000000000000000000000000000000000000f215"
+    },
+    "PRICE_PUBLISHER_ROLE": {
+      "id": "0x88d6d29e9d99b137797dca7ee33f866235537af9474d4549502f1b28e8d51373",
+      "expectedAddress": "0x000000000000000000000000000000000000f216"
+    },
+    "ASSIGNER_ROLE": {
+      "id": "0x1ca4917a93bbf937a078cf9cc2b3d0c4aaac3367aae1018d3d982bb6e49887f1",
+      "expectedAddress": "0x000000000000000000000000000000000000f217"
+    },
+    "PAUSER_ROLE": {
+      "id": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+      "expectedAddress": "0x000000000000000000000000000000000000f218"
+    },
+    "DISPUTE_RESOLVER_ROLE": {
+      "id": "0x7b8bb8356a3f32f5c111ff23f050d97f08988e0883529ea7bff3b918887a6e0e",
+      "expectedAddress": "0x000000000000000000000000000000000000f219"
+    }
+  },
+  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
+  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448"
+}

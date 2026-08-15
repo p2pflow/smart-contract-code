@@ -1,0 +1,49 @@
+{
+  "name": "@p2pflow/protocol",
+  "version": "0.1.0-local.2",
+  "description": "Canonical typed P2PFlow protocol boundary (local fixture until v2 deployment)",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": "24.18.0",
+    "npm": "11.16.0"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./artifacts/*": "./artifacts/*"
+  },
+  "files": [
+    "artifacts",
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "generate": "node scripts/generate.mjs",
+    "generate:check": "node scripts/generate.mjs --check",
+    "build": "npm run clean && npm run generate && tsc --project tsconfig.json",
+    "typecheck": "npm run generate:check && tsc --noEmit --project tsconfig.json",
+    "test": "npm run build --silent && vitest run",
+    "check": "npm run generate:check && npm run typecheck && npm test -- --run && npm run pack:check",
+    "pack:artifact": "npm run build --silent && node scripts/pack.mjs",
+    "pack:check": "npm run build --silent && node scripts/pack.mjs --check"
+  },
+  "dependencies": {
+    "viem": "2.55.16",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "6.0.3",
+    "vitest": "4.0.18"
+  }
+}

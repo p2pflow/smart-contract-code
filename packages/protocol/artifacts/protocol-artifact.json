@@ -1,0 +1,8 @@
+{
+  "packageName": "@p2pflow/protocol",
+  "packageVersion": "0.1.0-local.2",
+  "fixtureKind": "local-test-fixture",
+  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
+  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448",
+  "protocolArtifactDigest": "0x1a62c6264e310be3c07cccd1864e3bb3dfaa88ff5c1d007ded03a7a9be026a0d"
+}
