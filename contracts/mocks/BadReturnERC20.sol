@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 /// @notice Test-only ERC20 that returns `false` from transferFrom/transfer instead of
 ///         reverting. Used to verify SafeERC20 wraps raw calls and reverts on `false`.

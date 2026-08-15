@@ -2,9 +2,18 @@
   "name": "p2pflow-smart-contracts",
   "version": "1.0.0",
   "description": "P2PFlow Diamond Proxy Smart Contracts (EIP-2535)",
+  "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": "24.18.0",
+    "npm": "11.16.0"
+  },
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "verify:toolchain": "node scripts/verify-phase1.js",
+    "verify:phase1": "npm run verify:toolchain && npm run compile",
+    "verify": "npm run verify:phase1",
+    "verify:workspace": "node scripts/verify-workspace-phase1.js",
     "stress": "hardhat compile && node scripts/stressTest.js",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 interface IMerchantRegister {
     function registerMerchant(uint256 stakeAmount, string calldata telegramUsername) external;
