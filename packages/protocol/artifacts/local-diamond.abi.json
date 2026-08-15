@@ -2,6 +2,253 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AcceptedRecoveryDeadlineElapsed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AssignmentExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AssignmentNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CandidateAlreadyRejected",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "CandidateNotAcceptable",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CandidateNotAssigned",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "capacityE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "CapacityBelowReserved",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "obligationCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelHasObligations",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChannelNotEligible",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChannelNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CustodyAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DecisionAlreadyUsed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DisputeNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DisputeNotOpen",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "firstIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "duplicateIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "DuplicateCandidate",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "observedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "currentTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "FutureObservation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "received",
+        "type": "uint256"
+      }
+    ],
+    "name": "InboundBalanceMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_initializationContractAddress",
         "type": "address"
@@ -18,6 +265,463 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "available",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientAvailableLiquidity",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "availableE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientFiatCapacity",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientPriceSources",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidCandidate",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidCandidateCount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidChannelStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidConfiguration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDiamondContext",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidEvidence",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMerchantStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidOrderState",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidOrderType",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPricePolicy",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidPriceRound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPriceValues",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidSideMask",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidTerminalStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidToken",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidTokenDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LastDefaultAdmin",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "value",
+        "type": "bytes32"
+      }
+    ],
+    "name": "LegacyV1StateDetected",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MerchantAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantHasObligations",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotOnline",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minimumUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantStakeBelowMinimum",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "MissingRole",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "OrderNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "received",
+        "type": "uint256"
+      }
+    ],
+    "name": "OutboundBalanceMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "PageLimitInvalid",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PlatformIsNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PlatformIsPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "previousPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextPriceE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "PriceDeviationExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProtocolAlreadyInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProtocolNotInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
+      }
+    ],
+    "name": "QuoteExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
+      }
+    ],
+    "name": "QuoteValidityTooLong",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "RoleAccountAlreadyAssigned",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "RoleAccountIsDiamondOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoleAccountsMustBeDistinct",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "token",
         "type": "address"
@@ -27,143 +731,95 @@
     "type": "error"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum MerchantAvailability",
-        "name": "availability",
-        "type": "uint8"
-      }
-    ],
-    "name": "AvailabilityChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelApproved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum ChannelAvailability",
-        "name": "availability",
-        "type": "uint8"
-      }
-    ],
-    "name": "ChannelAvailabilityChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelRejected",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelTerminated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "dailyUsdc",
+        "name": "selectedPriceE6",
         "type": "uint256"
       },
       {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "monthlyUsdc",
+        "name": "boundPriceE6",
         "type": "uint256"
       }
     ],
-    "name": "DefaultChannelLimitsUpdated",
-    "type": "event"
+    "name": "SlippageBoundExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "StaleAssignmentEpoch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "observedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAgeSeconds",
+        "type": "uint256"
+      }
+    ],
+    "name": "StalePrice",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "actor",
+        "type": "address"
+      }
+    ],
+    "name": "UnauthorizedOrderActor",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "UnauthorizedRoleRenounce",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownRole",
+    "type": "error"
   },
   {
     "anonymous": false,
@@ -224,6 +880,12 @@
       },
       {
         "indexed": false,
+        "internalType": "enum OrderStatus",
+        "name": "priorOrderStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "raisedAt",
         "type": "uint256"
@@ -249,8 +911,14 @@
       },
       {
         "indexed": false,
-        "internalType": "enum DisputeResult",
-        "name": "result",
+        "internalType": "enum DisputeResolution",
+        "name": "resolution",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum OrderStatus",
+        "name": "finalOrderStatus",
         "type": "uint8"
       },
       {
@@ -267,45 +935,25 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payer",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "markedAt",
         "type": "uint256"
       }
     ],
-    "name": "DisputeWindowUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "EligibleMerchantAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "EligibleMerchantRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "EligibleMerchantsCleared",
+    "name": "FiatPaymentMarked",
     "type": "event"
   },
   {
@@ -314,15 +962,197 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "fromChannelId",
+        "name": "orderId",
         "type": "bytes32"
       },
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "toChannelId",
-        "type": "bytes32"
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
       },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "confirmedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "FiatReceiptConfirmed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reviewedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantApproved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MerchantAvailability",
+        "name": "availability",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantAvailabilityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "requestedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantExitRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalLiquidityUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantLiquidityDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalLiquidityUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantLiquidityWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalStakeUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantStakeDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       {
         "indexed": true,
         "internalType": "address",
@@ -336,46 +1166,7 @@
         "type": "uint256"
       }
     ],
-    "name": "FiatMigrated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantBlacklisted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantDisputeCleared",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantDisputed",
+    "name": "MerchantStakeWithdrawn",
     "type": "event"
   },
   {
@@ -389,12 +1180,24 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "usdcLiquidity",
-        "type": "uint256"
+        "internalType": "enum MerchantStatus",
+        "name": "previousStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MerchantStatus",
+        "name": "newStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
       }
     ],
-    "name": "MerchantRegistered",
+    "name": "MerchantStatusUpdated",
     "type": "event"
   },
   {
@@ -403,8 +1206,14 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newMinStakeUsdc",
+        "name": "minMerchantStakeUsdc",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
     "name": "MinMerchantStakeUpdated",
@@ -421,12 +1230,18 @@
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "merchant",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "bytes32",
         "name": "channelId",
         "type": "bytes32"
@@ -435,6 +1250,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "acceptedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "recoveryDeadline",
         "type": "uint256"
       }
     ],
@@ -452,18 +1273,30 @@
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "expiredEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nextEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "merchant",
+        "name": "by",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "assignedAt",
+        "name": "expiredAt",
         "type": "uint256"
       }
     ],
-    "name": "OrderAssigned",
+    "name": "OrderAssignmentExpired",
     "type": "event"
   },
   {
@@ -502,24 +1335,30 @@
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rank",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "merchant",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "completedAt",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "disputeExpiresAt",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       }
     ],
-    "name": "OrderCompleted",
+    "name": "OrderCandidateAssigned",
     "type": "event"
   },
   {
@@ -530,6 +1369,123 @@
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rejectedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidateRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "assignmentDeadline",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "candidateCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "assignedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidatesAssigned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "exhaustedEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nextEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "exhaustedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidatesExhausted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
       },
       {
         "indexed": true,
@@ -552,13 +1508,68 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fiatAmount",
+        "name": "fiatAmountE6",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "price",
+        "name": "completedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usdcAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatAmountE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "selectedPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadline",
         "type": "uint256"
       },
       {
@@ -595,55 +1606,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "paidAt",
+        "name": "expiredAt",
         "type": "uint256"
       }
     ],
-    "name": "OrderPaid",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
-        "type": "uint256"
-      }
-    ],
-    "name": "OrderPricingUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "orderId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "usdcAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "OrderRiskReleased",
+    "name": "OrderExpired",
     "type": "event"
   },
   {
@@ -670,18 +1637,160 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "previousAdmin",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "newAdmin",
+        "name": "merchant",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ChannelAvailability",
+        "name": "availability",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
       }
     ],
-    "name": "PlatformAdminTransferred",
+    "name": "PaymentChannelAvailabilityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelCapacityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ChannelStatus",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reviewedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelReviewed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "terminatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelTerminated",
     "type": "event"
   },
   {
@@ -714,19 +1823,31 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceQuorum",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "maxAgeSeconds",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxDeviationBps",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
-    "name": "UnstakeRequested",
+    "name": "PricePolicyUpdated",
     "type": "event"
   },
   {
@@ -734,12 +1855,60 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "buyPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sellPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceObservedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "publishedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "evidenceDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum PublicationKind",
+        "name": "publicationKind",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "wallet",
+        "name": "updater",
         "type": "address"
       }
     ],
-    "name": "UnstakeRequestRejected",
+    "name": "PriceRoundPublished",
     "type": "event"
   },
   {
@@ -747,18 +1916,54 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "protocolId",
+        "type": "bytes32"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "protocolVersion",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "layoutVersion",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "storageNamespace",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "usdcToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "diamondOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "rolesDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "configurationDigest",
+        "type": "bytes32"
       }
     ],
-    "name": "UsdcDeposited",
+    "name": "ProtocolInitialized",
     "type": "event"
   },
   {
@@ -766,18 +1971,86 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "wallet",
+        "name": "account",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "orderLifetimeSeconds",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "assignmentLifetimeSeconds",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "acceptedRecoverySeconds",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxQuoteValiditySeconds",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
-    "name": "UsdcWithdrawn",
+    "name": "SafetyConfigUpdated",
     "type": "event"
   },
   {
@@ -802,39 +2075,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "merchant",
+        "name": "wallet",
         "type": "address"
       }
     ],
-    "name": "addEligibleMerchant",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "bankName",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "accountLast4",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "upiId",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "label",
-        "type": "string"
-      }
-    ],
-    "name": "addPaymentChannel",
+    "name": "approveMerchant",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -843,37 +2088,38 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "channelId",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct Candidate[]",
+        "name": "candidates",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
         "type": "bytes32"
       }
     ],
-    "name": "approveChannel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "approveMerchantUnstake",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "blacklistMerchant",
+    "name": "assignOrderCandidates",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -892,26 +2138,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "clearEligibleMerchants",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "clearMerchantDispute",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -919,7 +2145,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "confirmPayment",
+    "name": "confirmFiatReceived",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -929,6 +2155,21 @@
       {
         "internalType": "uint256",
         "name": "usdcAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedRoundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
         "type": "uint256"
       }
     ],
@@ -938,11 +2179,6 @@
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
-      },
-      {
-        "internalType": "address[]",
-        "name": "assigned",
-        "type": "address[]"
       }
     ],
     "stateMutability": "nonpayable",
@@ -954,6 +2190,21 @@
         "internalType": "uint256",
         "name": "usdcAmount",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedRoundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
       }
     ],
     "name": "createSellOrder",
@@ -962,13 +2213,34 @@
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
-      },
-      {
-        "internalType": "address[]",
-        "name": "assigned",
-        "type": "address[]"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositLiquidity",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1021,6 +2293,32 @@
       }
     ],
     "name": "diamondCut",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DISPUTE_RESOLVER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "expireAssignment",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1102,19 +2400,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getAllMerchants",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -1122,12 +2407,49 @@
         "type": "bytes32"
       }
     ],
-    "name": "getAssignedMerchants",
+    "name": "getAssignment",
     "outputs": [
       {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "assignedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct Candidate[]",
+        "name": "candidates",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "enum CandidateStatus[]",
+        "name": "statuses",
+        "type": "uint8[]"
       }
     ],
     "stateMutability": "view",
@@ -1156,26 +2478,6 @@
             "type": "address"
           },
           {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
             "internalType": "enum ChannelStatus",
             "name": "status",
             "type": "uint8"
@@ -1186,13 +2488,28 @@
             "type": "uint8"
           },
           {
+            "internalType": "uint8",
+            "name": "sideMask",
+            "type": "uint8"
+          },
+          {
             "internalType": "uint256",
-            "name": "fiatBalance",
+            "name": "fiatCapacityE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "appliedAt",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
             "type": "uint256"
           },
           {
@@ -1202,41 +2519,11 @@
           },
           {
             "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
+            "name": "updatedAt",
             "type": "uint256"
           }
         ],
-        "internalType": "struct PaymentChannel",
+        "internalType": "struct PaymentChannelV2",
         "name": "",
         "type": "tuple"
       }
@@ -1252,83 +2539,21 @@
         "type": "bytes32"
       }
     ],
-    "name": "getChannelFiat",
+    "name": "getChannelCapacity",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "totalFiat",
+        "name": "capacityE6",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "reservedFiat",
+        "name": "reservedE6",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "unreservedFiat",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getChannelLimitDefaults",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "dailyUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyUsdc",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getChannelLimits",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "dailyLimitUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "dailyVolumeUsed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "dailyResetsAt",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyLimitUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyVolumeUsed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyResetsAt",
+        "name": "availableE6",
         "type": "uint256"
       }
     ],
@@ -1342,9 +2567,19 @@
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "admin",
-            "type": "address"
+            "internalType": "bytes32",
+            "name": "protocolId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protocolVersion",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "layoutVersion",
+            "type": "uint256"
           },
           {
             "internalType": "address",
@@ -1362,12 +2597,34 @@
             "type": "uint256"
           },
           {
-            "internalType": "bool",
-            "name": "initialized",
-            "type": "bool"
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "orderLifetimeSeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "assignmentLifetimeSeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "acceptedRecoverySeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxQuoteValiditySeconds",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct SafetyConfig",
+            "name": "safety",
+            "type": "tuple"
           }
         ],
-        "internalType": "struct PlatformConfig",
+        "internalType": "struct PlatformConfigV2",
         "name": "",
         "type": "tuple"
       }
@@ -1377,12 +2634,138 @@
   },
   {
     "inputs": [],
-    "name": "getEligibleMerchants",
+    "name": "getCustodyTotals",
     "outputs": [
       {
-        "internalType": "address[]",
+        "internalType": "uint256",
+        "name": "totalMerchantStakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalMerchantLiquidityUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalReservedBuyUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalSellEscrowUsdc",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDispute",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "enum DisputeStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum DisputeResolution",
+            "name": "resolution",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum OrderStatus",
+            "name": "priorOrderStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "openedBy",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "resolver",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "openedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "resolvedAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DisputeV2",
         "name": "",
-        "type": "address[]"
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLatestPriceRound",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "roundId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceObservedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "publishedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceDigest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "enum PublicationKind",
+            "name": "publicationKind",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct PriceRound",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1406,8 +2789,8 @@
             "type": "address"
           },
           {
-            "internalType": "enum MerchantAccountStatus",
-            "name": "accountStatus",
+            "internalType": "enum MerchantStatus",
+            "name": "status",
             "type": "uint8"
           },
           {
@@ -1417,33 +2800,13 @@
           },
           {
             "internalType": "uint256",
-            "name": "usdcLiquidity",
+            "name": "stakeUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "unstakePending",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "unstakeRequestedAmount",
+            "name": "liquidityUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "telegramUsername",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "registeredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "channelIds",
-            "type": "bytes32[]"
           },
           {
             "internalType": "uint256",
@@ -1452,47 +2815,38 @@
           },
           {
             "internalType": "uint256",
-            "name": "riskUsdc",
+            "name": "disputeLockedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "channelNonce",
             "type": "uint256"
           }
         ],
-        "internalType": "struct Merchant",
+        "internalType": "struct MerchantV2",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "getMerchantBalances",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "totalUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reservedUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "riskUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "unreservedUsdc",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1506,7 +2860,66 @@
         "type": "address"
       }
     ],
-    "name": "getMerchantChannels",
+    "name": "getMerchantBalances",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidityUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "disputeLockedUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "availableUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedFiatE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "obligationCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMerchantChannelPage",
     "outputs": [
       {
         "components": [
@@ -1521,26 +2934,6 @@
             "type": "address"
           },
           {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
             "internalType": "enum ChannelStatus",
             "name": "status",
             "type": "uint8"
@@ -1551,13 +2944,28 @@
             "type": "uint8"
           },
           {
+            "internalType": "uint8",
+            "name": "sideMask",
+            "type": "uint8"
+          },
+          {
             "internalType": "uint256",
-            "name": "fiatBalance",
+            "name": "fiatCapacityE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "appliedAt",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
             "type": "uint256"
           },
           {
@@ -1567,43 +2975,18 @@
           },
           {
             "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
+            "name": "updatedAt",
             "type": "uint256"
           }
         ],
-        "internalType": "struct PaymentChannel[]",
-        "name": "",
+        "internalType": "struct PaymentChannelV2[]",
+        "name": "items",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1615,127 +2998,48 @@
         "internalType": "address",
         "name": "merchant",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
       }
     ],
-    "name": "getMerchantOrders",
+    "name": "getMerchantOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getMyChannels",
-    "outputs": [
+      },
       {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "channelId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "merchant",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
-            "internalType": "enum ChannelStatus",
-            "name": "status",
-            "type": "uint8"
-          },
-          {
-            "internalType": "enum ChannelAvailability",
-            "name": "availability",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fiatBalance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "appliedAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reviewedAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct PaymentChannel[]",
-        "name": "",
-        "type": "tuple[]"
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getMyProfile",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMerchantPage",
     "outputs": [
       {
         "components": [
@@ -1745,8 +3049,8 @@
             "type": "address"
           },
           {
-            "internalType": "enum MerchantAccountStatus",
-            "name": "accountStatus",
+            "internalType": "enum MerchantStatus",
+            "name": "status",
             "type": "uint8"
           },
           {
@@ -1756,33 +3060,13 @@
           },
           {
             "internalType": "uint256",
-            "name": "usdcLiquidity",
+            "name": "stakeUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "unstakePending",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "unstakeRequestedAmount",
+            "name": "liquidityUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "telegramUsername",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "registeredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "channelIds",
-            "type": "bytes32[]"
           },
           {
             "internalType": "uint256",
@@ -1791,13 +3075,43 @@
           },
           {
             "internalType": "uint256",
-            "name": "riskUsdc",
+            "name": "disputeLockedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "channelNonce",
             "type": "uint256"
           }
         ],
-        "internalType": "struct Merchant",
-        "name": "",
-        "type": "tuple"
+        "internalType": "struct MerchantV2[]",
+        "name": "items",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1819,6 +3133,11 @@
             "internalType": "bytes32",
             "name": "orderId",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "orderNumber",
+            "type": "uint256"
           },
           {
             "internalType": "enum OrderType",
@@ -1852,12 +3171,17 @@
           },
           {
             "internalType": "uint256",
-            "name": "fiatAmount",
+            "name": "fiatAmountE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "price",
+            "name": "selectedPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "roundId",
             "type": "uint256"
           },
           {
@@ -1867,12 +3191,22 @@
           },
           {
             "internalType": "uint256",
+            "name": "orderDeadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "acceptedAt",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "paidAt",
+            "name": "acceptedRecoveryDeadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fiatSentAt",
             "type": "uint256"
           },
           {
@@ -1887,41 +3221,21 @@
           },
           {
             "internalType": "uint256",
-            "name": "disputeExpiresAt",
+            "name": "expiredAt",
             "type": "uint256"
-          },
-          {
-            "internalType": "enum DisputeStatus",
-            "name": "disputeStatus",
-            "type": "uint8"
-          },
-          {
-            "internalType": "address",
-            "name": "disputeResolver",
-            "type": "address"
-          },
-          {
-            "internalType": "enum DisputeResult",
-            "name": "disputeResult",
-            "type": "uint8"
-          },
-          {
-            "internalType": "address[]",
-            "name": "assignedMerchants",
-            "type": "address[]"
-          },
-          {
-            "internalType": "bool",
-            "name": "riskReleased",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "orderNumber",
+            "name": "assignmentEpoch",
             "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "custodyFinalized",
+            "type": "bool"
           }
         ],
-        "internalType": "struct Order",
+        "internalType": "struct OrderV2",
         "name": "",
         "type": "tuple"
       }
@@ -1930,13 +3244,29 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getOrderIds",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1944,21 +3274,127 @@
   },
   {
     "inputs": [],
-    "name": "getOrderPricing",
+    "name": "getPricePolicy",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "sourceQuorum",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAgeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxDeviationBps",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PricePolicy",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPriceRound",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "roundId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceObservedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "publishedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceDigest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "enum PublicationKind",
+            "name": "publicationKind",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct PriceRound",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleMemberCount",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1967,12 +3403,34 @@
   },
   {
     "inputs": [],
-    "name": "getPendingChannels",
+    "name": "getSafetyConfig",
     "outputs": [
       {
-        "internalType": "bytes32[]",
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "orderLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assignmentLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "acceptedRecoverySeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxQuoteValiditySeconds",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SafetyConfig",
         "name": "",
-        "type": "bytes32[]"
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1984,29 +3442,48 @@
         "internalType": "address",
         "name": "user",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
       }
     ],
-    "name": "getUserOrders",
+    "name": "getUserOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "goOffline",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "goOnline",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2014,12 +3491,30 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
-        "name": "merchant",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "isEligibleMerchant",
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isProtocolInitialized",
     "outputs": [
       {
         "internalType": "bool",
@@ -2038,7 +3533,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "markPaymentSent",
+    "name": "markFiatSent",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2047,18 +3542,39 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "fromChannelId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "toChannelId",
+        "name": "orderId",
         "type": "bytes32"
       }
     ],
-    "name": "migrateAndTerminate",
+    "name": "openDispute",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "OPERATOR_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ORDER_ASSIGNER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -2082,6 +3598,101 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "PAUSER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PRICE_UPDATER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolVersion",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "buyPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sellPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sourceObservedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sourceCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "evidenceDigest",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum PublicationKind",
+        "name": "publicationKind",
+        "type": "uint8"
+      }
+    ],
+    "name": "publishPriceRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -2089,7 +3700,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "raiseDispute",
+    "name": "recoverExpiredOrder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2100,11 +3711,6 @@
         "internalType": "uint256",
         "name": "stakeAmount",
         "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "telegramUsername",
-        "type": "string"
       }
     ],
     "name": "registerMerchant",
@@ -2115,12 +3721,41 @@
   {
     "inputs": [
       {
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "registerPaymentChannel",
+    "outputs": [
+      {
         "internalType": "bytes32",
         "name": "channelId",
         "type": "bytes32"
       }
     ],
-    "name": "rejectChannel",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "rejectAssignment",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2128,25 +3763,24 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
-        "name": "wallet",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "rejectMerchantUnstake",
+    "name": "renounceRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "removeEligibleMerchant",
+    "inputs": [],
+    "name": "requestMerchantExit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2159,8 +3793,8 @@
         "type": "bytes32"
       },
       {
-        "internalType": "enum DisputeResult",
-        "name": "result",
+        "internalType": "enum DisputeResolution",
+        "name": "resolution",
         "type": "uint8"
       }
     ],
@@ -2172,17 +3806,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "dailyUsdc",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       },
       {
-        "internalType": "uint256",
-        "name": "monthlyUsdc",
-        "type": "uint256"
+        "internalType": "enum ChannelStatus",
+        "name": "status",
+        "type": "uint8"
       }
     ],
-    "name": "setDefaultChannelLimits",
+    "name": "reviewPaymentChannel",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2190,12 +3824,66 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum MerchantAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "setAvailability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum ChannelAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "setChannelAvailability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
         "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "fiatCapacityE6",
         "type": "uint256"
       }
     ],
-    "name": "setDisputeWindow",
+    "name": "setChannelFiatCapacity",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2206,9 +3894,14 @@
         "internalType": "address",
         "name": "wallet",
         "type": "address"
+      },
+      {
+        "internalType": "enum MerchantStatus",
+        "name": "newStatus",
+        "type": "uint8"
       }
     ],
-    "name": "setMerchantDisputed",
+    "name": "setMerchantStatus",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2217,7 +3910,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "minStakeUsdc",
+        "name": "minMerchantStakeUsdc",
         "type": "uint256"
       }
     ],
@@ -2229,58 +3922,92 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "sourceQuorum",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAgeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxDeviationBps",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PricePolicy",
+        "name": "policy",
+        "type": "tuple"
+      }
+    ],
+    "name": "setPricePolicy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "orderLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assignmentLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "acceptedRecoverySeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxQuoteValiditySeconds",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SafetyConfig",
+        "name": "safety",
+        "type": "tuple"
+      }
+    ],
+    "name": "setSafetyConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "storageLayoutVersion",
+    "outputs": [
+      {
         "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "setOrderPricing",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "storageNamespace",
+    "outputs": [
       {
         "internalType": "bytes32",
-        "name": "channelId",
+        "name": "",
         "type": "bytes32"
       }
     ],
-    "name": "setPaymentChannelActive",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "setPaymentChannelInactive",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "orderId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "settleOrder",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -2305,6 +4032,19 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "terminatePaymentChannel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_newOwner",
         "type": "address"
@@ -2316,21 +4056,34 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newAdmin",
-        "type": "address"
-      }
-    ],
-    "name": "transferPlatformAdmin",
+    "inputs": [],
+    "name": "unpausePlatform",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "unpausePlatform",
+    "name": "UPGRADER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawLiquidity",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -1,10 +1,10 @@
-import { BPS_DENOMINATOR, E6 } from "./constants.js";
+import { BPS_DENOMINATOR, E6, MAX_UINT256 } from "./constants.js";
 
 export type RoundingMode = "floor" | "ceil";
 export type TradeSide = "BUY" | "SELL";
 
 function assertNonNegative(value: bigint, label: string): void {
-  if (value < 0n) throw new RangeError(`${label} must be non-negative`);
+  if (value < 0n || value > MAX_UINT256) throw new RangeError(`${label} must fit uint256`);
 }
 
 function assertSpreadBps(spreadBps: bigint): void {
@@ -18,7 +18,9 @@ export function parseE6(value: string): bigint {
     throw new TypeError("E6 input must be a non-negative plain decimal string with at most six fractional digits");
   }
   const [whole = "0", fraction = ""] = value.split(".");
-  return BigInt(whole) * E6 + BigInt(fraction.padEnd(6, "0") || "0");
+  const parsed = BigInt(whole) * E6 + BigInt(fraction.padEnd(6, "0") || "0");
+  assertNonNegative(parsed, "value");
+  return parsed;
 }
 
 export function formatE6(value: bigint, options: Readonly<{ trim?: boolean }> = {}): string {
@@ -33,12 +35,17 @@ export function mulDivFloor(multiplicand: bigint, multiplier: bigint, divisor: b
   assertNonNegative(multiplicand, "multiplicand");
   assertNonNegative(multiplier, "multiplier");
   if (divisor <= 0n) throw new RangeError("divisor must be positive");
-  return (multiplicand * multiplier) / divisor;
+  assertNonNegative(divisor, "divisor");
+  const result = (multiplicand * multiplier) / divisor;
+  assertNonNegative(result, "result");
+  return result;
 }
 
 export function mulDivCeil(multiplicand: bigint, multiplier: bigint, divisor: bigint): bigint {
   const floor = mulDivFloor(multiplicand, multiplier, divisor);
-  return (multiplicand * multiplier) % divisor === 0n ? floor : floor + 1n;
+  const result = (multiplicand * multiplier) % divisor === 0n ? floor : floor + 1n;
+  assertNonNegative(result, "result");
+  return result;
 }
 
 export function calculateFiatE6(usdcAtoms: bigint, priceE6: bigint, side: TradeSide): bigint {

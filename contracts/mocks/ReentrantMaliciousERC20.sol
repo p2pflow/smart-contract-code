@@ -36,6 +36,7 @@ contract ReentrantMaliciousERC20 {
     function transfer(address to, uint256 amount) external returns (bool) {
         balanceOf[msg.sender] -= amount;
         balanceOf[to]         += amount;
+        _invokeHook();
         return true;
     }
 
@@ -47,9 +48,11 @@ contract ReentrantMaliciousERC20 {
         balanceOf[from] -= amount;
         balanceOf[to]   += amount;
 
-        if (callee != address(0)) {
-            IReentrancyCallee(callee).reenter();
-        }
+        _invokeHook();
         return true;
+    }
+
+    function _invokeHook() private {
+        if (callee != address(0)) IReentrancyCallee(callee).reenter();
     }
 }

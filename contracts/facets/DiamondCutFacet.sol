@@ -17,6 +17,8 @@ pragma solidity 0.8.24;
 
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
 import { LibDiamond } from "../libraries/LibDiamond.sol";
+import { LibAccess } from "../libraries/LibAccess.sol";
+import { LibAppStorage } from "../libraries/LibAppStorage.sol";
 
 contract DiamondCutFacet is IDiamondCut {
     /// @notice Add/replace/remove any number of functions and optionally execute
@@ -29,8 +31,13 @@ contract DiamondCutFacet is IDiamondCut {
         address _init,
         bytes calldata _calldata
     ) external override {
-        // Only the diamond owner can upgrade
-        LibDiamond.enforceIsContractOwner();
+        // The owner bootstraps a fresh Diamond. After v2 initialization, the
+        // mutually-exclusive UPGRADER role is the only cut authority.
+        if (LibAppStorage.isInitialized()) {
+            LibAccess.enforceRole(LibAccess.UPGRADER_ROLE, msg.sender);
+        } else {
+            LibDiamond.enforceIsContractOwner();
+        }
         LibDiamond.diamondCut(_diamondCut, _init, _calldata);
     }
 }

@@ -1,56 +1,101 @@
 {
-  "schemaVersion": "1.0.0",
-  "protocolVersion": "0.1.0-local.2",
+  "schemaVersion": "2.0.0",
+  "packageVersion": "2.0.0-local.1",
+  "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
+  "protocolVersion": 2,
+  "layoutVersion": 2,
+  "storageNamespace": "0x8eda5a1d6c0dccefe0e030b73e1a1aaa2a90d7a9ed72f2505f70c49e1b3fa545",
   "kind": "local-test-fixture",
+  "deployed": false,
   "safeForSharedEnvironment": false,
   "chainId": 84532,
-  "network": "base-sepolia-local-test-fixture",
+  "network": "base-sepolia-local-v2-non-deployed",
   "createdAt": "1970-01-01T00:00:00.000Z",
   "diamond": {
     "address": "0x000000000000000000000000000000000000f201",
+    "owner": "0x000000000000000000000000000000000000f21e",
+    "codeHash": "0xbbd88e27e3dc818da8b39c862c218086fbbb327da98d1c2767cecab7ec0b5b2b",
     "deploymentTransactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "deploymentBlock": 0,
     "startBlock": 0
   },
+  "initialization": {
+    "initialized": false,
+    "initialPaused": true,
+    "initializerAddress": "0x000000000000000000000000000000000000f20c",
+    "initializerCodeHash": "0xbc7f27be3bc1097e78c4b7c95045b57a96c1e5048a0f82a961ace8d330528486",
+    "calldataHash": "0x3b4ad55673987534c35b5c769dddadfc2149e77583d1535457532037d4a16658",
+    "transactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "block": 0,
+    "protocolInitializedTopic0": "0x58a29b221a26c7039991cd95315d13e6ce2bfb596c36889f58e94c2c5455fac3"
+  },
   "usdc": {
     "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    "decimals": 6
+    "decimals": 6,
+    "codeHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },
   "facets": [
     {
-      "name": "ConfigFacet",
+      "name": "AccessControlFacet",
       "address": "0x000000000000000000000000000000000000f202",
-      "codeHash": "0x39b2016d474d2eb9a907ac8267799b611fb560ac68ffe6387d80c2a141456f7a",
+      "codeHash": "0x04760b9159dc11d46e258e5eef8d684a7b25fe9961206608b07a1e0d1f9f02cb",
       "functionSelectors": [
-        "0x09ec0f24",
+        "0x248a9ca3",
+        "0x2f2ff15d",
+        "0x36568abe",
+        "0x91d14854",
+        "0xa217fddf",
+        "0xbfe42a37",
+        "0xca15c873",
+        "0xcbff5d53",
+        "0xd547741f",
+        "0xe63ab1e9",
+        "0xf5b541a6",
+        "0xf72c0d8b",
+        "0xfb8d8101"
+      ]
+    },
+    {
+      "name": "AssignmentFacet",
+      "address": "0x000000000000000000000000000000000000f203",
+      "codeHash": "0xea6cb5557ba177fa818ca8736ad46574ca5216ca541ea70094468d55d3ee5a65",
+      "functionSelectors": [
+        "0x69fa9c12",
+        "0x8f03f7b7",
+        "0xfbe5b267"
+      ]
+    },
+    {
+      "name": "ConfigFacet",
+      "address": "0x000000000000000000000000000000000000f204",
+      "codeHash": "0x8ea90d6e417e980f70549388260937c7214d5f99d51bed7bc58428d935e8ab50",
+      "functionSelectors": [
         "0x1a9ba7eb",
-        "0x2f583d4b",
-        "0x332226d0",
-        "0x3397d9a2",
-        "0x3551ac6c",
+        "0x28c82b02",
+        "0x2ae9c600",
+        "0x3e4fb419",
         "0x64ec2ceb",
-        "0x6a96f84d",
         "0x6b78c29b",
-        "0x892b8a9c",
-        "0x903eadc0",
-        "0xab211bd9",
-        "0xbf284d84",
+        "0x9fd25012",
         "0xc3f909d4",
-        "0xf7260e6e"
+        "0xc72605f3",
+        "0xd6a1fe3b",
+        "0xda1f12ab",
+        "0xe4654b38"
       ]
     },
     {
       "name": "DiamondCutFacet",
-      "address": "0x000000000000000000000000000000000000f203",
-      "codeHash": "0x8f3d1f8f969498f8db867de7069f2c6e071c1697aaa5d2045fcc2a71078662b2",
+      "address": "0x000000000000000000000000000000000000f205",
+      "codeHash": "0x274049385b28a5355f18dd2bb5870e899d9263d9fc3da03cc9b8fd2da43232b7",
       "functionSelectors": [
         "0x1f931c1c"
       ]
     },
     {
       "name": "DiamondLoupeFacet",
-      "address": "0x000000000000000000000000000000000000f204",
-      "codeHash": "0x7fbe2d6918d93cd98f8797ae2f8199dded475a6605220f1dbb4a5efddc37b9b9",
+      "address": "0x000000000000000000000000000000000000f206",
+      "codeHash": "0x84eedb9f8cf4f5ba50b3d52ada9c9f2b3063f66f2a2994967ca53a01b9e51e2f",
       "functionSelectors": [
         "0x01ffc9a7",
         "0x52ef6b2c",
@@ -60,95 +105,121 @@
       ]
     },
     {
-      "name": "MerchantFacet",
-      "address": "0x000000000000000000000000000000000000f205",
-      "codeHash": "0x63be5a347276e61020373d31a0d90cef7c220c7f4ed7d93304f44a62b1c7dcd4",
+      "name": "DisputeFacet",
+      "address": "0x000000000000000000000000000000000000f207",
+      "codeHash": "0x4443f85823225053d1accb57595dd0ccde90e6743ed06fc53b2fdabff5b63552",
       "functionSelectors": [
-        "0x0586296c",
-        "0x1dcad144",
-        "0x1fee2a96",
-        "0x21527e50",
-        "0x30321dcc",
-        "0x38a9f5df",
-        "0x3d58ff4a",
-        "0x5b020623",
-        "0x66d3b61c",
-        "0x6e5b676b",
-        "0x8307d08b",
+        "0x136ba6aa",
+        "0xb641237c",
+        "0xf08ef6cb"
+      ]
+    },
+    {
+      "name": "MerchantFacet",
+      "address": "0x000000000000000000000000000000000000f208",
+      "codeHash": "0x3ab14944cb9048b3c4505fc5f28b019827c1ee62f1878e424ccb51b5c74ff454",
+      "functionSelectors": [
+        "0x0157ff42",
+        "0x0a861f2a",
+        "0x1acc3a92",
+        "0x27a8e6c4",
+        "0x285c62d1",
+        "0x4533d16e",
+        "0x62462d24",
+        "0x71409564",
+        "0x753f62f9",
+        "0x76d58e1a",
         "0x831c2b82",
-        "0x8ce2df51",
-        "0x8e0540de",
-        "0xa6485ccd",
-        "0xae180328",
-        "0xb00c52b0",
         "0xb2734eaf",
-        "0xb4de411c",
-        "0xb7889c93",
-        "0xbb634d55",
+        "0xb3199ac2",
         "0xbed9d861",
+        "0xc132d8cb",
         "0xcb82cc8f",
-        "0xd91b0a8d"
+        "0xdbac01ae",
+        "0xea07dc10",
+        "0xeb0817c5",
+        "0xfa298d79"
       ]
     },
     {
       "name": "OrderFacet",
-      "address": "0x000000000000000000000000000000000000f206",
-      "codeHash": "0x759486cbd66a78d02fdeda993e6e29cbc7e9954488a474247a6d8248cb41f90d",
+      "address": "0x000000000000000000000000000000000000f209",
+      "codeHash": "0xbab7bf030f5519df9f8ef5d863dde29ba69f3cc48ff122382037052d34191c70",
       "functionSelectors": [
-        "0x1e3e148d",
-        "0x3611d088",
-        "0x3af1b286",
-        "0x3c81c4b8",
-        "0x49085d8c",
-        "0x4ebac543",
+        "0x2fe44ea8",
+        "0x37609bb2",
         "0x5778472a",
-        "0x63c69f08",
-        "0x7372f2f1",
+        "0x5c26891d",
+        "0x6d9bd051",
         "0x7489ec23",
-        "0x84ce1bfc",
-        "0x9e0acf8f",
-        "0xb641237c",
+        "0x84dc1177",
+        "0x9d0b7c7c",
+        "0xa7508190",
+        "0xaac3a69a",
         "0xd6039a61",
-        "0xe14f5b7d",
-        "0xeb0817c5"
+        "0xf199aeb0"
       ]
     },
     {
       "name": "OwnershipFacet",
-      "address": "0x000000000000000000000000000000000000f207",
-      "codeHash": "0x582bf706bbd8b58d1c373226f4ca960d2f7a763498113074508efc17c1d8ee55",
+      "address": "0x000000000000000000000000000000000000f20a",
+      "codeHash": "0xbbd3b4d6229fe3ee0dd61a058ff6b23e6c0f8f9b8d3a70395897b54905c56b9b",
       "functionSelectors": [
         "0x8da5cb5b",
         "0xf2fde38b"
+      ]
+    },
+    {
+      "name": "PricingFacet",
+      "address": "0x000000000000000000000000000000000000f20b",
+      "codeHash": "0x4ea3068525beb4e3c9cf17c1f7663b88d68e566ff59fc8a5e1117cc5ae8497ab",
+      "functionSelectors": [
+        "0x1d18b6cd",
+        "0x2fb0c7bd",
+        "0x46b8a5fb",
+        "0x47c3df86",
+        "0xc2507b43"
       ]
     }
   ],
   "roles": {
     "DEFAULT_ADMIN_ROLE": {
       "id": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "expectedAddress": "0x000000000000000000000000000000000000f214"
+      "expectedAddress": "0x000000000000000000000000000000000000f21f"
     },
     "OPERATOR_ROLE": {
       "id": "0x97667070c54ef182b0f5858b034beac1b6f3089aa2d3188bb1e8929f4fa9b929",
-      "expectedAddress": "0x000000000000000000000000000000000000f215"
+      "expectedAddress": "0x000000000000000000000000000000000000f220"
     },
-    "PRICE_PUBLISHER_ROLE": {
-      "id": "0x88d6d29e9d99b137797dca7ee33f866235537af9474d4549502f1b28e8d51373",
-      "expectedAddress": "0x000000000000000000000000000000000000f216"
-    },
-    "ASSIGNER_ROLE": {
-      "id": "0x1ca4917a93bbf937a078cf9cc2b3d0c4aaac3367aae1018d3d982bb6e49887f1",
-      "expectedAddress": "0x000000000000000000000000000000000000f217"
+    "UPGRADER_ROLE": {
+      "id": "0x189ab7a9244df0848122154315af71fe140f3db0fe014031783b0946b8c9d2e3",
+      "expectedAddress": "0x000000000000000000000000000000000000f221"
     },
     "PAUSER_ROLE": {
       "id": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
-      "expectedAddress": "0x000000000000000000000000000000000000f218"
+      "expectedAddress": "0x000000000000000000000000000000000000f222"
+    },
+    "PRICE_UPDATER_ROLE": {
+      "id": "0xd96ba01d6560c2ab35f2940dd8d70c5f5fe06236c72674237120515918198fb0",
+      "expectedAddress": "0x000000000000000000000000000000000000f223"
+    },
+    "ORDER_ASSIGNER_ROLE": {
+      "id": "0xd34c391209bffb90d6e1f7450c0c7704bc00112b5b1957c5842a2c1a76b6ccc9",
+      "expectedAddress": "0x000000000000000000000000000000000000f224"
     },
     "DISPUTE_RESOLVER_ROLE": {
       "id": "0x7b8bb8356a3f32f5c111ff23f050d97f08988e0883529ea7bff3b918887a6e0e",
-      "expectedAddress": "0x000000000000000000000000000000000000f219"
+      "expectedAddress": "0x000000000000000000000000000000000000f225"
     }
   },
-  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
-  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448"
+  "build": {
+    "compiler": "solc-0.8.24",
+    "optimizerRuns": 200,
+    "selectorCount": 76,
+    "eventCount": 39,
+    "errorCount": 70
+  },
+  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
+  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420"
 }

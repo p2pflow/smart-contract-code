@@ -19,6 +19,7 @@ pragma solidity 0.8.24;
 \******************************************************************************/
 
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
+import { InvalidAddress } from "../shared/Errors.sol";
 
 // Custom error emitted when _init delegatecall fails without a revert reason
 error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
@@ -91,6 +92,7 @@ library LibDiamond {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     function setContractOwner(address _newOwner) internal {
+        if (_newOwner == address(0)) revert InvalidAddress();
         DiamondStorage storage ds = diamondStorage();
         address previousOwner = ds.contractOwner;
         ds.contractOwner = _newOwner;

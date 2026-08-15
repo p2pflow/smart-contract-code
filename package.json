@@ -12,7 +12,7 @@
     "test": "hardhat test",
     "verify:toolchain": "node scripts/verify-phase1.js",
     "verify:phase1": "npm run verify:toolchain && npm run compile",
-    "verify": "npm run verify:phase1 && npm run protocol:check",
+    "verify": "npm run verify:phase1 && npm test && npm run protocol:check && npm run preflight:fixture",
     "verify:workspace:phase1": "node scripts/verify-workspace-phase1.js",
     "verify:workspace": "npm run verify:workspace:phase1 && npm run protocol:vendor:check && node scripts/verify-protocol-consumers.mjs && npm run verify:executor:phase3",
     "verify:executor:phase3": "node scripts/verify-executor-phase3.mjs",
@@ -25,14 +25,10 @@
     "protocol:vendor": "node scripts/vendor-protocol.mjs",
     "protocol:vendor:check": "node scripts/vendor-protocol.mjs --check",
     "protocol:check": "npm run protocol:fixture && npm --prefix packages/protocol run check",
-    "stress": "hardhat compile && node scripts/stressTest.js",
-    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
-    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
-    "deploy:base-sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
-    "deploy:mock-usdc:base-sepolia": "hardhat run scripts/deployMockUsdc.js --network baseSepolia",
-    "upgrade:local": "hardhat run scripts/upgrade.js --network localhost",
-    "upgrade:sepolia": "hardhat run scripts/upgrade.js --network sepolia",
-    "upgrade:base-sepolia": "hardhat run scripts/upgrade.js --network baseSepolia",
+    "preflight:fixture": "npm --prefix packages/protocol run build --silent && node scripts/preflight-v2.mjs --check-local-fixture",
+    "preflight:base-sepolia": "npm --prefix packages/protocol run build --silent && node scripts/preflight-v2.mjs",
+    "deploy": "node scripts/deployment-disabled.mjs",
+    "upgrade": "node scripts/deployment-disabled.mjs",
     "node": "hardhat node"
   },
   "devDependencies": {
@@ -40,7 +36,6 @@
     "hardhat": "^2.22.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
-    "dotenv": "^17.4.2"
+    "@openzeppelin/contracts": "^5.0.0"
   }
 }

@@ -6,7 +6,7 @@ pragma solidity 0.8.24;
 contract BadReturnERC20 {
     string  public name     = "BadReturnERC20";
     string  public symbol   = "BAD";
-    uint8   public decimals = 18;
+    uint8   public decimals = 6;
     uint256 public totalSupply;
 
     mapping(address => uint256) public balanceOf;

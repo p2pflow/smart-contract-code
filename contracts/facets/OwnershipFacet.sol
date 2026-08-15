@@ -13,6 +13,9 @@ pragma solidity 0.8.24;
 
 import { LibDiamond } from "../libraries/LibDiamond.sol";
 import { IERC173 } from "../interfaces/IERC173.sol";
+import { InvalidAddress, RoleAccountAlreadyAssigned } from "../shared/Errors.sol";
+import { LibAccess } from "../libraries/LibAccess.sol";
+import { LibAppStorage } from "../libraries/LibAppStorage.sol";
 
 contract OwnershipFacet is IERC173 {
     /// @notice Returns the current diamond owner address
@@ -24,6 +27,10 @@ contract OwnershipFacet is IERC173 {
     /// @dev Only the current owner can call this
     function transferOwnership(address _newOwner) external override {
         LibDiamond.enforceIsContractOwner();
+        if (_newOwner == address(0)) revert InvalidAddress();
+        if (LibAppStorage.isInitialized() && LibAccess.hasAnyRole(_newOwner)) {
+            revert RoleAccountAlreadyAssigned(_newOwner);
+        }
         LibDiamond.setContractOwner(_newOwner);
     }
 }

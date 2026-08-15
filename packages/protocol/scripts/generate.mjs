@@ -29,7 +29,8 @@ const manifestInput = JSON.parse(
 );
 
 const abiSha256 = sha256(diamondAbi);
-const unsignedManifest = { ...manifestInput, abiSha256 };
+const usdcAbiSha256 = sha256(usdcAbi);
+const unsignedManifest = { ...manifestInput, abiSha256, usdcAbiSha256 };
 const manifest = { ...unsignedManifest, manifestSha256: sha256(unsignedManifest) };
 const protocolArtifactDigest = sha256({
   abiSha256,
@@ -40,8 +41,15 @@ const protocolArtifactDigest = sha256({
 const artifact = {
   packageName: packageJson.name,
   packageVersion: packageJson.version,
+  protocolId: manifest.protocolId,
+  protocolVersion: manifest.protocolVersion,
+  layoutVersion: manifest.layoutVersion,
+  storageNamespace: manifest.storageNamespace,
   fixtureKind: manifest.kind,
+  deployed: manifest.deployed,
+  safeForSharedEnvironment: manifest.safeForSharedEnvironment,
   abiSha256,
+  usdcAbiSha256,
   manifestSha256: manifest.manifestSha256,
   protocolArtifactDigest,
 };

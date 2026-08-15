@@ -1,10 +1,17 @@
 {
   "packageName": "@p2pflow/protocol",
-  "packageVersion": "0.1.0-local.2",
+  "packageVersion": "2.0.0-local.1",
+  "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
+  "protocolVersion": 2,
+  "layoutVersion": 2,
+  "storageNamespace": "0x8eda5a1d6c0dccefe0e030b73e1a1aaa2a90d7a9ed72f2505f70c49e1b3fa545",
   "fixtureKind": "local-test-fixture",
-  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
-  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448",
-  "protocolArtifactDigest": "0x1a62c6264e310be3c07cccd1864e3bb3dfaa88ff5c1d007ded03a7a9be026a0d",
-  "packageTarball": "p2pflow-protocol-0.1.0-local.2.tgz",
-  "packageSha256": "6fc3288e1ceff68635a54e3019562c370b03c665605f99933c984664c90e3421"
+  "deployed": false,
+  "safeForSharedEnvironment": false,
+  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
+  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420",
+  "protocolArtifactDigest": "0x6226c5e7edcc58a221493e781bd0780974d517baa23d6328293fe3d635a20d8e",
+  "packageTarball": "p2pflow-protocol-2.0.0-local.1.tgz",
+  "packageSha256": "3516ceee565c3a436e2c2a1dc792c2a875587eec569fccbbe1aaa00c94a4299c"
 }

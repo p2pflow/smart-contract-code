@@ -32,6 +32,7 @@ pragma solidity 0.8.24;
 
 import { LibDiamond } from "./libraries/LibDiamond.sol";
 import { IDiamondCut } from "./interfaces/IDiamondCut.sol";
+import { InvalidAddress, InvalidFacetAddress } from "./shared/Errors.sol";
 
 contract Diamond {
     // ─────────────────────────────────────────────────────────────────────────
@@ -45,7 +46,11 @@ contract Diamond {
     // The diamond starts with only ONE function: diamondCut().
     // All other facets are added via the first diamondCut call after deployment.
     // ─────────────────────────────────────────────────────────────────────────
-    constructor(address _contractOwner, address _diamondCutFacet) payable {
+    constructor(address _contractOwner, address _diamondCutFacet) {
+        if (_contractOwner == address(0)) revert InvalidAddress();
+        if (_diamondCutFacet == address(0) || _diamondCutFacet.code.length == 0) {
+            revert InvalidFacetAddress(_diamondCutFacet);
+        }
         LibDiamond.setContractOwner(_contractOwner);
 
         // Register diamondCut() from DiamondCutFacet as the first (and only) function
@@ -76,7 +81,7 @@ contract Diamond {
     //   - returndatacopy: copies the facet's return data into memory[0]
     //   - return / revert: forwards the result to the caller
     // ─────────────────────────────────────────────────────────────────────────
-    fallback() external payable {
+    fallback() external {
         LibDiamond.DiamondStorage storage ds;
         bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
 
@@ -103,7 +108,4 @@ contract Diamond {
             }
         }
     }
-
-    // Accept plain ETH transfers
-    receive() external payable {}
 }

@@ -1,14 +1,20 @@
 # `@p2pflow/protocol`
 
-This package is the single typed protocol boundary for P2PFlow. Version
-`0.1.0-local.2` deliberately contains a deterministic **local/test fixture**
-generated from the pre-v2 facets. It is not a Base Sepolia deployment record
-and is rejected for shared or production runtime modes.
+`2.0.0-local.1` is the immutable canonical boundary for the privacy-safe v2
+Diamond source. Package version, numeric on-chain protocol version (`2`), and
+storage-layout version (`2`) are independent and validated independently.
 
-Phase 4 will replace the fixture ABI and manifest input with the compiled v2
-facets and a safe deployment pipeline. Until then, consumers may use the
-fixture for builds, unit tests, compatibility checks, prepared-call shapes and
-receipt decoding only.
+The bundled Base Sepolia fixture is deliberately **not deployed**. Its fake
+addresses and zero deployment proof exist only for deterministic local/unit
+tests. The manifest parser and preflight reject it in shared, Base Sepolia, or
+production runtimes. A separately reviewed real deployment manifest must
+replace it before any shared consumer can start.
 
-All amounts and prices are integer E6 `bigint` values. The package never uses
-JavaScript floating-point arithmetic for protocol calculations.
+All USDC amounts, fiat amounts, and prices are integer E6 `bigint` values.
+BUY conversion rounds upward and SELL conversion rounds downward, matching
+the Solidity v2 implementation. Prepared calls validate names, arguments,
+manifest digests, and ABI digests; receipt decoding accepts exactly one
+canonical `OrderCreated` event from a successful manifest-Diamond receipt.
+
+Consumer applications still vendoring `0.1.0-local.2` are intentionally
+incompatible until the Phase 5/6 coordinated revendor and runtime migration.

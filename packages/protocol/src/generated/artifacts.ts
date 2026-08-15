@@ -3,6 +3,253 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AcceptedRecoveryDeadlineElapsed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AssignmentExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "AssignmentNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CandidateAlreadyRejected",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "CandidateNotAcceptable",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CandidateNotAssigned",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "capacityE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "CapacityBelowReserved",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "obligationCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelHasObligations",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChannelNotEligible",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChannelNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CustodyAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DecisionAlreadyUsed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DisputeNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DisputeNotOpen",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "firstIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "duplicateIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "DuplicateCandidate",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "observedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "currentTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "FutureObservation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "received",
+        "type": "uint256"
+      }
+    ],
+    "name": "InboundBalanceMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_initializationContractAddress",
         "type": "address"
@@ -19,6 +266,463 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "available",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientAvailableLiquidity",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "availableE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientFiatCapacity",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientPriceSources",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidCandidate",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidCandidateCount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidChannelStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidConfiguration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDiamondContext",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidEvidence",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMerchantStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidOrderState",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidOrderType",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPricePolicy",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidPriceRound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPriceValues",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidSideMask",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidTerminalStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidToken",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "actual",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidTokenDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LastDefaultAdmin",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "value",
+        "type": "bytes32"
+      }
+    ],
+    "name": "LegacyV1StateDetected",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MerchantAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantHasObligations",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      }
+    ],
+    "name": "MerchantNotOnline",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minimumUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantStakeBelowMinimum",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "MissingRole",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "OrderNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "received",
+        "type": "uint256"
+      }
+    ],
+    "name": "OutboundBalanceMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "PageLimitInvalid",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PlatformIsNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PlatformIsPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "previousPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextPriceE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "PriceDeviationExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProtocolAlreadyInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProtocolNotInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
+      }
+    ],
+    "name": "QuoteExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
+      }
+    ],
+    "name": "QuoteValidityTooLong",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "RoleAccountAlreadyAssigned",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "RoleAccountIsDiamondOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoleAccountsMustBeDistinct",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "token",
         "type": "address"
@@ -28,143 +732,95 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "error"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum MerchantAvailability",
-        "name": "availability",
-        "type": "uint8"
-      }
-    ],
-    "name": "AvailabilityChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelApproved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum ChannelAvailability",
-        "name": "availability",
-        "type": "uint8"
-      }
-    ],
-    "name": "ChannelAvailabilityChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelRejected",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "ChannelTerminated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "dailyUsdc",
+        "name": "selectedPriceE6",
         "type": "uint256"
       },
       {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "monthlyUsdc",
+        "name": "boundPriceE6",
         "type": "uint256"
       }
     ],
-    "name": "DefaultChannelLimitsUpdated",
-    "type": "event"
+    "name": "SlippageBoundExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "StaleAssignmentEpoch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "observedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAgeSeconds",
+        "type": "uint256"
+      }
+    ],
+    "name": "StalePrice",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "actor",
+        "type": "address"
+      }
+    ],
+    "name": "UnauthorizedOrderActor",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "UnauthorizedRoleRenounce",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownRole",
+    "type": "error"
   },
   {
     "anonymous": false,
@@ -225,6 +881,12 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": false,
+        "internalType": "enum OrderStatus",
+        "name": "priorOrderStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "raisedAt",
         "type": "uint256"
@@ -250,8 +912,14 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": false,
-        "internalType": "enum DisputeResult",
-        "name": "result",
+        "internalType": "enum DisputeResolution",
+        "name": "resolution",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum OrderStatus",
+        "name": "finalOrderStatus",
         "type": "uint8"
       },
       {
@@ -268,45 +936,25 @@ export const GENERATED_DIAMOND_ABI = [
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payer",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "markedAt",
         "type": "uint256"
       }
     ],
-    "name": "DisputeWindowUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "EligibleMerchantAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "EligibleMerchantRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "EligibleMerchantsCleared",
+    "name": "FiatPaymentMarked",
     "type": "event"
   },
   {
@@ -315,15 +963,197 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "fromChannelId",
+        "name": "orderId",
         "type": "bytes32"
       },
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "toChannelId",
-        "type": "bytes32"
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
       },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "confirmedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "FiatReceiptConfirmed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reviewedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantApproved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MerchantAvailability",
+        "name": "availability",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantAvailabilityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "requestedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantExitRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalLiquidityUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantLiquidityDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalLiquidityUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantLiquidityWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalStakeUsdc",
+        "type": "uint256"
+      }
+    ],
+    "name": "MerchantStakeDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       {
         "indexed": true,
         "internalType": "address",
@@ -337,46 +1167,7 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "uint256"
       }
     ],
-    "name": "FiatMigrated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantBlacklisted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantDisputeCleared",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "MerchantDisputed",
+    "name": "MerchantStakeWithdrawn",
     "type": "event"
   },
   {
@@ -390,12 +1181,24 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "usdcLiquidity",
-        "type": "uint256"
+        "internalType": "enum MerchantStatus",
+        "name": "previousStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum MerchantStatus",
+        "name": "newStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
       }
     ],
-    "name": "MerchantRegistered",
+    "name": "MerchantStatusUpdated",
     "type": "event"
   },
   {
@@ -404,8 +1207,14 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newMinStakeUsdc",
+        "name": "minMerchantStakeUsdc",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
     "name": "MinMerchantStakeUpdated",
@@ -422,12 +1231,18 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "merchant",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "bytes32",
         "name": "channelId",
         "type": "bytes32"
@@ -436,6 +1251,12 @@ export const GENERATED_DIAMOND_ABI = [
         "indexed": false,
         "internalType": "uint256",
         "name": "acceptedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "recoveryDeadline",
         "type": "uint256"
       }
     ],
@@ -453,18 +1274,30 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "expiredEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nextEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "merchant",
+        "name": "by",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "assignedAt",
+        "name": "expiredAt",
         "type": "uint256"
       }
     ],
-    "name": "OrderAssigned",
+    "name": "OrderAssignmentExpired",
     "type": "event"
   },
   {
@@ -503,24 +1336,30 @@ export const GENERATED_DIAMOND_ABI = [
       },
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rank",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "merchant",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "completedAt",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "disputeExpiresAt",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       }
     ],
-    "name": "OrderCompleted",
+    "name": "OrderCandidateAssigned",
     "type": "event"
   },
   {
@@ -531,6 +1370,123 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rejectedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidateRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "assignmentDeadline",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "candidateCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "assignedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidatesAssigned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "exhaustedEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nextEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "exhaustedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCandidatesExhausted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
       },
       {
         "indexed": true,
@@ -553,13 +1509,68 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fiatAmount",
+        "name": "fiatAmountE6",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "price",
+        "name": "completedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "OrderCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usdcAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatAmountE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "selectedPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadline",
         "type": "uint256"
       },
       {
@@ -596,55 +1607,11 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "paidAt",
+        "name": "expiredAt",
         "type": "uint256"
       }
     ],
-    "name": "OrderPaid",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
-        "type": "uint256"
-      }
-    ],
-    "name": "OrderPricingUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "orderId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "usdcAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "OrderRiskReleased",
+    "name": "OrderExpired",
     "type": "event"
   },
   {
@@ -671,18 +1638,160 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "previousAdmin",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "newAdmin",
+        "name": "merchant",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ChannelAvailability",
+        "name": "availability",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
       }
     ],
-    "name": "PlatformAdminTransferred",
+    "name": "PaymentChannelAvailabilityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "updatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelCapacityUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ChannelStatus",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reviewedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelReviewed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "merchant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "terminatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentChannelTerminated",
     "type": "event"
   },
   {
@@ -715,19 +1824,31 @@ export const GENERATED_DIAMOND_ABI = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceQuorum",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "maxAgeSeconds",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxDeviationBps",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
-    "name": "UnstakeRequested",
+    "name": "PricePolicyUpdated",
     "type": "event"
   },
   {
@@ -735,12 +1856,60 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "buyPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sellPriceE6",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceObservedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "publishedAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "evidenceDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum PublicationKind",
+        "name": "publicationKind",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "wallet",
+        "name": "updater",
         "type": "address"
       }
     ],
-    "name": "UnstakeRequestRejected",
+    "name": "PriceRoundPublished",
     "type": "event"
   },
   {
@@ -748,18 +1917,54 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "protocolId",
+        "type": "bytes32"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "protocolVersion",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "layoutVersion",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "storageNamespace",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "usdcToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "diamondOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "rolesDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "configurationDigest",
+        "type": "bytes32"
       }
     ],
-    "name": "UsdcDeposited",
+    "name": "ProtocolInitialized",
     "type": "event"
   },
   {
@@ -767,18 +1972,86 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "wallet",
+        "name": "account",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "orderLifetimeSeconds",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "assignmentLifetimeSeconds",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "acceptedRecoverySeconds",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxQuoteValiditySeconds",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
       }
     ],
-    "name": "UsdcWithdrawn",
+    "name": "SafetyConfigUpdated",
     "type": "event"
   },
   {
@@ -803,39 +2076,11 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "merchant",
+        "name": "wallet",
         "type": "address"
       }
     ],
-    "name": "addEligibleMerchant",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "bankName",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "accountLast4",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "upiId",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "label",
-        "type": "string"
-      }
-    ],
-    "name": "addPaymentChannel",
+    "name": "approveMerchant",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -844,37 +2089,38 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "channelId",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct Candidate[]",
+        "name": "candidates",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
         "type": "bytes32"
       }
     ],
-    "name": "approveChannel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "approveMerchantUnstake",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "blacklistMerchant",
+    "name": "assignOrderCandidates",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -893,26 +2139,6 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "clearEligibleMerchants",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "wallet",
-        "type": "address"
-      }
-    ],
-    "name": "clearMerchantDispute",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -920,7 +2146,7 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       }
     ],
-    "name": "confirmPayment",
+    "name": "confirmFiatReceived",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -930,6 +2156,21 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "internalType": "uint256",
         "name": "usdcAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedRoundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
         "type": "uint256"
       }
     ],
@@ -939,11 +2180,6 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
-      },
-      {
-        "internalType": "address[]",
-        "name": "assigned",
-        "type": "address[]"
       }
     ],
     "stateMutability": "nonpayable",
@@ -955,6 +2191,21 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "uint256",
         "name": "usdcAmount",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedRoundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quoteValidUntil",
+        "type": "uint256"
       }
     ],
     "name": "createSellOrder",
@@ -963,13 +2214,34 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
-      },
-      {
-        "internalType": "address[]",
-        "name": "assigned",
-        "type": "address[]"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositLiquidity",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1022,6 +2294,32 @@ export const GENERATED_DIAMOND_ABI = [
       }
     ],
     "name": "diamondCut",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DISPUTE_RESOLVER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "expireAssignment",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1103,19 +2401,6 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getAllMerchants",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -1123,12 +2408,49 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       }
     ],
-    "name": "getAssignedMerchants",
+    "name": "getAssignment",
     "outputs": [
       {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
+        "internalType": "uint256",
+        "name": "assignmentEpoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "assignedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "decisionDigest",
+        "type": "bytes32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "merchant",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "channelId",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct Candidate[]",
+        "name": "candidates",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "enum CandidateStatus[]",
+        "name": "statuses",
+        "type": "uint8[]"
       }
     ],
     "stateMutability": "view",
@@ -1157,26 +2479,6 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "address"
           },
           {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
             "internalType": "enum ChannelStatus",
             "name": "status",
             "type": "uint8"
@@ -1187,13 +2489,28 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "uint8"
           },
           {
+            "internalType": "uint8",
+            "name": "sideMask",
+            "type": "uint8"
+          },
+          {
             "internalType": "uint256",
-            "name": "fiatBalance",
+            "name": "fiatCapacityE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "appliedAt",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
             "type": "uint256"
           },
           {
@@ -1203,41 +2520,11 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
+            "name": "updatedAt",
             "type": "uint256"
           }
         ],
-        "internalType": "struct PaymentChannel",
+        "internalType": "struct PaymentChannelV2",
         "name": "",
         "type": "tuple"
       }
@@ -1253,83 +2540,21 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       }
     ],
-    "name": "getChannelFiat",
+    "name": "getChannelCapacity",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "totalFiat",
+        "name": "capacityE6",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "reservedFiat",
+        "name": "reservedE6",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "unreservedFiat",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getChannelLimitDefaults",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "dailyUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyUsdc",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getChannelLimits",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "dailyLimitUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "dailyVolumeUsed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "dailyResetsAt",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyLimitUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyVolumeUsed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "monthlyResetsAt",
+        "name": "availableE6",
         "type": "uint256"
       }
     ],
@@ -1343,9 +2568,19 @@ export const GENERATED_DIAMOND_ABI = [
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "admin",
-            "type": "address"
+            "internalType": "bytes32",
+            "name": "protocolId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protocolVersion",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "layoutVersion",
+            "type": "uint256"
           },
           {
             "internalType": "address",
@@ -1363,12 +2598,34 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "uint256"
           },
           {
-            "internalType": "bool",
-            "name": "initialized",
-            "type": "bool"
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "orderLifetimeSeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "assignmentLifetimeSeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "acceptedRecoverySeconds",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxQuoteValiditySeconds",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct SafetyConfig",
+            "name": "safety",
+            "type": "tuple"
           }
         ],
-        "internalType": "struct PlatformConfig",
+        "internalType": "struct PlatformConfigV2",
         "name": "",
         "type": "tuple"
       }
@@ -1378,12 +2635,138 @@ export const GENERATED_DIAMOND_ABI = [
   },
   {
     "inputs": [],
-    "name": "getEligibleMerchants",
+    "name": "getCustodyTotals",
     "outputs": [
       {
-        "internalType": "address[]",
+        "internalType": "uint256",
+        "name": "totalMerchantStakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalMerchantLiquidityUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalReservedBuyUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalSellEscrowUsdc",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDispute",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "enum DisputeStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum DisputeResolution",
+            "name": "resolution",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum OrderStatus",
+            "name": "priorOrderStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "openedBy",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "resolver",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "openedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "resolvedAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DisputeV2",
         "name": "",
-        "type": "address[]"
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLatestPriceRound",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "roundId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceObservedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "publishedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceDigest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "enum PublicationKind",
+            "name": "publicationKind",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct PriceRound",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1407,8 +2790,8 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "address"
           },
           {
-            "internalType": "enum MerchantAccountStatus",
-            "name": "accountStatus",
+            "internalType": "enum MerchantStatus",
+            "name": "status",
             "type": "uint8"
           },
           {
@@ -1418,33 +2801,13 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "usdcLiquidity",
+            "name": "stakeUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "unstakePending",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "unstakeRequestedAmount",
+            "name": "liquidityUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "telegramUsername",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "registeredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "channelIds",
-            "type": "bytes32[]"
           },
           {
             "internalType": "uint256",
@@ -1453,47 +2816,38 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "riskUsdc",
+            "name": "disputeLockedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "channelNonce",
             "type": "uint256"
           }
         ],
-        "internalType": "struct Merchant",
+        "internalType": "struct MerchantV2",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "getMerchantBalances",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "totalUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reservedUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "riskUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "unreservedUsdc",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1507,7 +2861,66 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "address"
       }
     ],
-    "name": "getMerchantChannels",
+    "name": "getMerchantBalances",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakeUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidityUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "disputeLockedUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "availableUsdc",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reservedFiatE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "obligationCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMerchantChannelPage",
     "outputs": [
       {
         "components": [
@@ -1522,26 +2935,6 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "address"
           },
           {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
             "internalType": "enum ChannelStatus",
             "name": "status",
             "type": "uint8"
@@ -1552,13 +2945,28 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "uint8"
           },
           {
+            "internalType": "uint8",
+            "name": "sideMask",
+            "type": "uint8"
+          },
+          {
             "internalType": "uint256",
-            "name": "fiatBalance",
+            "name": "fiatCapacityE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "appliedAt",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
             "type": "uint256"
           },
           {
@@ -1568,43 +2976,18 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
+            "name": "updatedAt",
             "type": "uint256"
           }
         ],
-        "internalType": "struct PaymentChannel[]",
-        "name": "",
+        "internalType": "struct PaymentChannelV2[]",
+        "name": "items",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1616,127 +2999,48 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "address",
         "name": "merchant",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
       }
     ],
-    "name": "getMerchantOrders",
+    "name": "getMerchantOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getMyChannels",
-    "outputs": [
+      },
       {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "channelId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "merchant",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "bankName",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "accountLast4",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "upiId",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "label",
-            "type": "string"
-          },
-          {
-            "internalType": "enum ChannelStatus",
-            "name": "status",
-            "type": "uint8"
-          },
-          {
-            "internalType": "enum ChannelAvailability",
-            "name": "availability",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fiatBalance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "appliedAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reviewedAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_dailyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "__deprecated_monthlyLimitUsdc",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dailyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyVolumeUsed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "monthlyWindowStart",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reservedFiat",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct PaymentChannel[]",
-        "name": "",
-        "type": "tuple[]"
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getMyProfile",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMerchantPage",
     "outputs": [
       {
         "components": [
@@ -1746,8 +3050,8 @@ export const GENERATED_DIAMOND_ABI = [
             "type": "address"
           },
           {
-            "internalType": "enum MerchantAccountStatus",
-            "name": "accountStatus",
+            "internalType": "enum MerchantStatus",
+            "name": "status",
             "type": "uint8"
           },
           {
@@ -1757,33 +3061,13 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "usdcLiquidity",
+            "name": "stakeUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "unstakePending",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "unstakeRequestedAmount",
+            "name": "liquidityUsdc",
             "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "telegramUsername",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "registeredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "channelIds",
-            "type": "bytes32[]"
           },
           {
             "internalType": "uint256",
@@ -1792,13 +3076,43 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "riskUsdc",
+            "name": "disputeLockedUsdc",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reservedFiatE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "obligationCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reviewedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "channelNonce",
             "type": "uint256"
           }
         ],
-        "internalType": "struct Merchant",
-        "name": "",
-        "type": "tuple"
+        "internalType": "struct MerchantV2[]",
+        "name": "items",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1820,6 +3134,11 @@ export const GENERATED_DIAMOND_ABI = [
             "internalType": "bytes32",
             "name": "orderId",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "orderNumber",
+            "type": "uint256"
           },
           {
             "internalType": "enum OrderType",
@@ -1853,12 +3172,17 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "fiatAmount",
+            "name": "fiatAmountE6",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "price",
+            "name": "selectedPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "roundId",
             "type": "uint256"
           },
           {
@@ -1868,12 +3192,22 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
+            "name": "orderDeadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "acceptedAt",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "paidAt",
+            "name": "acceptedRecoveryDeadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fiatSentAt",
             "type": "uint256"
           },
           {
@@ -1888,41 +3222,21 @@ export const GENERATED_DIAMOND_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "disputeExpiresAt",
+            "name": "expiredAt",
             "type": "uint256"
-          },
-          {
-            "internalType": "enum DisputeStatus",
-            "name": "disputeStatus",
-            "type": "uint8"
-          },
-          {
-            "internalType": "address",
-            "name": "disputeResolver",
-            "type": "address"
-          },
-          {
-            "internalType": "enum DisputeResult",
-            "name": "disputeResult",
-            "type": "uint8"
-          },
-          {
-            "internalType": "address[]",
-            "name": "assignedMerchants",
-            "type": "address[]"
-          },
-          {
-            "internalType": "bool",
-            "name": "riskReleased",
-            "type": "bool"
           },
           {
             "internalType": "uint256",
-            "name": "orderNumber",
+            "name": "assignmentEpoch",
             "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "custodyFinalized",
+            "type": "bool"
           }
         ],
-        "internalType": "struct Order",
+        "internalType": "struct OrderV2",
         "name": "",
         "type": "tuple"
       }
@@ -1931,13 +3245,29 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getOrderIds",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1945,21 +3275,127 @@ export const GENERATED_DIAMOND_ABI = [
   },
   {
     "inputs": [],
-    "name": "getOrderPricing",
+    "name": "getPricePolicy",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "sourceQuorum",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAgeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxDeviationBps",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PricePolicy",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPriceRound",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "roundId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellPriceE6",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceObservedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "publishedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sourceCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceDigest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "enum PublicationKind",
+            "name": "publicationKind",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct PriceRound",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleMemberCount",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1968,12 +3404,34 @@ export const GENERATED_DIAMOND_ABI = [
   },
   {
     "inputs": [],
-    "name": "getPendingChannels",
+    "name": "getSafetyConfig",
     "outputs": [
       {
-        "internalType": "bytes32[]",
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "orderLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assignmentLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "acceptedRecoverySeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxQuoteValiditySeconds",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SafetyConfig",
         "name": "",
-        "type": "bytes32[]"
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1985,29 +3443,48 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "address",
         "name": "user",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
       }
     ],
-    "name": "getUserOrders",
+    "name": "getUserOrderIdPage",
     "outputs": [
       {
         "internalType": "bytes32[]",
-        "name": "",
+        "name": "items",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextCursor",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "goOffline",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "goOnline",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2015,12 +3492,30 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
-        "name": "merchant",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "isEligibleMerchant",
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isProtocolInitialized",
     "outputs": [
       {
         "internalType": "bool",
@@ -2039,7 +3534,7 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       }
     ],
-    "name": "markPaymentSent",
+    "name": "markFiatSent",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2048,18 +3543,39 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "fromChannelId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "toChannelId",
+        "name": "orderId",
         "type": "bytes32"
       }
     ],
-    "name": "migrateAndTerminate",
+    "name": "openDispute",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "OPERATOR_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ORDER_ASSIGNER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -2083,6 +3599,101 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "PAUSER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PRICE_UPDATER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolVersion",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "buyPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sellPriceE6",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sourceObservedAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sourceCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "evidenceDigest",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum PublicationKind",
+        "name": "publicationKind",
+        "type": "uint8"
+      }
+    ],
+    "name": "publishPriceRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -2090,7 +3701,7 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       }
     ],
-    "name": "raiseDispute",
+    "name": "recoverExpiredOrder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2101,11 +3712,6 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "uint256",
         "name": "stakeAmount",
         "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "telegramUsername",
-        "type": "string"
       }
     ],
     "name": "registerMerchant",
@@ -2116,12 +3722,41 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint8",
+        "name": "sideMask",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fiatCapacityE6",
+        "type": "uint256"
+      }
+    ],
+    "name": "registerPaymentChannel",
+    "outputs": [
+      {
         "internalType": "bytes32",
         "name": "channelId",
         "type": "bytes32"
       }
     ],
-    "name": "rejectChannel",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "orderId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "rejectAssignment",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2129,25 +3764,24 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
-        "name": "wallet",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "rejectMerchantUnstake",
+    "name": "renounceRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "merchant",
-        "type": "address"
-      }
-    ],
-    "name": "removeEligibleMerchant",
+    "inputs": [],
+    "name": "requestMerchantExit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2160,8 +3794,8 @@ export const GENERATED_DIAMOND_ABI = [
         "type": "bytes32"
       },
       {
-        "internalType": "enum DisputeResult",
-        "name": "result",
+        "internalType": "enum DisputeResolution",
+        "name": "resolution",
         "type": "uint8"
       }
     ],
@@ -2173,17 +3807,17 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "dailyUsdc",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
       },
       {
-        "internalType": "uint256",
-        "name": "monthlyUsdc",
-        "type": "uint256"
+        "internalType": "enum ChannelStatus",
+        "name": "status",
+        "type": "uint8"
       }
     ],
-    "name": "setDefaultChannelLimits",
+    "name": "reviewPaymentChannel",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2191,12 +3825,66 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum MerchantAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "setAvailability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum ChannelAvailability",
+        "name": "availability",
+        "type": "uint8"
+      }
+    ],
+    "name": "setChannelAvailability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      },
+      {
         "internalType": "uint256",
-        "name": "disputeWindowSeconds",
+        "name": "fiatCapacityE6",
         "type": "uint256"
       }
     ],
-    "name": "setDisputeWindow",
+    "name": "setChannelFiatCapacity",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2207,9 +3895,14 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "address",
         "name": "wallet",
         "type": "address"
+      },
+      {
+        "internalType": "enum MerchantStatus",
+        "name": "newStatus",
+        "type": "uint8"
       }
     ],
-    "name": "setMerchantDisputed",
+    "name": "setMerchantStatus",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2218,7 +3911,7 @@ export const GENERATED_DIAMOND_ABI = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "minStakeUsdc",
+        "name": "minMerchantStakeUsdc",
         "type": "uint256"
       }
     ],
@@ -2230,58 +3923,92 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "sourceQuorum",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAgeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxDeviationBps",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PricePolicy",
+        "name": "policy",
+        "type": "tuple"
+      }
+    ],
+    "name": "setPricePolicy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "orderLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assignmentLifetimeSeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "acceptedRecoverySeconds",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxQuoteValiditySeconds",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SafetyConfig",
+        "name": "safety",
+        "type": "tuple"
+      }
+    ],
+    "name": "setSafetyConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "storageLayoutVersion",
+    "outputs": [
+      {
         "internalType": "uint256",
-        "name": "buyPriceInrPerUsdc",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "sellPriceInrPerUsdc",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "setOrderPricing",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "storageNamespace",
+    "outputs": [
       {
         "internalType": "bytes32",
-        "name": "channelId",
+        "name": "",
         "type": "bytes32"
       }
     ],
-    "name": "setPaymentChannelActive",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "channelId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "setPaymentChannelInactive",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "orderId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "settleOrder",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -2306,6 +4033,19 @@ export const GENERATED_DIAMOND_ABI = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "channelId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "terminatePaymentChannel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_newOwner",
         "type": "address"
@@ -2317,21 +4057,34 @@ export const GENERATED_DIAMOND_ABI = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newAdmin",
-        "type": "address"
-      }
-    ],
-    "name": "transferPlatformAdmin",
+    "inputs": [],
+    "name": "unpausePlatform",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "unpausePlatform",
+    "name": "UPGRADER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawLiquidity",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2418,58 +4171,103 @@ export const GENERATED_USDC_ABI = [
   }
 ] as const;
 export const GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE = {
-  "schemaVersion": "1.0.0",
-  "protocolVersion": "0.1.0-local.2",
+  "schemaVersion": "2.0.0",
+  "packageVersion": "2.0.0-local.1",
+  "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
+  "protocolVersion": 2,
+  "layoutVersion": 2,
+  "storageNamespace": "0x8eda5a1d6c0dccefe0e030b73e1a1aaa2a90d7a9ed72f2505f70c49e1b3fa545",
   "kind": "local-test-fixture",
+  "deployed": false,
   "safeForSharedEnvironment": false,
   "chainId": 84532,
-  "network": "base-sepolia-local-test-fixture",
+  "network": "base-sepolia-local-v2-non-deployed",
   "createdAt": "1970-01-01T00:00:00.000Z",
   "diamond": {
     "address": "0x000000000000000000000000000000000000f201",
+    "owner": "0x000000000000000000000000000000000000f21e",
+    "codeHash": "0xbbd88e27e3dc818da8b39c862c218086fbbb327da98d1c2767cecab7ec0b5b2b",
     "deploymentTransactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "deploymentBlock": 0,
     "startBlock": 0
   },
+  "initialization": {
+    "initialized": false,
+    "initialPaused": true,
+    "initializerAddress": "0x000000000000000000000000000000000000f20c",
+    "initializerCodeHash": "0xbc7f27be3bc1097e78c4b7c95045b57a96c1e5048a0f82a961ace8d330528486",
+    "calldataHash": "0x3b4ad55673987534c35b5c769dddadfc2149e77583d1535457532037d4a16658",
+    "transactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "block": 0,
+    "protocolInitializedTopic0": "0x58a29b221a26c7039991cd95315d13e6ce2bfb596c36889f58e94c2c5455fac3"
+  },
   "usdc": {
     "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    "decimals": 6
+    "decimals": 6,
+    "codeHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },
   "facets": [
     {
-      "name": "ConfigFacet",
+      "name": "AccessControlFacet",
       "address": "0x000000000000000000000000000000000000f202",
-      "codeHash": "0x39b2016d474d2eb9a907ac8267799b611fb560ac68ffe6387d80c2a141456f7a",
+      "codeHash": "0x04760b9159dc11d46e258e5eef8d684a7b25fe9961206608b07a1e0d1f9f02cb",
       "functionSelectors": [
-        "0x09ec0f24",
+        "0x248a9ca3",
+        "0x2f2ff15d",
+        "0x36568abe",
+        "0x91d14854",
+        "0xa217fddf",
+        "0xbfe42a37",
+        "0xca15c873",
+        "0xcbff5d53",
+        "0xd547741f",
+        "0xe63ab1e9",
+        "0xf5b541a6",
+        "0xf72c0d8b",
+        "0xfb8d8101"
+      ]
+    },
+    {
+      "name": "AssignmentFacet",
+      "address": "0x000000000000000000000000000000000000f203",
+      "codeHash": "0xea6cb5557ba177fa818ca8736ad46574ca5216ca541ea70094468d55d3ee5a65",
+      "functionSelectors": [
+        "0x69fa9c12",
+        "0x8f03f7b7",
+        "0xfbe5b267"
+      ]
+    },
+    {
+      "name": "ConfigFacet",
+      "address": "0x000000000000000000000000000000000000f204",
+      "codeHash": "0x8ea90d6e417e980f70549388260937c7214d5f99d51bed7bc58428d935e8ab50",
+      "functionSelectors": [
         "0x1a9ba7eb",
-        "0x2f583d4b",
-        "0x332226d0",
-        "0x3397d9a2",
-        "0x3551ac6c",
+        "0x28c82b02",
+        "0x2ae9c600",
+        "0x3e4fb419",
         "0x64ec2ceb",
-        "0x6a96f84d",
         "0x6b78c29b",
-        "0x892b8a9c",
-        "0x903eadc0",
-        "0xab211bd9",
-        "0xbf284d84",
+        "0x9fd25012",
         "0xc3f909d4",
-        "0xf7260e6e"
+        "0xc72605f3",
+        "0xd6a1fe3b",
+        "0xda1f12ab",
+        "0xe4654b38"
       ]
     },
     {
       "name": "DiamondCutFacet",
-      "address": "0x000000000000000000000000000000000000f203",
-      "codeHash": "0x8f3d1f8f969498f8db867de7069f2c6e071c1697aaa5d2045fcc2a71078662b2",
+      "address": "0x000000000000000000000000000000000000f205",
+      "codeHash": "0x274049385b28a5355f18dd2bb5870e899d9263d9fc3da03cc9b8fd2da43232b7",
       "functionSelectors": [
         "0x1f931c1c"
       ]
     },
     {
       "name": "DiamondLoupeFacet",
-      "address": "0x000000000000000000000000000000000000f204",
-      "codeHash": "0x7fbe2d6918d93cd98f8797ae2f8199dded475a6605220f1dbb4a5efddc37b9b9",
+      "address": "0x000000000000000000000000000000000000f206",
+      "codeHash": "0x84eedb9f8cf4f5ba50b3d52ada9c9f2b3063f66f2a2994967ca53a01b9e51e2f",
       "functionSelectors": [
         "0x01ffc9a7",
         "0x52ef6b2c",
@@ -2479,103 +4277,136 @@ export const GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE = {
       ]
     },
     {
-      "name": "MerchantFacet",
-      "address": "0x000000000000000000000000000000000000f205",
-      "codeHash": "0x63be5a347276e61020373d31a0d90cef7c220c7f4ed7d93304f44a62b1c7dcd4",
+      "name": "DisputeFacet",
+      "address": "0x000000000000000000000000000000000000f207",
+      "codeHash": "0x4443f85823225053d1accb57595dd0ccde90e6743ed06fc53b2fdabff5b63552",
       "functionSelectors": [
-        "0x0586296c",
-        "0x1dcad144",
-        "0x1fee2a96",
-        "0x21527e50",
-        "0x30321dcc",
-        "0x38a9f5df",
-        "0x3d58ff4a",
-        "0x5b020623",
-        "0x66d3b61c",
-        "0x6e5b676b",
-        "0x8307d08b",
+        "0x136ba6aa",
+        "0xb641237c",
+        "0xf08ef6cb"
+      ]
+    },
+    {
+      "name": "MerchantFacet",
+      "address": "0x000000000000000000000000000000000000f208",
+      "codeHash": "0x3ab14944cb9048b3c4505fc5f28b019827c1ee62f1878e424ccb51b5c74ff454",
+      "functionSelectors": [
+        "0x0157ff42",
+        "0x0a861f2a",
+        "0x1acc3a92",
+        "0x27a8e6c4",
+        "0x285c62d1",
+        "0x4533d16e",
+        "0x62462d24",
+        "0x71409564",
+        "0x753f62f9",
+        "0x76d58e1a",
         "0x831c2b82",
-        "0x8ce2df51",
-        "0x8e0540de",
-        "0xa6485ccd",
-        "0xae180328",
-        "0xb00c52b0",
         "0xb2734eaf",
-        "0xb4de411c",
-        "0xb7889c93",
-        "0xbb634d55",
+        "0xb3199ac2",
         "0xbed9d861",
+        "0xc132d8cb",
         "0xcb82cc8f",
-        "0xd91b0a8d"
+        "0xdbac01ae",
+        "0xea07dc10",
+        "0xeb0817c5",
+        "0xfa298d79"
       ]
     },
     {
       "name": "OrderFacet",
-      "address": "0x000000000000000000000000000000000000f206",
-      "codeHash": "0x759486cbd66a78d02fdeda993e6e29cbc7e9954488a474247a6d8248cb41f90d",
+      "address": "0x000000000000000000000000000000000000f209",
+      "codeHash": "0xbab7bf030f5519df9f8ef5d863dde29ba69f3cc48ff122382037052d34191c70",
       "functionSelectors": [
-        "0x1e3e148d",
-        "0x3611d088",
-        "0x3af1b286",
-        "0x3c81c4b8",
-        "0x49085d8c",
-        "0x4ebac543",
+        "0x2fe44ea8",
+        "0x37609bb2",
         "0x5778472a",
-        "0x63c69f08",
-        "0x7372f2f1",
+        "0x5c26891d",
+        "0x6d9bd051",
         "0x7489ec23",
-        "0x84ce1bfc",
-        "0x9e0acf8f",
-        "0xb641237c",
+        "0x84dc1177",
+        "0x9d0b7c7c",
+        "0xa7508190",
+        "0xaac3a69a",
         "0xd6039a61",
-        "0xe14f5b7d",
-        "0xeb0817c5"
+        "0xf199aeb0"
       ]
     },
     {
       "name": "OwnershipFacet",
-      "address": "0x000000000000000000000000000000000000f207",
-      "codeHash": "0x582bf706bbd8b58d1c373226f4ca960d2f7a763498113074508efc17c1d8ee55",
+      "address": "0x000000000000000000000000000000000000f20a",
+      "codeHash": "0xbbd3b4d6229fe3ee0dd61a058ff6b23e6c0f8f9b8d3a70395897b54905c56b9b",
       "functionSelectors": [
         "0x8da5cb5b",
         "0xf2fde38b"
+      ]
+    },
+    {
+      "name": "PricingFacet",
+      "address": "0x000000000000000000000000000000000000f20b",
+      "codeHash": "0x4ea3068525beb4e3c9cf17c1f7663b88d68e566ff59fc8a5e1117cc5ae8497ab",
+      "functionSelectors": [
+        "0x1d18b6cd",
+        "0x2fb0c7bd",
+        "0x46b8a5fb",
+        "0x47c3df86",
+        "0xc2507b43"
       ]
     }
   ],
   "roles": {
     "DEFAULT_ADMIN_ROLE": {
       "id": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "expectedAddress": "0x000000000000000000000000000000000000f214"
+      "expectedAddress": "0x000000000000000000000000000000000000f21f"
     },
     "OPERATOR_ROLE": {
       "id": "0x97667070c54ef182b0f5858b034beac1b6f3089aa2d3188bb1e8929f4fa9b929",
-      "expectedAddress": "0x000000000000000000000000000000000000f215"
+      "expectedAddress": "0x000000000000000000000000000000000000f220"
     },
-    "PRICE_PUBLISHER_ROLE": {
-      "id": "0x88d6d29e9d99b137797dca7ee33f866235537af9474d4549502f1b28e8d51373",
-      "expectedAddress": "0x000000000000000000000000000000000000f216"
-    },
-    "ASSIGNER_ROLE": {
-      "id": "0x1ca4917a93bbf937a078cf9cc2b3d0c4aaac3367aae1018d3d982bb6e49887f1",
-      "expectedAddress": "0x000000000000000000000000000000000000f217"
+    "UPGRADER_ROLE": {
+      "id": "0x189ab7a9244df0848122154315af71fe140f3db0fe014031783b0946b8c9d2e3",
+      "expectedAddress": "0x000000000000000000000000000000000000f221"
     },
     "PAUSER_ROLE": {
       "id": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
-      "expectedAddress": "0x000000000000000000000000000000000000f218"
+      "expectedAddress": "0x000000000000000000000000000000000000f222"
+    },
+    "PRICE_UPDATER_ROLE": {
+      "id": "0xd96ba01d6560c2ab35f2940dd8d70c5f5fe06236c72674237120515918198fb0",
+      "expectedAddress": "0x000000000000000000000000000000000000f223"
+    },
+    "ORDER_ASSIGNER_ROLE": {
+      "id": "0xd34c391209bffb90d6e1f7450c0c7704bc00112b5b1957c5842a2c1a76b6ccc9",
+      "expectedAddress": "0x000000000000000000000000000000000000f224"
     },
     "DISPUTE_RESOLVER_ROLE": {
       "id": "0x7b8bb8356a3f32f5c111ff23f050d97f08988e0883529ea7bff3b918887a6e0e",
-      "expectedAddress": "0x000000000000000000000000000000000000f219"
+      "expectedAddress": "0x000000000000000000000000000000000000f225"
     }
   },
-  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
-  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448"
+  "build": {
+    "compiler": "solc-0.8.24",
+    "optimizerRuns": 200,
+    "selectorCount": 76,
+    "eventCount": 39,
+    "errorCount": 70
+  },
+  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
+  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420"
 } as const;
 export const GENERATED_PROTOCOL_ARTIFACT = {
   "packageName": "@p2pflow/protocol",
-  "packageVersion": "0.1.0-local.2",
+  "packageVersion": "2.0.0-local.1",
+  "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
+  "protocolVersion": 2,
+  "layoutVersion": 2,
+  "storageNamespace": "0x8eda5a1d6c0dccefe0e030b73e1a1aaa2a90d7a9ed72f2505f70c49e1b3fa545",
   "fixtureKind": "local-test-fixture",
-  "abiSha256": "0xa52cf6de9c37df2ccf4913ca36b49d8383e4cf35fa08b8cc0fb4c3a26731c27d",
-  "manifestSha256": "0x1af9f861e0f74f6f54c07e1a97c0160da0c5194b9918ccfa4b7563bbaa45b448",
-  "protocolArtifactDigest": "0x1a62c6264e310be3c07cccd1864e3bb3dfaa88ff5c1d007ded03a7a9be026a0d"
+  "deployed": false,
+  "safeForSharedEnvironment": false,
+  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
+  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420",
+  "protocolArtifactDigest": "0x6226c5e7edcc58a221493e781bd0780974d517baa23d6328293fe3d635a20d8e"
 } as const;

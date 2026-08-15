@@ -5,32 +5,58 @@ import {
   createProtocolCallFactory,
   DIAMOND_ABI,
   LOCAL_BASE_SEPOLIA_FIXTURE,
-  PROTOCOL_VERSION,
+  ONCHAIN_PROTOCOL_VERSION,
+  PACKAGE_VERSION,
+  ProtocolErrorCode,
   USDC_ABI,
 } from "../src/index.js";
 
-describe("prepared protocol calls", () => {
-  it("prepares immutable Diamond and official-USDC call contracts", () => {
-    const calls = createProtocolCallFactory({
-      manifest: LOCAL_BASE_SEPOLIA_FIXTURE,
-      diamondAbi: DIAMOND_ABI,
-      usdcAbi: USDC_ABI,
-      runtime: "test",
-    });
+const input = {
+  manifest: LOCAL_BASE_SEPOLIA_FIXTURE,
+  diamondAbi: DIAMOND_ABI,
+  usdcAbi: USDC_ABI,
+  runtime: "test" as const,
+};
+
+describe("ABI-bound prepared protocol calls", () => {
+  it("prepares immutable canonical v2 Diamond and official-USDC calls", () => {
+    const calls = createProtocolCallFactory(input);
     const orderId = `0x${"11".repeat(32)}` as const;
-    const markSent = calls.diamond("markPaymentSent", [orderId] as const);
+    const markSent = calls.diamond("markFiatSent", [orderId] as const);
     expect(markSent).toMatchObject({
       chainId: BASE_SEPOLIA_CHAIN_ID,
       contract: "diamond",
       address: LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address,
-      functionName: "markPaymentSent",
+      functionName: "markFiatSent",
       args: [orderId],
       value: 0n,
-      protocolVersion: PROTOCOL_VERSION,
+      packageVersion: PACKAGE_VERSION,
+      protocolVersion: ONCHAIN_PROTOCOL_VERSION,
     });
+    const create = calls.diamond("createBuyOrder", [1_000_000n, 7n, 95_000_000n, 1_700_000_000n] as const);
+    expect(create.functionName).toBe("createBuyOrder");
     const approve = calls.usdc("approve", [LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address, 1_000_000n] as const);
     expect(approve.address).toBe(LOCAL_BASE_SEPOLIA_FIXTURE.usdc.address);
     expect(Object.isFrozen(approve)).toBe(true);
     expect(Object.isFrozen(approve.args)).toBe(true);
+  });
+
+  it("rejects legacy/unknown names, wrong argument shapes and both ABI digest drifts", () => {
+    const calls = createProtocolCallFactory(input);
+    expect(() => calls.diamond("markPaymentSent" as never, [] as never)).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.VALIDATION_FAILED }),
+    );
+    expect(() => calls.diamond("markFiatSent", [] as never)).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.VALIDATION_FAILED }),
+    );
+    expect(() => calls.diamond("markFiatSent", ["not-bytes32"] as never)).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.VALIDATION_FAILED }),
+    );
+    expect(() => createProtocolCallFactory({ ...input, diamondAbi: DIAMOND_ABI.slice(1) })).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.ABI_DIGEST_MISMATCH }),
+    );
+    expect(() => createProtocolCallFactory({ ...input, usdcAbi: USDC_ABI.slice(1) })).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.ABI_DIGEST_MISMATCH }),
+    );
   });
 });

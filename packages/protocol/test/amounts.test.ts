@@ -9,6 +9,7 @@ import {
   mulDivFloor,
   parseE6,
   roundRationalToE6,
+  MAX_UINT256,
 } from "../src/index.js";
 
 describe("exact E6 arithmetic", () => {
@@ -39,5 +40,11 @@ describe("exact E6 arithmetic", () => {
     expect(() => applyBuySpreadE6(83_000_001n, -1n)).toThrow(/between 0 and 10000/u);
     expect(() => applySellSpreadE6(83_000_001n, 10_001n)).toThrow(/between 0 and 10000/u);
     expect(() => roundRationalToE6(1n, 3n, "nearest" as never)).toThrow(/floor or ceil/u);
+  });
+
+  it("matches uint256 bounds and rejects an overflowing Solidity result", () => {
+    expect(mulDivFloor(MAX_UINT256, 1n, 1n)).toBe(MAX_UINT256);
+    expect(() => mulDivCeil(MAX_UINT256, 2n, 1n)).toThrow(/uint256/u);
+    expect(() => formatE6(MAX_UINT256 + 1n)).toThrow(/uint256/u);
   });
 });

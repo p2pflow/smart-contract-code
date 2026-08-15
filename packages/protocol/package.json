@@ -1,9 +1,9 @@
 {
   "name": "@p2pflow/protocol",
-  "version": "0.1.0-local.2",
-  "description": "Canonical typed P2PFlow protocol boundary (local fixture until v2 deployment)",
+  "version": "2.0.0-local.1",
+  "description": "Canonical privacy-safe P2PFlow v2 protocol boundary (non-deployed local artifact)",
   "license": "UNLICENSED",
-  "private": false,
+  "private": true,
   "type": "module",
   "packageManager": "npm@11.16.0",
   "engines": {
