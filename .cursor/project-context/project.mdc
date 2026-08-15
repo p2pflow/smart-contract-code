@@ -1,0 +1,142 @@
+---
+description: Cross-repository P2PFlow MVP identity, technology, verification, and constraints.
+globs:
+alwaysApply: false
+---
+
+# project.mdc
+
+```yaml
+project:
+  name: p2pflow-base-sepolia-mvp
+  displayName: P2PFlow Base Sepolia MVP
+  type: microservice
+
+repositories:
+  primary: p2pflow/p2pflow-smart-contract
+  modifiable:
+    - p2pflow/p2pflow-smart-contract
+    - p2pflow/p2pflow-subgraph
+    - p2pflow/p2pflow-user-ui
+    - p2pflow/p2pflow-merchant-ui
+    - p2pflow/p2pflow-admin-ui
+    - local/p2pflow-executor
+  readOnly:
+    - p2pdotme/user-app-client
+    - p2pdotme/p2pdotme-sdk
+    - p2pdotme/executor
+    - p2pdotme/subgraph
+  involved:
+    - p2pflow/p2pflow-smart-contract
+    - p2pflow/p2pflow-subgraph
+    - p2pflow/p2pflow-user-ui
+    - p2pflow/p2pflow-merchant-ui
+    - p2pflow/p2pflow-admin-ui
+    - local/p2pflow-executor
+  localWorkspace: true
+
+technology:
+  languages:
+    - Solidity
+    - JavaScript
+    - JSX
+    - TypeScript
+    - AssemblyScript
+    - GraphQL
+  languageVersions:
+    Solidity: 0.8.24
+    Node.js: 24.x LTS target
+    ECMAScript: ES2022
+  frameworks:
+    - Hardhat 2
+    - OpenZeppelin Contracts 5
+    - EIP-2535 Diamond
+    - React 18/19
+    - Vite 5
+    - Thirdweb v5
+    - TanStack Query 5
+    - The Graph / Goldsky
+    - planned Fastify modular executor
+  buildTool: npm with Hardhat, Vite, and Graph CLI
+  testCommands:
+    fullSuite: npm test
+    singleClass: npx hardhat test test/orders.test.js
+  packageRoots:
+    - contracts
+    - scripts
+    - test
+    - ../p2pflow-subgraph/src
+    - ../p2pflow-user-ui/src
+    - ../p2pflow-merchant-ui/src
+    - ../p2pflow-admin-ui/src
+    - ../p2pflow-executor/src
+  routeConfigPatterns:
+    - ../p2pflow-user-ui/src/App.jsx
+    - ../p2pflow-merchant-ui/src/App.jsx
+    - ../p2pflow-admin-ui/src/App.jsx
+    - ../p2pflow-executor/src/http/**/*.ts
+
+bugbot:
+  enabled: false
+  repoUrl: https://github.com/p2pflow/p2pflow-smart-contract
+  triggerOnDraftPr: false
+  triggerComment: /bugbot
+  botLogins: []
+  setupDoc: .cursor/docs/bugbot-setup.md
+
+jira:
+  enabled: false
+  baseUrl: TBD
+  projectKey: TBD
+  projectStyle: team-managed
+  issueTypes:
+    epic: Epic
+    story: Story
+    task: Task
+    subtask: Sub-task
+
+branching:
+  defaultBranch: dev
+  workingBranch: codex-2
+  mergeStrategy: merge
+  commitConvention: conventional
+
+dependencies:
+  internal:
+    - shared generated Diamond ABI and deployment manifest
+    - executor HTTP/session API
+    - Goldsky subgraph read model
+  external:
+    - Base Sepolia chain 84532
+    - Circle Base Sepolia USDC
+    - Alchemy RPC
+    - Thirdweb wallet SDK
+    - Goldsky hosted subgraph
+    - PostgreSQL
+    - multiple price data providers
+
+agentVerification:
+  runLocally: true
+  ciCommands:
+    compile: npm run compile
+    unitTests: npm test
+    contractSecurity: npm test
+    subgraph: npm run codegen && npm run build
+    ui: npm run lint && npm run build
+    executor: npm run lint && npm run typecheck && npm test && npm run build
+  skipLocal: []
+  deferTo:
+    - coordinated GitHub pull-request checks when repository remotes are available
+    - pre-PR dependency reconciliation and minimum compilation
+
+constraints:
+  - Base Sepolia only for this phase; never deploy or configure mainnet
+  - Use codex-2 from latest origin/dev in all existing P2PFlow repositories, overriding generic branch naming
+  - Build one deployable modular executor; do not create separate pricing, matching, auth, or scanner microservices
+  - Do not commit secrets, tokens, private keys, or .env files
+  - Never use the exposed workspace deployer key for signing or deployment
+  - Keep all VITE variables public-only; Thirdweb secret and Goldsky token are server-only
+  - Do not modify p2pme reference repositories
+  - Do not edit .cursor kit files outside .cursor/project-context; workflow state/reports are local and gitignored
+  - Contract custody and eligibility checks remain authoritative; subgraph data is never a security authority
+```

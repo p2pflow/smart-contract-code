@@ -1,0 +1,56 @@
+---
+description: P2PFlow local and Base Sepolia build, deployment, rollback, CI, and observability context.
+globs:
+alwaysApply: false
+---
+
+# deployment.mdc
+
+```yaml
+deployment:
+  cloudProvider: TBD
+
+  environments:
+    - name: local
+      purpose: deterministic contract, executor, subgraph mapping, and UI development
+      runCommand: npm test in contracts; Docker Compose for PostgreSQL/executor; npm run dev in each UI
+    - name: base-sepolia
+      purpose: sole shared integration and capped MVP test environment for this phase
+      deployMechanism: Hardhat Diamond deployment, Goldsky subgraph deployment, one executor container, and static Vite clients
+
+  strategy:
+    type: staged Base Sepolia rollout with feature flags default-off for risky automation
+    featureFlags: executor pricing and matching writes support dry-run/shadow mode before enablement
+
+  rollback:
+    code: revert the coordinated PRs and redeploy previous UI/executor artifacts; use an additive Diamond cut to restore prior facet selectors
+    database: apply only reversible migrations and run documented down migrations after disabling executor writes
+    config: restore the prior versioned deployment manifest and keep the platform paused until ABI, subgraph, and clients agree
+
+  ci:
+    provider: Jenkins for current UIs; GitHub checks and executor pipeline to be added
+    prChecks: required-before-merge across every coordinated repository
+    watchCommand: gh pr checks {number}
+
+  observability:
+    apm: TBD
+    logs: structured redacted executor logs with request, job, order, price-round, decision, and transaction correlation IDs
+    metrics:
+      - chain head and finalized cursor lag
+      - subgraph indexing lag and errors
+      - price age, source count, and deviation
+      - match latency, candidate count, and rejection reason
+      - queue depth, retry count, uncertain transactions, and nonce state
+      - session failures and privileged API denials
+
+  secrets:
+    injection: server-only environment or managed secret store; never Docker build args or VITE variables
+    signing: replaced testnet deployer required before transactions; production-style updater and assigner use separate managed identities
+
+  baseSepolia:
+    chainId: 84532
+    usdc: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+    rpc: server-side Alchemy endpoint from injected environment
+    subgraph: Goldsky endpoint generated after final Diamond deployment
+    deploymentManifest: one generated versioned JSON artifact consumed by contracts, executor, subgraph, and all UIs
+```

@@ -1,0 +1,101 @@
+---
+description: P2PFlow MVP business journeys used for implementation and regression validation.
+globs:
+alwaysApply: false
+---
+
+# business-flows.mdc
+
+```yaml
+businessFlows:
+  - id: user-wallet-session
+    name: User establishes a wallet-backed session
+    description: A wallet reconnects once, signs a nonce for privileged backend functions, and receives a short-lived Secure HttpOnly session without storing authoritative login state in localStorage.
+    entryPoints:
+      - ../p2pflow-user-ui/src/pages/Auth/Login.jsx
+      - ../p2pflow-user-ui/src/components/Auth/RequireAuth.jsx
+      - ../p2pflow-executor/src/modules/sessions
+    criticality: high
+
+  - id: dynamic-price-publication
+    name: Executor publishes a validated market price round
+    description: The pricing module gathers independent market and FX observations, rejects stale/deviant inputs, persists the evidence, and submits a monotonic price round that the Diamond validates for role and freshness.
+    entryPoints:
+      - contracts/facets/ConfigFacet.sol
+      - ../p2pflow-executor/src/modules/pricing
+      - ../p2pflow-admin-ui/src/pages/BuyAndSell/BuyAndSellIndex.jsx
+    criticality: high
+
+  - id: user-buy-usdc
+    name: User buys USDC with INR through an assigned merchant
+    description: The user receives a bounded quote, creates a BUY order, the executor assigns eligible merchant candidates, a merchant accepts, the fiat payer marks payment sent, the receiver confirms, and USDC settles according to contract custody rules.
+    entryPoints:
+      - ../p2pflow-user-ui/src/pages/Buy/BuyIndex.jsx
+      - contracts/facets/OrderFacet.sol
+      - ../p2pflow-merchant-ui/src/pages/Orders
+    criticality: high
+
+  - id: user-sell-usdc
+    name: User sells escrowed USDC for INR through an assigned merchant
+    description: The user approves a bounded USDC amount, creates a SELL order, the executor assigns candidates, a merchant accepts and sends fiat, the receiver confirms, and escrow settles without relying on fake UI state.
+    entryPoints:
+      - ../p2pflow-user-ui/src/pages/Sell/SellOrderPreview.jsx
+      - contracts/facets/OrderFacet.sol
+      - ../p2pflow-merchant-ui/src/pages/Orders
+    criticality: high
+
+  - id: merchant-onboarding-liquidity
+    name: Merchant registers, stakes, and activates an approved UPI channel
+    description: A merchant connects a wallet, registers and escrows stake, submits a payment-channel reference, receives operator approval, activates the channel, and goes online before matching eligibility.
+    entryPoints:
+      - ../p2pflow-merchant-ui/src/pages/Register
+      - ../p2pflow-merchant-ui/src/pages/Account
+      - contracts/facets/MerchantFacet.sol
+    criticality: high
+
+  - id: merchant-assignment
+    name: Executor selects and assigns eligible merchants
+    description: A confirmed OrderCreated event becomes one idempotent job; the executor queries indexed snapshots, combines in-flight reservations, ranks a bounded candidate set, records its decision, and submits exact candidates for on-chain revalidation.
+    entryPoints:
+      - ../p2pflow-executor/src/modules/matching
+      - ../p2pflow-executor/src/chain
+      - contracts/facets/OrderFacet.sol
+    criticality: high
+
+  - id: order-cancel-dispute-recovery
+    name: Parties cancel, dispute, or recover an unresolved order
+    description: Authorized actors use explicit cancellation and dispute paths; only minimal price/order safety timestamps remain and executor-driven expiry cannot bypass custody or role checks.
+    entryPoints:
+      - contracts/facets/OrderFacet.sol
+      - ../p2pflow-user-ui/src/pages/Order/OrderIndex.jsx
+      - ../p2pflow-admin-ui/src/pages/AllTransactions/AllTransactionsIndex.jsx
+    criticality: high
+
+  - id: merchant-cap-analytics
+    name: Executor respects off-chain daily and monthly merchant caps
+    description: The subgraph materializes UTC daily/monthly completed volume while PostgreSQL reserves in-flight capacity; the matcher excludes merchants whose indexed plus reserved total exceeds configured caps. Solidity does not enforce business-period caps.
+    entryPoints:
+      - ../p2pflow-subgraph/schema.graphql
+      - ../p2pflow-subgraph/src/mapping.ts
+      - ../p2pflow-executor/src/modules/matching
+    criticality: high
+
+  - id: chain-index-recovery
+    name: Executor and subgraph recover from missed events and restarts
+    description: WebSocket signals provide low latency while confirmed HTTP log scans, durable block/hash cursors, overlap replay, idempotent actions, and receipt reconciliation restore canonical state after outages or reorganizations.
+    entryPoints:
+      - ../p2pflow-executor/src/chain
+      - ../p2pflow-executor/src/queue
+      - ../p2pflow-subgraph/subgraph.yaml
+    criticality: high
+
+  - id: operator-protocol-control
+    name: Authenticated operator manages the Base Sepolia protocol
+    description: A wallet and server-side role guard protect merchant/channel review, dispute resolution, price health, pause controls, order inspection, and automation health. Placeholder routes are not shipped as live features.
+    entryPoints:
+      - ../p2pflow-admin-ui/src/App.jsx
+      - ../p2pflow-admin-ui/src/pages/Dashboard/DashboardIndex.jsx
+      - contracts/facets/ConfigFacet.sol
+      - contracts/facets/MerchantFacet.sol
+    criticality: high
+```

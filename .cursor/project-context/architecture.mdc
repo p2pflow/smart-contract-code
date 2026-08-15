@@ -1,0 +1,108 @@
+---
+description: P2PFlow MVP cross-repository architecture and service boundaries.
+globs:
+alwaysApply: false
+---
+
+# architecture.mdc
+
+```yaml
+architecture:
+  summary: P2PFlow is a three-sided USDC-to-INR/UPI peer marketplace on an EIP-2535 Diamond. Users create BUY or SELL orders, approved merchants fulfill fiat legs, and authenticated operators manage merchants, disputes, prices, and emergency controls. The MVP uses three React clients, a Diamond contract, one Goldsky subgraph read model, and exactly one modular executor service for pricing, matching, event recovery, transactions, sessions, and operations.
+
+  style: multi-repository platform with one modular executor deployable
+
+  layers:
+    - name: http
+      paths:
+        - ../p2pflow-user-ui/src/App.jsx
+        - ../p2pflow-merchant-ui/src/App.jsx
+        - ../p2pflow-admin-ui/src/App.jsx
+        - ../p2pflow-executor/src/http
+    - name: business
+      paths:
+        - contracts/facets
+        - contracts/libraries
+        - ../p2pflow-executor/src/modules/pricing
+        - ../p2pflow-executor/src/modules/matching
+        - ../p2pflow-executor/src/modules/sessions
+        - ../p2pflow-executor/src/modules/orders
+        - ../p2pflow-user-ui/src/hooks
+        - ../p2pflow-merchant-ui/src/hooks
+        - ../p2pflow-admin-ui/src/hooks
+    - name: infrastructure
+      paths:
+        - contracts/shared
+        - scripts
+        - ../p2pflow-subgraph/src
+        - ../p2pflow-executor/src/chain
+        - ../p2pflow-executor/src/db
+        - ../p2pflow-executor/src/queue
+        - ../p2pflow-executor/src/providers
+        - ../p2pflow-user-ui/src/thirdweb
+        - ../p2pflow-merchant-ui/src/thirdweb
+        - ../p2pflow-admin-ui/src/thirdweb
+
+  boundaries:
+    - The Diamond is authoritative for custody, order transitions, roles, pause state, merchant/channel eligibility, and current liquidity guardrails.
+    - The executor may discover and rank from indexed data but must submit exact candidates for independent contract revalidation.
+    - The subgraph is an eventually consistent query projection and must never authorize a financial action.
+    - Browser applications contain only public configuration and never privileged credentials or authoritative payment data.
+    - All executor capabilities run as modules in one process and one deployment artifact; modules communicate through typed interfaces and a shared PostgreSQL transaction boundary.
+    - P2P.me repositories are reference-only and cannot be imported as runtime dependencies.
+
+  integrations:
+    - Base Sepolia JSON-RPC and WebSocket providers
+    - Circle Base Sepolia USDC at 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+    - Thirdweb embedded and external wallets
+    - Goldsky hosted subgraph
+    - PostgreSQL durable jobs, cursors, sessions, reservations, and audit records
+    - multiple independent market and INR FX price providers
+    - operator health metrics and alerts
+
+  auth:
+    userFacingPattern: wallet auto-connect plus nonce/signature backend session in Secure HttpOnly cookie
+    partnerPattern: server-verified wallet roles with Diamond role revalidation for privileged actions
+    configPaths:
+      - ../p2pflow-user-ui/src/components/Auth
+      - ../p2pflow-merchant-ui/src/components/Guards
+      - ../p2pflow-admin-ui/src
+      - ../p2pflow-executor/src/modules/sessions
+
+  errorHandling:
+    businessException: typed domain errors mapped to stable HTTP and contract error codes
+    codes:
+      - INVALID_PRICE_ROUND
+      - STALE_PRICE
+      - ORDER_STATE_CONFLICT
+      - NO_ELIGIBLE_MERCHANT
+      - ASSIGNMENT_REJECTED
+      - SESSION_INVALID
+      - CHAIN_REORG_RETRY
+      - TRANSACTION_UNCERTAIN
+
+  diagrams:
+    existing:
+      - P2PFLOW_MVP_PHASE_1_HIGH_LEVEL.pdf in workspace root
+    preferredFormat: mermaid
+
+  repositoryRelationships:
+    - primary: p2pflow/p2pflow-smart-contract
+      consumes:
+        - Circle USDC
+    - primary: local/p2pflow-executor
+      consumes:
+        - p2pflow/p2pflow-smart-contract
+        - p2pflow/p2pflow-subgraph
+        - PostgreSQL
+        - price providers
+    - primary: p2pflow/p2pflow-subgraph
+      consumes:
+        - p2pflow/p2pflow-smart-contract events
+    - primary: p2pflow frontends
+      consumes:
+        - shared ABI/deployment manifest
+        - local/p2pflow-executor API
+        - p2pflow/p2pflow-subgraph
+        - Base Sepolia RPC
+```

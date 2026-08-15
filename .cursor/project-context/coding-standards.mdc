@@ -1,0 +1,81 @@
+---
+description: P2PFlow implementation, testing, review, security, and entropy standards.
+globs:
+alwaysApply: true
+---
+
+# coding-standards.mdc
+
+```yaml
+codingStandards:
+  languages:
+    Solidity: Solidity 0.8.24, custom errors, explicit state transitions, NatSpec for public financial behavior
+    JavaScript: ES modules in Vite clients; CommonJS only where existing Hardhat configuration requires it
+    JSX: functional React components and hooks with stable dependency arrays
+    TypeScript: strict mode for the new executor and shared protocol package
+    AssemblyScript: deterministic Graph mappings with immutable event IDs and guarded aggregate transitions
+
+  frameworks:
+    Hardhat: Mocha and Chai contract/fork tests; deploy scripts validate chain, addresses, bytecode, and roles
+    React: TanStack Query owns remote state; wallet lifecycle is centralized; no authoritative localStorage state
+    Fastify: modules expose typed service interfaces; HTTP handlers do not perform chain or database logic directly
+    Graph: mutable snapshots plus immutable event records; cursor pagination and block provenance
+
+  testing:
+    framework: Hardhat Mocha/Chai, Vitest for executor/shared package, React Testing Library, Matchstick where feasible
+    runner: npm scripts per repository
+    location: test, tests, src/**/*.test.*, and subgraph tests
+    requirements:
+      - New financial and order-state behavior requires unit, negative, access-control, and invariant tests
+      - Every executor job requires idempotency, retry, restart, and uncertain-transaction tests
+      - Contract ABI/event changes require regenerated ABI plus subgraph mapping and client compatibility tests
+      - Released BUY and SELL journeys require end-to-end UI tests with receipt-derived order IDs
+      - Security regressions for reentrancy, stale prices, replay, role bypass, allowance, and accounting must be tested
+    coverage:
+      tool: Hardhat coverage and Vitest coverage where configured
+      threshold: null
+
+  naming:
+    commits: conventional
+    packages: feature modules with explicit public index and no cross-module deep imports
+
+  review:
+    blockingSeverities: [BLOCKER]
+    strictReview: true
+    dimensions:
+      - architecture
+      - custody correctness
+      - access control
+      - security
+      - privacy
+      - performance
+      - reorg and retry safety
+      - maintainability
+      - entropy
+    securityChecks:
+      - no secrets, private keys, UPI data, or .env content in source, logs, events, artifacts, or browser bundles
+      - no unbounded merchant scans or user-controlled unbounded arrays in state-changing calls
+      - exact units and explicit rounding for USDC and INR price arithmetic
+      - checks-effects-interactions, SafeERC20, reentrancy protection, bounded allowances, role separation, and pause controls
+      - deterministic job/action IDs, durable transaction outbox, receipt reconciliation, and reorg-aware cursors
+      - do not edit .cursor kit files outside project-context
+
+  entropy:
+    enabled: true
+    policy: remove-on-touch
+    onChange:
+      - remove demo records, hardcoded statistics, fake timers, unused authentication stores, and commented-out actions when replacing those flows
+      - delete superseded ABI/config/helper copies after consumers use the shared protocol package
+      - remove orphaned routes, tests, and environment keys
+    blockReview:
+      - new commented-out code without a tracked reason
+      - parallel superseded implementation left in the diff
+      - launched route that still renders demo, placeholder, or development-mode content
+      - separate deployable services for executor modules
+    reference: .cursor/sdlc-system/workflow/entropy-management.md
+
+  documentation:
+    sdlcArtifacts: docs/sdlc/{workflowId}/
+    projectGuide: AGENTS.md
+    stackRules: []
+```
