@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "packageVersion": "2.0.0-local.1",
+  "packageVersion": "2.0.0-local.2",
   "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
   "protocolVersion": 2,
   "layoutVersion": 2,
@@ -58,11 +58,11 @@
     {
       "name": "AssignmentFacet",
       "address": "0x000000000000000000000000000000000000f203",
-      "codeHash": "0xea6cb5557ba177fa818ca8736ad46574ca5216ca541ea70094468d55d3ee5a65",
+      "codeHash": "0xa9b72955e07c5e4faed3ea4caad79a8b8d52bb7919a45c8d1c98479437e8f112",
       "functionSelectors": [
         "0x69fa9c12",
         "0x8f03f7b7",
-        "0xfbe5b267"
+        "0xe038069a"
       ]
     },
     {

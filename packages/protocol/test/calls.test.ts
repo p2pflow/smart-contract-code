@@ -35,6 +35,8 @@ describe("ABI-bound prepared protocol calls", () => {
     });
     const create = calls.diamond("createBuyOrder", [1_000_000n, 7n, 95_000_000n, 1_700_000_000n] as const);
     expect(create.functionName).toBe("createBuyOrder");
+    const expire = calls.diamond("expireAssignment", [orderId, 4n] as const);
+    expect(expire.args).toEqual([orderId, 4n]);
     const approve = calls.usdc("approve", [LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address, 1_000_000n] as const);
     expect(approve.address).toBe(LOCAL_BASE_SEPOLIA_FIXTURE.usdc.address);
     expect(Object.isFrozen(approve)).toBe(true);

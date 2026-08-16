@@ -1,6 +1,6 @@
 # `@p2pflow/protocol`
 
-`2.0.0-local.1` is the immutable canonical boundary for the privacy-safe v2
+`2.0.0-local.2` is the immutable canonical boundary for the privacy-safe v2
 Diamond source. Package version, numeric on-chain protocol version (`2`), and
 storage-layout version (`2`) are independent and validated independently.
 

@@ -6,12 +6,13 @@ const { Interface, ZeroHash, id, keccak256 } = require("ethers");
 
 const ROOT = path.resolve(__dirname, "..");
 const PACKAGE_ROOT = path.join(ROOT, "packages", "protocol");
+const CHECK_ONLY = process.argv.includes("--check");
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8"));
 const PROTOCOL_ID = id("P2PFLOW_BASE_SEPOLIA_MARKETPLACE_V2");
 const STORAGE_NAMESPACE = id("p2pflow.app.storage.v2");
 const OFFICIAL_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const EXPECTED = Object.freeze({ selectors: 76, events: 39, errors: 70 });
-const EXPECTED_ABI_SHA256 = "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360";
+const EXPECTED_ABI_SHA256 = "0x2ff9f22c565dab812c496ff5fc1825c0734e51dd87fdd5c1dcd03b225d398147";
 
 const FACETS = Object.freeze([
   "AccessControlFacet",
@@ -34,7 +35,7 @@ const EXPECTED_FACET_SIGNATURES = Object.freeze({
   ],
   AssignmentFacet: [
     "assignOrderCandidates(bytes32,uint256,(address,bytes32)[],bytes32)",
-    "expireAssignment(bytes32)", "getAssignment(bytes32)",
+    "expireAssignment(bytes32,uint256)", "getAssignment(bytes32)",
   ],
   ConfigFacet: [
     "getConfig()", "getCustodyTotals()", "getSafetyConfig()", "isProtocolInitialized()",
@@ -311,14 +312,25 @@ const manifestInput = {
 };
 
 const fixtureDirectory = path.join(PACKAGE_ROOT, "fixtures");
-fs.mkdirSync(fixtureDirectory, { recursive: true });
-fs.writeFileSync(path.join(fixtureDirectory, "local-diamond.abi.json"), `${JSON.stringify(diamondAbi, null, 2)}\n`);
-fs.writeFileSync(
-  path.join(fixtureDirectory, "local-base-sepolia.manifest.input.json"),
-  `${JSON.stringify(manifestInput, null, 2)}\n`,
-);
+const outputs = new Map([
+  [path.join(fixtureDirectory, "local-diamond.abi.json"), `${JSON.stringify(diamondAbi, null, 2)}\n`],
+  [
+    path.join(fixtureDirectory, "local-base-sepolia.manifest.input.json"),
+    `${JSON.stringify(manifestInput, null, 2)}\n`,
+  ],
+]);
+for (const [target, content] of outputs) {
+  if (CHECK_ONLY) {
+    if (!fs.existsSync(target) || fs.readFileSync(target, "utf8") !== content) {
+      throw new Error(`${path.relative(ROOT, target)} has generated drift; run npm run protocol:fixture`);
+    }
+  } else {
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, content);
+  }
+}
 
 console.log(
-  `Generated non-deployed v2 fixture: ${FACETS.length} facets, ${counts.selectors} selectors, ` +
+  `${CHECK_ONLY ? "Verified" : "Generated"} non-deployed v2 fixture: ${FACETS.length} facets, ${counts.selectors} selectors, ` +
   `${counts.events} events, ${counts.errors} errors`,
 );

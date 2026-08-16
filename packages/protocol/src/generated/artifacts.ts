@@ -2317,6 +2317,11 @@ export const GENERATED_DIAMOND_ABI = [
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedAssignmentEpoch",
+        "type": "uint256"
       }
     ],
     "name": "expireAssignment",
@@ -4172,7 +4177,7 @@ export const GENERATED_USDC_ABI = [
 ] as const;
 export const GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE = {
   "schemaVersion": "2.0.0",
-  "packageVersion": "2.0.0-local.1",
+  "packageVersion": "2.0.0-local.2",
   "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
   "protocolVersion": 2,
   "layoutVersion": 2,
@@ -4230,11 +4235,11 @@ export const GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE = {
     {
       "name": "AssignmentFacet",
       "address": "0x000000000000000000000000000000000000f203",
-      "codeHash": "0xea6cb5557ba177fa818ca8736ad46574ca5216ca541ea70094468d55d3ee5a65",
+      "codeHash": "0xa9b72955e07c5e4faed3ea4caad79a8b8d52bb7919a45c8d1c98479437e8f112",
       "functionSelectors": [
         "0x69fa9c12",
         "0x8f03f7b7",
-        "0xfbe5b267"
+        "0xe038069a"
       ]
     },
     {
@@ -4391,13 +4396,13 @@ export const GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE = {
     "eventCount": 39,
     "errorCount": 70
   },
-  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "abiSha256": "0x2ff9f22c565dab812c496ff5fc1825c0734e51dd87fdd5c1dcd03b225d398147",
   "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
-  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420"
+  "manifestSha256": "0x7ff40c151c42f37c7f62ff369f76d93326a459522d348f2dee66209fc84131aa"
 } as const;
 export const GENERATED_PROTOCOL_ARTIFACT = {
   "packageName": "@p2pflow/protocol",
-  "packageVersion": "2.0.0-local.1",
+  "packageVersion": "2.0.0-local.2",
   "protocolId": "0xee34f489349fbe024aa70447b08f85e9becad4ffc266742cb4d76dfc294aacc5",
   "protocolVersion": 2,
   "layoutVersion": 2,
@@ -4405,8 +4410,8 @@ export const GENERATED_PROTOCOL_ARTIFACT = {
   "fixtureKind": "local-test-fixture",
   "deployed": false,
   "safeForSharedEnvironment": false,
-  "abiSha256": "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+  "abiSha256": "0x2ff9f22c565dab812c496ff5fc1825c0734e51dd87fdd5c1dcd03b225d398147",
   "usdcAbiSha256": "0xf6a1a40166468e7a78fb682e3773ec3db40e1bda97e65f99c043eb5f71354636",
-  "manifestSha256": "0x92f18ec9858fbc0ee85bd249767577ce2220e9324978a97694011fe28e5e5420",
-  "protocolArtifactDigest": "0x6226c5e7edcc58a221493e781bd0780974d517baa23d6328293fe3d635a20d8e"
+  "manifestSha256": "0x7ff40c151c42f37c7f62ff369f76d93326a459522d348f2dee66209fc84131aa",
+  "protocolArtifactDigest": "0xbf1fc8124270f537f95646df8c9f43063c4fa50ff749e437c62ccd8d3a9a97e5"
 } as const;

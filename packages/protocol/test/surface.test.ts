@@ -26,7 +26,7 @@ import {
 describe("frozen v2 ABI/status/error surface", () => {
   it("locks exact ABI digest, counts, initializer event, and removed legacy surface", () => {
     expect(LOCAL_BASE_SEPOLIA_FIXTURE.abiSha256).toBe(
-      "0xfaa27132dd078889ab2df0d77e4614ecbdf00d8e42f83704a96a39f161fdd360",
+      "0x2ff9f22c565dab812c496ff5fc1825c0734e51dd87fdd5c1dcd03b225d398147",
     );
     expect(DIAMOND_ABI.filter(({ type }) => type === "function")).toHaveLength(EXPECTED_SELECTOR_COUNT);
     expect(DIAMOND_ABI.filter(({ type }) => type === "event")).toHaveLength(EXPECTED_EVENT_COUNT);
@@ -34,6 +34,9 @@ describe("frozen v2 ABI/status/error surface", () => {
     expect(DIAMOND_ABI.some((item) => item.type === "event" && item.name === "ProtocolInitialized")).toBe(true);
     expect(DIAMOND_ABI.some((item) => item.type === "function" && item.name === "initV2")).toBe(false);
     expect(DIAMOND_ABI.some((item) => item.type === "function" && item.name === "setOrderPricing")).toBe(false);
+    const assignmentFacet = LOCAL_BASE_SEPOLIA_FIXTURE.facets.find(({ name }) => name === "AssignmentFacet");
+    expect(assignmentFacet?.functionSelectors).toContain("0xe038069a");
+    expect(assignmentFacet?.functionSelectors).not.toContain("0xfbe5b267");
   });
 
   it("locks every public enum ordinal and bounded constant", () => {

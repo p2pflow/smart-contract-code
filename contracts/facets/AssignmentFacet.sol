@@ -125,8 +125,11 @@ contract AssignmentFacet is Modifiers {
         }
     }
 
-    function expireAssignment(bytes32 orderId) external nonReentrant {
+    function expireAssignment(bytes32 orderId, uint256 expectedAssignmentEpoch) external nonReentrant {
         OrderV2 storage order = _requireOrder(orderId);
+        if (expectedAssignmentEpoch != order.assignmentEpoch) {
+            revert StaleAssignmentEpoch(order.assignmentEpoch, expectedAssignmentEpoch);
+        }
         if (order.status != OrderStatus.ASSIGNED) {
             revert InvalidOrderState(orderId, uint8(order.status));
         }

@@ -2316,6 +2316,11 @@
         "internalType": "bytes32",
         "name": "orderId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedAssignmentEpoch",
+        "type": "uint256"
       }
     ],
     "name": "expireAssignment",

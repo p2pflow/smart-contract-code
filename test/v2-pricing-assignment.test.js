@@ -382,14 +382,14 @@ describe("v2 bounded assignment", function () {
       [{ merchant: fixture.merchantOne.address, channelId }], ethers.id("expire"),
     );
     const before = await fixture.assignments.getAssignment(first.orderId);
-    await expect(fixture.assignments.connect(fixture.other).expireAssignment(first.orderId))
+    await expect(fixture.assignments.connect(fixture.other).expireAssignment(first.orderId, 1))
       .to.be.revertedWithCustomError(fixture.assignments, "AssignmentNotExpired");
     await time.increaseTo(before.deadline);
-    await expect(fixture.assignments.connect(fixture.other).expireAssignment(first.orderId))
+    await expect(fixture.assignments.connect(fixture.other).expireAssignment(first.orderId, 1))
       .to.be.revertedWithCustomError(fixture.assignments, "UnauthorizedOrderActor");
     await expect(fixture.orders.connect(fixture.merchantOne).acceptOrder(first.orderId, channelId))
       .to.be.revertedWithCustomError(fixture.orders, "AssignmentExpired");
-    await fixture.assignments.connect(fixture.orderAssigner).expireAssignment(first.orderId);
+    await fixture.assignments.connect(fixture.orderAssigner).expireAssignment(first.orderId, 1);
     const after = await fixture.assignments.getAssignment(first.orderId);
     expect(after.assignmentEpoch).to.equal(2n);
     expect(after.candidates).to.have.length(0);
@@ -407,5 +407,43 @@ describe("v2 bounded assignment", function () {
     expect(rejected.assignmentEpoch).to.equal(2n);
     expect(rejected.candidates).to.have.length(0);
     expect((await fixture.orders.getOrder(second.orderId)).status).to.equal(OrderStatus.CREATED);
+  });
+
+  it("cannot replay delayed epoch-N expiry calldata against epoch N+1", async function () {
+    const fixture = await loadFixture(fixtureWithMerchant);
+    const { channelId } = fixture.merchantSetup;
+    const { orderId } = await createOrder(fixture, OrderType.BUY, E6);
+    await fixture.assignments.connect(fixture.orderAssigner).assignOrderCandidates(
+      orderId, 1,
+      [{ merchant: fixture.merchantOne.address, channelId }], ethers.id("expiry-replay-epoch-1"),
+    );
+    const delayedExactCalldata = fixture.assignments.interface.encodeFunctionData(
+      "expireAssignment",
+      [orderId, 1],
+    );
+    const epochOne = await fixture.assignments.getAssignment(orderId);
+    await time.increaseTo(epochOne.deadline);
+    await fixture.assignments.connect(fixture.orderAssigner).expireAssignment(orderId, 1);
+
+    const epochTwoDigest = ethers.id("expiry-replay-epoch-2");
+    await fixture.assignments.connect(fixture.orderAssigner).assignOrderCandidates(
+      orderId, 2,
+      [{ merchant: fixture.merchantOne.address, channelId }], epochTwoDigest,
+    );
+    const epochTwo = await fixture.assignments.getAssignment(orderId);
+    await time.increaseTo(epochTwo.deadline);
+
+    await expect(fixture.orderAssigner.sendTransaction({
+      to: fixture.diamondAddress,
+      data: delayedExactCalldata,
+    })).to.be.revertedWithCustomError(fixture.assignments, "StaleAssignmentEpoch")
+      .withArgs(2, 1);
+
+    const afterReplay = await fixture.assignments.getAssignment(orderId);
+    expect(afterReplay.assignmentEpoch).to.equal(2n);
+    expect(afterReplay.deadline).to.equal(epochTwo.deadline);
+    expect(afterReplay.decisionDigest).to.equal(epochTwoDigest);
+    expect(afterReplay.candidates).to.have.length(1);
+    expect((await fixture.orders.getOrder(orderId)).status).to.equal(OrderStatus.ASSIGNED);
   });
 });
