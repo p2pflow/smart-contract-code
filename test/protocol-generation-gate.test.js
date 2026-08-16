@@ -29,6 +29,7 @@ describe("Protocol generation gate", function () {
         "artifacts/local-base-sepolia.manifest.json",
         "artifacts/protocol-artifact.json",
         "src/generated/artifacts.ts",
+        "src/generated/test-fixture.ts",
         "scripts/generate.mjs",
       ]) {
         const source = path.join(protocolRoot, relativePath);

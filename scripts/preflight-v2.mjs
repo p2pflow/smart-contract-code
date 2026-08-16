@@ -50,18 +50,28 @@ const fixturePath = path.join(
 );
 
 if (process.argv.includes("--check-local-fixture")) {
+  const testProtocol = await import(
+    pathToFileURL(path.join(root, "packages", "protocol", "dist", "test-fixture.js")).href
+  );
   const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
-  const parsed = protocol.assertProtocolBoundary(fixture, protocol.DIAMOND_ABI, "test");
+  const parsed = testProtocol.assertTestProtocolBoundary(fixture, protocol.DIAMOND_ABI, "test");
   if (parsed.deployed || parsed.safeForSharedEnvironment || parsed.initialization.initialized) {
     throw new Error("Local fixture lost its non-deployed fail-closed markers");
   }
   let sharedRejected = false;
   try {
-    protocol.assertProtocolBoundary(fixture, protocol.DIAMOND_ABI, "base-sepolia");
+    testProtocol.assertTestProtocolBoundary(fixture, protocol.DIAMOND_ABI, "base-sepolia");
   } catch (error) {
     sharedRejected = error?.code === protocol.ProtocolErrorCode.MANIFEST_FIXTURE_FORBIDDEN;
   }
   if (!sharedRejected) throw new Error("Local fixture was not rejected for shared Base Sepolia");
+  let productionRejected = false;
+  try {
+    protocol.assertProtocolBoundary(fixture, protocol.DIAMOND_ABI, "base-sepolia");
+  } catch (error) {
+    productionRejected = error?.code === protocol.ProtocolErrorCode.MANIFEST_INVALID;
+  }
+  if (!productionRejected) throw new Error("Production protocol root accepted a test fixture");
   console.log("Local v2 artifact is internally valid, explicitly non-deployed, and shared-runtime forbidden");
   process.exit(0);
 }

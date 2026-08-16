@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  assertManifestRuntime,
   assertProtocolBoundary,
   BASE_SEPOLIA_CHAIN_ID,
   DIAMOND_ABI,
   DIAMOND_FACET_NAMES,
-  LOCAL_BASE_SEPOLIA_FIXTURE,
   OFFICIAL_BASE_SEPOLIA_USDC_ADDRESS,
   ONCHAIN_PROTOCOL_ID,
   ONCHAIN_PROTOCOL_VERSION,
@@ -17,6 +15,13 @@ import {
   sha256Canonical,
   STORAGE_LAYOUT_VERSION,
 } from "../src/index.js";
+import {
+  LOCAL_BASE_SEPOLIA_FIXTURE,
+  TEST_BASE_SEPOLIA_DEPLOYMENT,
+  assertTestManifestRuntime,
+  assertTestProtocolBoundary,
+  parseTestDeploymentManifest,
+} from "../src/test-fixture.js";
 
 function resign(value: Record<string, unknown>) {
   const { manifestSha256: _old, ...unsigned } = value;
@@ -25,7 +30,7 @@ function resign(value: Record<string, unknown>) {
 
 describe("deployment manifest schema", () => {
   it("locks independent package, on-chain, layout, facet, owner and role identities", () => {
-    const parsed = parseDeploymentManifest(LOCAL_BASE_SEPOLIA_FIXTURE);
+    const parsed = parseTestDeploymentManifest(LOCAL_BASE_SEPOLIA_FIXTURE);
     expect(parsed.packageVersion).toBe(PACKAGE_VERSION);
     expect(parsed.protocolId).toBe(ONCHAIN_PROTOCOL_ID);
     expect(parsed.protocolVersion).toBe(ONCHAIN_PROTOCOL_VERSION);
@@ -42,24 +47,28 @@ describe("deployment manifest schema", () => {
     expect(parsed.deployed).toBe(false);
     expect(parsed.initialization.initialized).toBe(false);
     expect(parsed.safeForSharedEnvironment).toBe(false);
-    expect(() => assertProtocolBoundary(parsed, DIAMOND_ABI, "test")).not.toThrow();
+    expect(() => assertTestProtocolBoundary(parsed, DIAMOND_ABI, "test")).not.toThrow();
+    expect(() => parseDeploymentManifest(LOCAL_BASE_SEPOLIA_FIXTURE)).toThrow(
+      expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_INVALID }),
+    );
+    expect(() => assertProtocolBoundary(TEST_BASE_SEPOLIA_DEPLOYMENT, DIAMOND_ABI, "test")).not.toThrow();
   });
 
   it("rejects schema, chain, token, digest, facet, role and deployment-proof drift", () => {
-    expect(() => parseDeploymentManifest({ ...LOCAL_BASE_SEPOLIA_FIXTURE, chainId: 1 })).toThrow();
-    expect(() => parseDeploymentManifest(resign({
+    expect(() => parseTestDeploymentManifest({ ...LOCAL_BASE_SEPOLIA_FIXTURE, chainId: 1 })).toThrow();
+    expect(() => parseTestDeploymentManifest(resign({
       ...LOCAL_BASE_SEPOLIA_FIXTURE,
       usdc: { ...LOCAL_BASE_SEPOLIA_FIXTURE.usdc, address: "0x0000000000000000000000000000000000000001" },
     }))).toThrow(expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_INVALID }));
-    expect(() => parseDeploymentManifest({
+    expect(() => parseTestDeploymentManifest({
       ...LOCAL_BASE_SEPOLIA_FIXTURE,
       createdAt: "1970-01-02T00:00:00.000Z",
     })).toThrow(expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_DIGEST_MISMATCH }));
-    expect(() => parseDeploymentManifest(resign({
+    expect(() => parseTestDeploymentManifest(resign({
       ...LOCAL_BASE_SEPOLIA_FIXTURE,
       facets: LOCAL_BASE_SEPOLIA_FIXTURE.facets.slice(1),
     }))).toThrow(expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_INVALID }));
-    expect(() => parseDeploymentManifest(resign({
+    expect(() => parseTestDeploymentManifest(resign({
       ...LOCAL_BASE_SEPOLIA_FIXTURE,
       roles: {
         ...LOCAL_BASE_SEPOLIA_FIXTURE.roles,
@@ -69,7 +78,7 @@ describe("deployment manifest schema", () => {
         },
       },
     }))).toThrow(expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_INVALID }));
-    expect(() => parseDeploymentManifest(resign({
+    expect(() => parseTestDeploymentManifest(resign({
       ...LOCAL_BASE_SEPOLIA_FIXTURE,
       deployed: true,
       safeForSharedEnvironment: true,
@@ -78,12 +87,12 @@ describe("deployment manifest schema", () => {
 
   it("fails closed outside local/test and rejects any supplied ABI drift", () => {
     for (const runtime of ["base-sepolia", "shared", "production"] as const) {
-      expect(() => assertManifestRuntime(LOCAL_BASE_SEPOLIA_FIXTURE, runtime)).toThrow(
+      expect(() => assertTestManifestRuntime(LOCAL_BASE_SEPOLIA_FIXTURE, runtime)).toThrow(
         expect.objectContaining({ code: ProtocolErrorCode.MANIFEST_FIXTURE_FORBIDDEN }),
       );
     }
     const drifted = DIAMOND_ABI.slice(1);
-    expect(() => assertProtocolBoundary(LOCAL_BASE_SEPOLIA_FIXTURE, drifted, "test")).toThrow(
+    expect(() => assertTestProtocolBoundary(LOCAL_BASE_SEPOLIA_FIXTURE, drifted, "test")).toThrow(
       expect.objectContaining({ code: ProtocolErrorCode.ABI_DIGEST_MISMATCH }),
     );
   });

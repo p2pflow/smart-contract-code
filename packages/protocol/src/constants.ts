@@ -1,5 +1,5 @@
 export const PACKAGE_NAME = "@p2pflow/protocol" as const;
-export const PACKAGE_VERSION = "2.0.0-local.2" as const;
+export const PACKAGE_VERSION = "2.0.0-local.3" as const;
 export const MANIFEST_SCHEMA_VERSION = "2.0.0" as const;
 
 export const ONCHAIN_PROTOCOL_ID =

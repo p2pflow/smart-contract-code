@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import {
   decodeOrderCreated,
   DIAMOND_ABI,
-  LOCAL_BASE_SEPOLIA_FIXTURE,
   ProtocolErrorCode,
 } from "../src/index.js";
+import { TEST_BASE_SEPOLIA_DEPLOYMENT } from "../src/test-fixture.js";
 
 const event = DIAMOND_ABI.find((entry) => entry.type === "event" && entry.name === "OrderCreated") as AbiEvent;
 const orderId = `0x${"11".repeat(32)}` as const;
@@ -30,7 +30,7 @@ function orderCreatedLog(overrides: Record<string, bigint | string> = {}) {
     ...overrides,
   };
   return {
-    address: LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address,
+    address: TEST_BASE_SEPOLIA_DEPLOYMENT.diamond.address,
     topics: encodeEventTopics({
       abi: [event],
       eventName: "OrderCreated",
@@ -41,7 +41,7 @@ function orderCreatedLog(overrides: Record<string, bigint | string> = {}) {
 }
 
 const options = {
-  manifest: LOCAL_BASE_SEPOLIA_FIXTURE,
+  manifest: TEST_BASE_SEPOLIA_DEPLOYMENT,
   diamondAbi: DIAMOND_ABI,
   runtime: "test" as const,
 };
@@ -105,7 +105,7 @@ describe("strict v2 receipt order ID decoding", () => {
     }] as const satisfies Abi;
     const old = oldEvent[0] as AbiEvent;
     const legacyLog = {
-      address: LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address,
+      address: TEST_BASE_SEPOLIA_DEPLOYMENT.diamond.address,
       topics: encodeEventTopics({ abi: oldEvent, eventName: "OrderCreated", args: { orderId, user } }),
       data: encodeAbiParameters(old.inputs.filter((input) => !input.indexed), [1n, 1n]),
     };

@@ -4,15 +4,15 @@ import {
   BASE_SEPOLIA_CHAIN_ID,
   createProtocolCallFactory,
   DIAMOND_ABI,
-  LOCAL_BASE_SEPOLIA_FIXTURE,
   ONCHAIN_PROTOCOL_VERSION,
   PACKAGE_VERSION,
   ProtocolErrorCode,
   USDC_ABI,
 } from "../src/index.js";
+import { TEST_BASE_SEPOLIA_DEPLOYMENT } from "../src/test-fixture.js";
 
 const input = {
-  manifest: LOCAL_BASE_SEPOLIA_FIXTURE,
+  manifest: TEST_BASE_SEPOLIA_DEPLOYMENT,
   diamondAbi: DIAMOND_ABI,
   usdcAbi: USDC_ABI,
   runtime: "test" as const,
@@ -26,7 +26,7 @@ describe("ABI-bound prepared protocol calls", () => {
     expect(markSent).toMatchObject({
       chainId: BASE_SEPOLIA_CHAIN_ID,
       contract: "diamond",
-      address: LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address,
+      address: TEST_BASE_SEPOLIA_DEPLOYMENT.diamond.address,
       functionName: "markFiatSent",
       args: [orderId],
       value: 0n,
@@ -37,8 +37,8 @@ describe("ABI-bound prepared protocol calls", () => {
     expect(create.functionName).toBe("createBuyOrder");
     const expire = calls.diamond("expireAssignment", [orderId, 4n] as const);
     expect(expire.args).toEqual([orderId, 4n]);
-    const approve = calls.usdc("approve", [LOCAL_BASE_SEPOLIA_FIXTURE.diamond.address, 1_000_000n] as const);
-    expect(approve.address).toBe(LOCAL_BASE_SEPOLIA_FIXTURE.usdc.address);
+    const approve = calls.usdc("approve", [TEST_BASE_SEPOLIA_DEPLOYMENT.diamond.address, 1_000_000n] as const);
+    expect(approve.address).toBe(TEST_BASE_SEPOLIA_DEPLOYMENT.usdc.address);
     expect(Object.isFrozen(approve)).toBe(true);
     expect(Object.isFrozen(approve.args)).toBe(true);
   });

@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import { encodeErrorResult } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +14,6 @@ import {
   EXPECTED_ERROR_COUNT,
   EXPECTED_EVENT_COUNT,
   EXPECTED_SELECTOR_COUNT,
-  LOCAL_BASE_SEPOLIA_FIXTURE,
   mapProtocolError,
   MerchantAvailability,
   MerchantStatus,
@@ -22,8 +23,29 @@ import {
   ProtocolErrorCode,
   SideMask,
 } from "../src/index.js";
+import { LOCAL_BASE_SEPOLIA_FIXTURE } from "../src/test-fixture.js";
 
 describe("frozen v2 ABI/status/error surface", () => {
+  it("keeps the local manifest behind the explicit test-only package entry", async () => {
+    const production = await import("../dist/index.js");
+    const testFixture = await import("@p2pflow/protocol/test-fixture");
+    const productionSources = [
+      "../dist/index.js",
+      "../dist/manifest.js",
+      "../dist/generated/artifacts.js",
+    ].map((relativePath) => fs.readFileSync(new URL(relativePath, import.meta.url), "utf8"));
+
+    expect("LOCAL_BASE_SEPOLIA_FIXTURE" in production).toBe(false);
+    expect("DeploymentManifestShapeSchema" in production).toBe(false);
+    expect("assertManifestShapeSemantics" in production).toBe(false);
+    for (const productionSource of productionSources) {
+      expect(productionSource).not.toContain("local-test-fixture");
+      expect(productionSource).not.toContain("GENERATED_LOCAL_BASE_SEPOLIA_FIXTURE");
+      expect(productionSource).not.toContain("generated/test-fixture");
+    }
+    expect(testFixture.LOCAL_BASE_SEPOLIA_FIXTURE.kind).toBe("local-test-fixture");
+  });
+
   it("locks exact ABI digest, counts, initializer event, and removed legacy surface", () => {
     expect(LOCAL_BASE_SEPOLIA_FIXTURE.abiSha256).toBe(
       "0x2ff9f22c565dab812c496ff5fc1825c0734e51dd87fdd5c1dcd03b225d398147",

@@ -9,7 +9,6 @@ const shouldWrite = process.argv.includes("--write");
 const logoPaths = [
   "p2pflow-user-ui/public/images/logo.jpg",
   "p2pflow-merchant-ui/public/images/logo.jpg",
-  "p2pflow-admin-ui/public/images/logo.jpg",
 ].map((relativePath) => path.join(workspaceDirectory, relativePath));
 const removableMarkers = new Set([0xe1, 0xed]);
 const localPathPatterns = [

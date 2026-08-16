@@ -40,14 +40,14 @@ const Bytes32Schema = z.string().regex(bytes32Pattern);
 const SelectorSchema = z.string().regex(selectorPattern);
 const RoleSchema = z.object({ id: Bytes32Schema, expectedAddress: AddressSchema }).strict();
 
-export const DeploymentManifestSchema = z.object({
+export const DeploymentManifestShapeSchema = z.object({
   schemaVersion: z.string().min(1),
   packageVersion: z.string().min(1),
   protocolId: Bytes32Schema,
   protocolVersion: z.number().int().nonnegative(),
   layoutVersion: z.number().int().nonnegative(),
   storageNamespace: Bytes32Schema,
-  kind: z.enum(["local-test-fixture", "base-sepolia-deployment"]),
+  kind: z.string().min(1),
   deployed: z.boolean(),
   safeForSharedEnvironment: z.boolean(),
   chainId: z.literal(BASE_SEPOLIA_CHAIN_ID),
@@ -103,7 +103,12 @@ export const DeploymentManifestSchema = z.object({
   manifestSha256: Bytes32Schema,
 }).strict();
 
-export type DeploymentManifest = z.infer<typeof DeploymentManifestSchema>;
+export const DeploymentManifestSchema = DeploymentManifestShapeSchema.extend({
+  kind: z.literal("base-sepolia-deployment"),
+}).strict();
+
+export type DeploymentManifest = z.infer<typeof DeploymentManifestShapeSchema>;
+type BaseSepoliaDeploymentManifest = z.infer<typeof DeploymentManifestSchema>;
 export type ManifestRuntime = "local" | "test" | "base-sepolia" | "shared" | "production";
 
 function canonicalize(value: unknown): unknown {
@@ -139,7 +144,7 @@ function isZero(value: string): boolean {
   return /^0x0+$/iu.test(value);
 }
 
-function enforceManifestSemantics(manifest: DeploymentManifest): void {
+export function assertManifestShapeSemantics(manifest: DeploymentManifest): void {
   if (
     manifest.schemaVersion !== MANIFEST_SCHEMA_VERSION ||
     manifest.packageVersion !== PACKAGE_VERSION ||
@@ -213,15 +218,10 @@ function enforceManifestSemantics(manifest: DeploymentManifest): void {
     fail("Initializer code/calldata commitments must be nonzero");
   }
 
-  if (manifest.kind === "local-test-fixture") {
-    if (
-      manifest.network !== "base-sepolia-local-v2-non-deployed" ||
-      manifest.deployed || manifest.safeForSharedEnvironment || manifest.initialization.initialized ||
-      !isZero(manifest.diamond.deploymentTransactionHash) || manifest.diamond.deploymentBlock !== 0 ||
-      manifest.diamond.startBlock !== 0 || !isZero(manifest.initialization.transactionHash) ||
-      manifest.initialization.block !== 0 || !isZero(manifest.usdc.codeHash)
-    ) fail("Local fixture must remain conspicuously non-deployed and non-shared");
-  } else if (
+}
+
+function assertBaseSepoliaDeploymentSemantics(manifest: BaseSepoliaDeploymentManifest): void {
+  if (
     manifest.network !== "base-sepolia" ||
     !manifest.deployed || !manifest.safeForSharedEnvironment || !manifest.initialization.initialized ||
     isZero(manifest.diamond.deploymentTransactionHash) || manifest.diamond.deploymentBlock === 0 ||
@@ -238,7 +238,8 @@ export function parseDeploymentManifest(value: unknown): DeploymentManifest {
     throw new ProtocolError(ProtocolErrorCode.MANIFEST_INVALID, parsed.error.issues[0]?.message);
   }
   const manifest = parsed.data;
-  enforceManifestSemantics(manifest);
+  assertManifestShapeSemantics(manifest);
+  assertBaseSepoliaDeploymentSemantics(manifest);
   const calculated = sha256Canonical(manifestDigestInput(manifest));
   if (calculated.toLowerCase() !== manifest.manifestSha256.toLowerCase()) {
     throw new ProtocolError(ProtocolErrorCode.MANIFEST_DIGEST_MISMATCH);
@@ -248,9 +249,6 @@ export function parseDeploymentManifest(value: unknown): DeploymentManifest {
 
 export function assertManifestRuntime(manifestValue: unknown, runtime: ManifestRuntime): DeploymentManifest {
   const manifest = parseDeploymentManifest(manifestValue);
-  if (manifest.kind === "local-test-fixture" && runtime !== "local" && runtime !== "test") {
-    throw new ProtocolError(ProtocolErrorCode.MANIFEST_FIXTURE_FORBIDDEN);
-  }
   if (runtime !== "local" && runtime !== "test" && !manifest.safeForSharedEnvironment) {
     throw new ProtocolError(ProtocolErrorCode.MANIFEST_FIXTURE_FORBIDDEN);
   }

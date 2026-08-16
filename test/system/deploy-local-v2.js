@@ -111,8 +111,12 @@ async function main() {
     __dirname,
     "../../packages/protocol/dist/index.js",
   )).href);
-  manifest.abiSha256 = protocolModule.LOCAL_BASE_SEPOLIA_FIXTURE.abiSha256;
-  manifest.usdcAbiSha256 = protocolModule.LOCAL_BASE_SEPOLIA_FIXTURE.usdcAbiSha256;
+  const fixtureModule = await import(pathToFileURL(path.resolve(
+    __dirname,
+    "../../packages/protocol/dist/test-fixture.js",
+  )).href);
+  manifest.abiSha256 = fixtureModule.LOCAL_BASE_SEPOLIA_FIXTURE.abiSha256;
+  manifest.usdcAbiSha256 = fixtureModule.LOCAL_BASE_SEPOLIA_FIXTURE.usdcAbiSha256;
   manifest.manifestSha256 = protocolModule.sha256Canonical(protocolModule.manifestDigestInput(manifest));
   protocolModule.parseDeploymentManifest(manifest);
 

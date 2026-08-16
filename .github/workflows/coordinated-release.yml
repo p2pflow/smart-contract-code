@@ -1,0 +1,83 @@
+name: Coordinated release digest gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      smart_ref:
+        description: Reviewed smart-contract commit
+        required: true
+        type: string
+      subgraph_ref:
+        description: Reviewed subgraph commit
+        required: true
+        type: string
+      user_ref:
+        description: Reviewed user-UI commit
+        required: true
+        type: string
+      merchant_ref:
+        description: Reviewed merchant-UI commit
+        required: true
+        type: string
+      admin_ref:
+        description: Reviewed admin-UI commit
+        required: true
+        type: string
+      executor_repository:
+        description: Q-8 approved owner/repository for the executor
+        required: true
+        type: string
+      executor_ref:
+        description: Reviewed executor commit
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  digest-and-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: p2pflow/p2pflow-smart-contract
+          ref: ${{ inputs.smart_ref }}
+          path: p2pflow-smart-contract
+      - uses: actions/checkout@v4
+        with:
+          repository: p2pflow/p2pflow-subgraph
+          ref: ${{ inputs.subgraph_ref }}
+          path: p2pflow-subgraph
+      - uses: actions/checkout@v4
+        with:
+          repository: p2pflow/p2pflow-user-ui
+          ref: ${{ inputs.user_ref }}
+          path: p2pflow-user-ui
+      - uses: actions/checkout@v4
+        with:
+          repository: p2pflow/p2pflow-merchant-ui
+          ref: ${{ inputs.merchant_ref }}
+          path: p2pflow-merchant-ui
+      - uses: actions/checkout@v4
+        with:
+          repository: p2pflow/p2pflow-admin-ui
+          ref: ${{ inputs.admin_ref }}
+          path: p2pflow-admin-ui
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.executor_repository }}
+          ref: ${{ inputs.executor_ref }}
+          path: p2pflow-executor
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - run: npm install --global npm@11.16.0
+      - run: npm --prefix p2pflow-smart-contract/packages/protocol ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-smart-contract ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-subgraph ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-user-ui ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-merchant-ui ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-admin-ui ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-executor ci --no-audit --no-fund
+      - run: npm --prefix p2pflow-smart-contract run verify:coordinated

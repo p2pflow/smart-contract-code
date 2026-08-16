@@ -1,0 +1,26 @@
+name: Smart contract CI
+
+on:
+  pull_request:
+  push:
+    branches: [codex-2, dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/protocol/package-lock.json
+      - run: npm install --global npm@11.16.0
+      - run: npm --prefix packages/protocol ci --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
