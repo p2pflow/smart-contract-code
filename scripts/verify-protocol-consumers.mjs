@@ -18,6 +18,10 @@ const consumers = [
 ];
 
 const sha256File = (file) => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+const sriSha512File = (file) =>
+  `sha512-${crypto.createHash("sha512").update(fs.readFileSync(file)).digest("base64")}`;
+const canonicalTarball = path.join(canonicalVendor, canonical.packageTarball);
+const canonicalIntegrity = sriSha512File(canonicalTarball);
 
 function sourceFiles(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -37,7 +41,10 @@ for (const { repository, boundary, sourceRoot } of consumers) {
   );
   assert.equal(packageJson.dependencies?.[canonical.packageName], dependency, `${repository} dependency drift`);
   assert.equal(lock.packages?.[""]?.dependencies?.[canonical.packageName], dependency, `${repository} lock root drift`);
-  assert.equal(lock.packages?.["node_modules/@p2pflow/protocol"]?.version, canonical.packageVersion);
+  const lockDependency = lock.packages?.["node_modules/@p2pflow/protocol"];
+  assert.equal(lockDependency?.version, canonical.packageVersion, `${repository} lock protocol version drift`);
+  assert.equal(lockDependency?.resolved, dependency, `${repository} lock protocol archive drift`);
+  assert.equal(lockDependency?.integrity, canonicalIntegrity, `${repository} lock protocol integrity drift`);
   assert.equal(installed.version, canonical.packageVersion, `${repository} installed protocol version drift`);
   assert.deepEqual(metadata, canonical, `${repository} protocol metadata drift`);
   assert.equal(
