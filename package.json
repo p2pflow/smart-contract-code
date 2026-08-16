@@ -10,11 +10,15 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "test:invariant-gas": "hardhat test test/v2-invariant-gas.test.js",
+    "test:system": "node test/system/local-system.mjs",
+    "coverage": "hardhat coverage",
     "verify:toolchain": "node scripts/verify-phase1.js",
     "verify:phase1": "npm run verify:toolchain && npm run compile",
     "verify": "npm run verify:phase1 && npm run protocol:generated:check && npm test && npm run protocol:check && npm run preflight:fixture",
     "verify:workspace:phase1": "node scripts/verify-workspace-phase1.js",
-    "verify:workspace": "npm run verify:workspace:phase1 && npm run protocol:vendor:check && node scripts/verify-protocol-consumers.mjs && npm run verify:executor:phase3",
+    "verify:workspace": "npm run verify:workspace:phase1 && npm run protocol:vendor:check && node scripts/verify-protocol-consumers.mjs && npm run verify:executor:phase3 && npm run verify:image-privacy",
+    "verify:image-privacy": "node scripts/verify-workspace-image-privacy.mjs",
     "verify:executor:phase3": "node scripts/verify-executor-phase3.mjs",
     "protocol:install": "npm --prefix packages/protocol ci --no-audit --no-fund",
     "protocol:fixture": "npm run compile && node scripts/generate-protocol-fixture.js",
@@ -35,7 +39,8 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.0"
+    "hardhat": "^2.22.0",
+    "playwright": "1.62.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0"

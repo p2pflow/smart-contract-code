@@ -12,8 +12,11 @@ module.exports = {
     },
   },
   networks: {
+    hardhat: {
+      chainId: 84532,
+    },
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: process.env.P2PFLOW_HARDHAT_RPC_URL || "http://127.0.0.1:8545",
     },
   },
 };
