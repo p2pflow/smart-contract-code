@@ -24,11 +24,9 @@ import {
     MerchantNotActive,
     MerchantNotFound,
     MerchantStakeBelowMinimum,
-    PageLimitInvalid,
     PlatformIsPaused
 } from "../shared/Errors.sol";
 import {Modifiers} from "../shared/Modifiers.sol";
-import {LibAccess} from "../libraries/LibAccess.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {LibCustody} from "../libraries/LibCustody.sol";
 import {LibMerchants} from "../libraries/LibMerchants.sol";
@@ -49,7 +47,8 @@ contract MerchantFacet is Modifiers {
         uint256 updatedAt
     );
     event MerchantStakeDeposited(address indexed wallet, uint256 amount, uint256 totalStakeUsdc);
-    event MerchantExitRequested(address indexed wallet, uint256 requestedAt);
+    event MerchantUnstakeRequested(address indexed wallet, uint256 requestedAt);
+    event MerchantUnstakeRejected(address indexed wallet, uint256 reviewedAt);
     event MerchantStakeWithdrawn(address indexed wallet, uint256 amount);
     event MerchantLiquidityDeposited(address indexed wallet, uint256 amount, uint256 totalLiquidityUsdc);
     event MerchantLiquidityWithdrawn(address indexed wallet, uint256 amount, uint256 totalLiquidityUsdc);
@@ -96,7 +95,6 @@ contract MerchantFacet is Modifiers {
         merchant.availability = MerchantAvailability.OFFLINE;
         merchant.stakeUsdc = stakeAmount;
         merchant.registeredAt = block.timestamp;
-        s.merchantIndex.push(msg.sender);
         s.totalMerchantStakeUsdc += stakeAmount;
 
         LibCustody.pullExact(msg.sender, stakeAmount);
@@ -105,7 +103,7 @@ contract MerchantFacet is Modifiers {
 
     function approveMerchant(address wallet)
         external
-        onlyRole(LibAccess.OPERATOR_ROLE)
+        onlyDiamondOwner
         whenNotPaused
         nonReentrant
     {
@@ -119,16 +117,16 @@ contract MerchantFacet is Modifiers {
 
     function setMerchantStatus(address wallet, MerchantStatus newStatus)
         external
-        onlyRole(LibAccess.OPERATOR_ROLE)
+        onlyDiamondOwner
         nonReentrant
     {
         if (
             newStatus == MerchantStatus.PENDING ||
-            newStatus == MerchantStatus.EXITING ||
+            newStatus == MerchantStatus.UNSTAKE_PENDING ||
             newStatus == MerchantStatus.EXITED
         ) revert InvalidMerchantStatus();
         MerchantV2 storage merchant = _requireMerchant(wallet);
-        if (merchant.status == MerchantStatus.EXITING || merchant.status == MerchantStatus.EXITED) {
+        if (merchant.status == MerchantStatus.UNSTAKE_PENDING || merchant.status == MerchantStatus.EXITED) {
             revert InvalidMerchantStatus();
         }
         MerchantStatus previous = merchant.status;
@@ -146,7 +144,7 @@ contract MerchantFacet is Modifiers {
         if (amount == 0) revert InvalidAmount();
         AppStorageV2 storage s = LibAppStorage.appStorage();
         MerchantV2 storage merchant = _requireMerchant(msg.sender);
-        if (merchant.status == MerchantStatus.EXITING || merchant.status == MerchantStatus.EXITED) {
+        if (merchant.status == MerchantStatus.UNSTAKE_PENDING || merchant.status == MerchantStatus.EXITED) {
             revert InvalidMerchantStatus();
         }
         merchant.stakeUsdc += amount;
@@ -155,7 +153,7 @@ contract MerchantFacet is Modifiers {
         emit MerchantStakeDeposited(msg.sender, amount, merchant.stakeUsdc);
     }
 
-    function requestMerchantExit() external nonReentrant {
+    function requestUnstake() external nonReentrant {
         MerchantV2 storage merchant = _requireMerchant(msg.sender);
         if (
             merchant.status != MerchantStatus.PENDING &&
@@ -165,30 +163,36 @@ contract MerchantFacet is Modifiers {
             revert InvalidMerchantStatus();
         }
         _enforceNoObligations(merchant);
-        if (merchant.liquidityUsdc != 0) {
-            revert InsufficientAvailableLiquidity(0, merchant.liquidityUsdc);
-        }
-        merchant.status = MerchantStatus.EXITING;
+        merchant.status = MerchantStatus.UNSTAKE_PENDING;
         merchant.availability = MerchantAvailability.OFFLINE;
-        emit MerchantExitRequested(msg.sender, block.timestamp);
+        emit MerchantUnstakeRequested(msg.sender, block.timestamp);
     }
 
-    function withdrawStake() external nonReentrant {
+    function approveMerchantUnstake(address wallet) external onlyDiamondOwner nonReentrant {
         AppStorageV2 storage s = LibAppStorage.appStorage();
-        MerchantV2 storage merchant = _requireMerchant(msg.sender);
-        if (merchant.status != MerchantStatus.EXITING) revert InvalidMerchantStatus();
+        MerchantV2 storage merchant = _requireMerchant(wallet);
+        if (merchant.status != MerchantStatus.UNSTAKE_PENDING) revert InvalidMerchantStatus();
         _enforceNoObligations(merchant);
-        if (merchant.liquidityUsdc != 0) {
-            revert InsufficientAvailableLiquidity(0, merchant.liquidityUsdc);
-        }
-        uint256 amount = merchant.stakeUsdc;
-        if (amount == 0) revert InvalidAmount();
+        uint256 stakeAmount = merchant.stakeUsdc;
+        uint256 liquidityAmount = merchant.liquidityUsdc;
+        uint256 settlementAmount = stakeAmount + liquidityAmount;
+        if (settlementAmount == 0) revert InvalidAmount();
 
         merchant.stakeUsdc = 0;
+        merchant.liquidityUsdc = 0;
         merchant.status = MerchantStatus.EXITED;
-        s.totalMerchantStakeUsdc -= amount;
-        LibCustody.pushExact(msg.sender, amount);
-        emit MerchantStakeWithdrawn(msg.sender, amount);
+        s.totalMerchantStakeUsdc -= stakeAmount;
+        s.totalMerchantLiquidityUsdc -= liquidityAmount;
+        LibCustody.pushExact(wallet, settlementAmount);
+        if (liquidityAmount != 0) emit MerchantLiquidityWithdrawn(wallet, liquidityAmount, 0);
+        if (stakeAmount != 0) emit MerchantStakeWithdrawn(wallet, stakeAmount);
+    }
+
+    function rejectMerchantUnstake(address wallet) external onlyDiamondOwner nonReentrant {
+        MerchantV2 storage merchant = _requireMerchant(wallet);
+        if (merchant.status != MerchantStatus.UNSTAKE_PENDING) revert InvalidMerchantStatus();
+        merchant.status = MerchantStatus.INACTIVE;
+        emit MerchantUnstakeRejected(wallet, block.timestamp);
     }
 
     function depositLiquidity(uint256 amount) external whenNotPaused nonReentrant {
@@ -237,7 +241,11 @@ contract MerchantFacet is Modifiers {
         if (fiatCapacityE6 == 0) revert InvalidAmount();
         AppStorageV2 storage s = LibAppStorage.appStorage();
         MerchantV2 storage merchant = _requireMerchant(msg.sender);
-        if (merchant.status != MerchantStatus.ACTIVE) revert MerchantNotActive(msg.sender);
+        // Onboarding is a two-part application: a PENDING merchant submits
+        // their channel before the owner reviews and approves both records.
+        if (merchant.status != MerchantStatus.PENDING && merchant.status != MerchantStatus.ACTIVE) {
+            revert MerchantNotActive(msg.sender);
+        }
 
         merchant.channelNonce += 1;
         channelId = LibMerchants.generateChannelId(
@@ -255,14 +263,13 @@ contract MerchantFacet is Modifiers {
         channel.fiatCapacityE6 = fiatCapacityE6;
         channel.registeredAt = block.timestamp;
         channel.updatedAt = block.timestamp;
-        s.merchantChannelIndex[msg.sender].push(channelId);
 
         emit PaymentChannelRegistered(channelId, msg.sender, sideMask, fiatCapacityE6, block.timestamp);
     }
 
     function reviewPaymentChannel(bytes32 channelId, ChannelStatus status)
         external
-        onlyRole(LibAccess.OPERATOR_ROLE)
+        onlyDiamondOwner
         nonReentrant
     {
         if (status != ChannelStatus.APPROVED && status != ChannelStatus.REJECTED) {
@@ -343,45 +350,6 @@ contract MerchantFacet is Modifiers {
         return _requireChannel(channelId);
     }
 
-    function getMerchantPage(uint256 cursor, uint256 limit)
-        external
-        view
-        onlyInitialized
-        returns (MerchantV2[] memory items, uint256 nextCursor)
-    {
-        _validatePageLimit(limit);
-        AppStorageV2 storage s = LibAppStorage.appStorage();
-        uint256 length = s.merchantIndex.length;
-        if (cursor >= length) return (new MerchantV2[](0), length);
-        uint256 end = cursor + limit;
-        if (end > length) end = length;
-        items = new MerchantV2[](end - cursor);
-        for (uint256 i = cursor; i < end; ++i) {
-            items[i - cursor] = s.merchants[s.merchantIndex[i]];
-        }
-        return (items, end);
-    }
-
-    function getMerchantChannelPage(address wallet, uint256 cursor, uint256 limit)
-        external
-        view
-        onlyInitialized
-        returns (PaymentChannelV2[] memory items, uint256 nextCursor)
-    {
-        _requireMerchant(wallet);
-        _validatePageLimit(limit);
-        AppStorageV2 storage s = LibAppStorage.appStorage();
-        bytes32[] storage ids = s.merchantChannelIndex[wallet];
-        if (cursor >= ids.length) return (new PaymentChannelV2[](0), ids.length);
-        uint256 end = cursor + limit;
-        if (end > ids.length) end = ids.length;
-        items = new PaymentChannelV2[](end - cursor);
-        for (uint256 i = cursor; i < end; ++i) {
-            items[i - cursor] = s.channels[ids[i]];
-        }
-        return (items, end);
-    }
-
     function getMerchantBalances(address wallet)
         external
         view
@@ -444,10 +412,6 @@ contract MerchantFacet is Modifiers {
             merchant.disputeLockedUsdc != 0 ||
             merchant.reservedFiatE6 != 0
         ) revert MerchantHasObligations(merchant.wallet);
-    }
-
-    function _validatePageLimit(uint256 limit) private pure {
-        if (limit == 0 || limit > LibMerchants.MAX_PAGE_SIZE) revert PageLimitInvalid(limit);
     }
 
     function _enforceMinimumStake(MerchantV2 storage merchant) private view {

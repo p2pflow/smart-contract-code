@@ -3,7 +3,6 @@ pragma solidity 0.8.24;
 
 import {
     AppStorageV2,
-    Candidate,
     MerchantAvailability,
     MerchantStatus,
     MerchantV2,
@@ -16,7 +15,7 @@ import {
     ChannelNotFound,
     InsufficientAvailableLiquidity,
     InsufficientFiatCapacity,
-    InvalidCandidate,
+    InvalidAssignment,
     MerchantNotActive,
     MerchantNotFound,
     MerchantNotOnline,
@@ -26,42 +25,29 @@ import {LibAppStorage} from "./LibAppStorage.sol";
 import {LibMerchants} from "./LibMerchants.sol";
 
 library LibEligibility {
-    function enforceCandidate(OrderV2 storage order, Candidate memory candidate, uint256 index) internal view {
-        if (candidate.merchant == address(0) || candidate.channelId == bytes32(0)) {
-            revert InvalidCandidate(index);
+    function enforceAssignment(OrderV2 storage order, address merchantAddress, bytes32 channelId) internal view {
+        if (merchantAddress == address(0) || channelId == bytes32(0) || merchantAddress == order.user) {
+            revert InvalidAssignment();
         }
-        if (candidate.merchant == order.user) revert InvalidCandidate(index);
         AppStorageV2 storage s = LibAppStorage.appStorage();
-        MerchantV2 storage merchant = s.merchants[candidate.merchant];
-        if (merchant.wallet == address(0)) revert MerchantNotFound(candidate.merchant);
-        if (merchant.status != MerchantStatus.ACTIVE) revert MerchantNotActive(candidate.merchant);
+        MerchantV2 storage merchant = s.merchants[merchantAddress];
+        if (merchant.wallet == address(0)) revert MerchantNotFound(merchantAddress);
+        if (merchant.status != MerchantStatus.ACTIVE) revert MerchantNotActive(merchantAddress);
         if (merchant.stakeUsdc < s.config.minMerchantStakeUsdc) {
-            revert MerchantStakeBelowMinimum(
-                candidate.merchant,
-                merchant.stakeUsdc,
-                s.config.minMerchantStakeUsdc
-            );
+            revert MerchantStakeBelowMinimum(merchantAddress, merchant.stakeUsdc, s.config.minMerchantStakeUsdc);
         }
-        if (merchant.availability != MerchantAvailability.ONLINE) {
-            revert MerchantNotOnline(candidate.merchant);
+        if (merchant.availability != MerchantAvailability.ONLINE) revert MerchantNotOnline(merchantAddress);
+        PaymentChannelV2 storage channel = s.channels[channelId];
+        if (channel.channelId == bytes32(0)) revert ChannelNotFound(channelId);
+        if (!LibMerchants.isEligibleChannel(channel, merchantAddress, order.orderType)) {
+            revert ChannelNotEligible(channelId);
         }
-
-        PaymentChannelV2 storage channel = s.channels[candidate.channelId];
-        if (channel.channelId == bytes32(0)) revert ChannelNotFound(candidate.channelId);
-        if (!LibMerchants.isEligibleChannel(channel, candidate.merchant, order.orderType)) {
-            revert ChannelNotEligible(candidate.channelId);
-        }
-
         if (order.orderType == OrderType.BUY) {
             uint256 availableUsdc = LibMerchants.availableUsdc(merchant);
-            if (availableUsdc < order.usdcAmount) {
-                revert InsufficientAvailableLiquidity(availableUsdc, order.usdcAmount);
-            }
+            if (availableUsdc < order.usdcAmount) revert InsufficientAvailableLiquidity(availableUsdc, order.usdcAmount);
         } else {
             uint256 availableFiatE6 = LibMerchants.availableFiatE6(channel);
-            if (availableFiatE6 < order.fiatAmountE6) {
-                revert InsufficientFiatCapacity(availableFiatE6, order.fiatAmountE6);
-            }
+            if (availableFiatE6 < order.fiatAmountE6) revert InsufficientFiatCapacity(availableFiatE6, order.fiatAmountE6);
         }
     }
 }

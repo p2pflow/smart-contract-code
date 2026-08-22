@@ -1,0 +1,27 @@
+{
+  "chainId": 84532,
+  "diamond": "0x3D09CA2d1D44467FE8814c41cf9Ba8bb27175756",
+  "initializer": "0x0C1D45E560bDEf328CC469c34bB95e6954e85704",
+  "owner": "0xA486891ED5Abd2C3B1bB2a20F36B9456e32c7866",
+  "executor": "0xA486891ED5Abd2C3B1bB2a20F36B9456e32c7866",
+  "usdc": "0xa50e77Ae17F290Cfb0E2F29B4F2d9D0071Cb6D63",
+  "facets": {
+    "DiamondCutFacet": "0x6dc638086f650468070706DAcD8852adb3d8A319",
+    "DiamondLoupeFacet": "0xd2899c28A7D7c005C871B2CE654F1a69791C07CF",
+    "OwnershipFacet": "0x61E432494Db274e72C249616FD4aE94EEAABd0B3",
+    "AccessControlFacet": "0xf4E7a2DFb53ce3b151461712c3e4B3DC1AfEaa5d",
+    "ConfigFacet": "0x262A89d8755fc7f9027f0d65868bEAda5bC021Ec",
+    "PricingFacet": "0x4f232aD60c1FdBb4EF9a1ca65AC5c175DE6Ef3C4",
+    "MerchantFacet": "0x6EBE3b5D657fF965D1BCA32bD3960114A02CEf08",
+    "AssignmentFacet": "0xbdc2daD8BbBf0579614519fd63f75d5C5d87Ce59",
+    "OrderFacet": "0x288e5c449eAf4e88a4E29FD42EF5Ef72e2e90467",
+    "DisputeFacet": "0x03971f14cD527Da0566dB3d31C36BF7C3730Ff9E"
+  },
+  "deploymentBlock": 45828303,
+  "startBlock": 45828303,
+  "deploymentTransactionHash": "0x953de5a334d35786b9e0a0238ce175b8888f0908ead099e9512501ee73ed5812",
+  "initializationTransactionHash": "0x412f4e489cdb13a91bcbec4d0c83d6e119c8a3b13dab9d5cfa01ef99ee23a47a",
+  "unpauseTransactionHash": "0xadce91607f7d3e283bd6a7a83598f924d46cdd52f24e81b3a959b780f998e85b",
+  "lastUpgradeTransactionHash": "0xd9697dec6b6bb166e98f9447bf72ade01355b515fc78ac351d472aa677df651c",
+  "lastUpgradeBlock": 45828655
+}

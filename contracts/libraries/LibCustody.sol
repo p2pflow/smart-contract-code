@@ -128,12 +128,13 @@ library LibCustody {
 
     function cancel(OrderV2 storage order, OrderStatus terminalStatus) internal {
         if (order.custodyFinalized) revert CustodyAlreadyFinalized(order.orderId);
-        if (terminalStatus != OrderStatus.CANCELLED && terminalStatus != OrderStatus.EXPIRED) {
+        if (terminalStatus != OrderStatus.CANCELLED) {
             revert InvalidTerminalStatus(uint8(terminalStatus));
         }
         AppStorageV2 storage s = LibAppStorage.appStorage();
 
-        if (order.merchant != address(0)) {
+        bool hadReservation = order.status == OrderStatus.ACCEPTED || order.status == OrderStatus.FIAT_SENT || order.status == OrderStatus.DISPUTED;
+        if (hadReservation) {
             MerchantV2 storage merchant = s.merchants[order.merchant];
             PaymentChannelV2 storage channel = s.channels[order.channelId];
             if (order.orderType == OrderType.BUY) {
@@ -156,11 +157,7 @@ library LibCustody {
 
         order.custodyFinalized = true;
         order.status = terminalStatus;
-        if (terminalStatus == OrderStatus.CANCELLED) {
-            order.cancelledAt = block.timestamp;
-        } else {
-            order.expiredAt = block.timestamp;
-        }
+        order.cancelledAt = block.timestamp;
 
         if (refundSell) {
             pushExact(order.user, order.usdcAmount);

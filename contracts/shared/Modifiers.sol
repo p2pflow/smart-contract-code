@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {PlatformIsPaused, ProtocolNotInitialized, ReentrantCall} from "./Errors.sol";
-import {LibAccess} from "../libraries/LibAccess.sol";
+import {PlatformIsPaused, ProtocolNotInitialized, ReentrantCall, UnauthorizedExecutor} from "./Errors.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
+import {LibDiamond} from "../libraries/LibDiamond.sol";
 
 abstract contract Modifiers {
     modifier onlyInitialized() {
@@ -11,9 +11,17 @@ abstract contract Modifiers {
         _;
     }
 
-    modifier onlyRole(bytes32 role) {
+    modifier onlyDiamondOwner() {
         if (!LibAppStorage.isInitialized()) revert ProtocolNotInitialized();
-        LibAccess.enforceRole(role, msg.sender);
+        LibDiamond.enforceIsContractOwner();
+        _;
+    }
+
+    modifier onlyExecutor() {
+        if (!LibAppStorage.isInitialized()) revert ProtocolNotInitialized();
+        if (msg.sender != LibAppStorage.appStorage().config.executor) {
+            revert UnauthorizedExecutor(msg.sender);
+        }
         _;
     }
 

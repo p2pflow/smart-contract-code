@@ -10,14 +10,12 @@ import {
     OrderV2
 } from "../shared/AppStorage.sol";
 import {
-    AcceptedRecoveryDeadlineElapsed,
     DisputeNotAllowed,
     DisputeNotOpen,
     OrderNotFound,
     UnauthorizedOrderActor
 } from "../shared/Errors.sol";
 import {Modifiers} from "../shared/Modifiers.sol";
-import {LibAccess} from "../libraries/LibAccess.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {LibCustody} from "../libraries/LibCustody.sol";
 
@@ -51,12 +49,6 @@ contract DisputeFacet is Modifiers {
         if (order.status != OrderStatus.ACCEPTED && order.status != OrderStatus.FIAT_SENT) {
             revert DisputeNotAllowed(orderId);
         }
-        if (
-            order.status == OrderStatus.ACCEPTED &&
-            block.timestamp >= order.acceptedRecoveryDeadline
-        ) {
-            revert AcceptedRecoveryDeadlineElapsed(orderId, order.acceptedRecoveryDeadline);
-        }
         if (msg.sender != order.user && msg.sender != order.merchant) {
             revert UnauthorizedOrderActor(orderId, msg.sender);
         }
@@ -78,7 +70,7 @@ contract DisputeFacet is Modifiers {
 
     function resolveDispute(bytes32 orderId, DisputeResolution resolution)
         external
-        onlyRole(LibAccess.DISPUTE_RESOLVER_ROLE)
+        onlyDiamondOwner
         nonReentrant
     {
         OrderV2 storage order = _requireOrder(orderId);

@@ -1,53 +1,40 @@
-# P2PFlow v2 smart contract
+# P2PFlow smart contract
 
-This repository is the canonical source for the P2PFlow v2 EIP-2535 Diamond, its generated protocol package, deterministic local verification, and read-only Base Sepolia preflight. It does not contain an enabled deployment command. `npm run deploy` and `npm run upgrade` deliberately fail.
+Simplified EIP-2535 Diamond for Base Sepolia development.
 
-## Protocol boundary
+## Authority
 
-The Diamond composes access control, configuration, merchant, pricing, assignment, order, dispute, loupe, ownership, and upgrade facets over namespaced `AppStorage`. Custody uses six-decimal USDC accounting. BUY orders reserve merchant liquidity; SELL orders escrow user USDC. The contract enforces status transitions, quote freshness and user price bounds, bounded assignment candidates, exact reservation release, role separation, pause controls, and terminal-state idempotency.
+- Diamond owner: administration, merchant/channel review, disputes, pause, and upgrades.
+- Executor: assigns one merchant/channel to each order and publishes the latest BUY/SELL prices.
 
-`packages/protocol` is the only consumer boundary for ABIs, constants, status values, errors, deployment-manifest validation, call factories, receipt decoding, and protocol digests. Its explicit test-fixture subpath is not imported by production consumers. `scripts/vendor-protocol.mjs` reproducibly distributes one packed artifact to the subgraph, executor, and three UIs.
+There are no application role sets, assignment rounds, price rounds/history/quorum, protocol timeouts, configuration versions, or paginated on-chain registries.
 
-## Verification
+## Base Sepolia deployment
 
-Use Node 24.18.0 and npm 11.16.0.
+The development token is mUSDC at `0xa50e77Ae17F290Cfb0E2F29B4F2d9D0071Cb6D63`.
 
-```sh
-npm --prefix packages/protocol ci --no-audit --no-fund
-npm ci --no-audit --no-fund
-npm run verify
+Configure `.env`:
+
+```dotenv
+BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+DEPLOYER_PRIVATE_KEY=0x...
+P2PFLOW_EXECUTOR_ADDR=0x...
+P2PFLOW_MIN_MERCHANT_STAKE_USDC_ATOMS=100000000
 ```
 
-The full gate compiles Solidity 0.8.24, checks generated artifacts, runs contract, invariant, storage-layout, gas, recovery, and package tests, verifies the local fail-closed fixture, and checks the reproducible package. From the six-repository workspace, run:
+Then run:
 
 ```sh
-npm run verify:workspace
-npm run verify:coordinated
-npm run test:system
+npm run deploy:base-sepolia:mock
 ```
 
-The system test creates a fresh local v2 Diamond and uses local test infrastructure only. Test mocks and the local fixture are intentionally retained but are forbidden in a shared runtime.
+The script checks chain ID 84532 and the six-decimal mUSDC contract, compiles all facets, deploys and initializes the Diamond, unpauses it, and writes the addresses to `deployments/base-sepolia/`.
 
-## Base Sepolia release boundary
-
-The sole real-network command is read-only:
+## Local checks
 
 ```sh
-BASE_SEPOLIA_RPC_URL=https://reviewed-rpc.example \
-  npm run preflight:base-sepolia -- --manifest /reviewed/base-sepolia-v2.json
+npm run compile
+npm test
 ```
 
-It requires chain 84532, official Base Sepolia USDC, exact deployment and initialization receipts, bytecode hashes, facet selectors, protocol/storage identity, mutually distinct role holders, and a freshly paused Diamond. It never reads a local environment file and never signs or broadcasts.
-
-Before any separately authorized deployment or enablement, every Q-1–Q-8 decision, a replacement signer set, independent contract review, reviewed shadow evidence, and explicit operator approval must be recorded. See `docs/runbooks/` and `docs/release/coordinated-base-sepolia-checklist.md`.
-
-## Key paths
-
-- `contracts/` — Diamond, facets, shared storage, libraries, v2 initializer, and test-only mocks.
-- `packages/protocol/` — canonical generated consumer package and explicit test fixture.
-- `scripts/preflight-v2.mjs` — fail-closed read-only deployment verification.
-- `test/` — contract, invariant, gas, compatibility, and local system coverage.
-- `docs/architecture/` — as-built system overview and user-facing guide.
-- `docs/runbooks/` — operator, recovery, privacy, and signer procedures.
-
-Never commit credentials, private settlement data, deployment secrets, or a real manifest containing unreviewed authority decisions.
+Never commit RPC credentials or private keys.

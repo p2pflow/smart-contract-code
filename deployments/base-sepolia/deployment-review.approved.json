@@ -1,0 +1,7 @@
+{
+  "decision": "approved",
+  "environment": "base-sepolia",
+  "reviewer": "project-owner (explicit Base Sepolia development deployment approval)",
+  "reviewedAt": "2026-08-22T19:18:00Z",
+  "manifestFileSha256": "5b5edf284b9c42b608ee16f6c9c81dc653a3eb20b8967153d9d4418e49285942"
+}
