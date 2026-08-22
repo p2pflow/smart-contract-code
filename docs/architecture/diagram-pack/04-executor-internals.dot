@@ -1,0 +1,107 @@
+digraph P2PFlowExecutor {
+  graph [
+    bgcolor="#071321",
+    pad="0.28",
+    margin="0",
+    rankdir=LR,
+    nodesep="0.34",
+    ranksep="0.72",
+    splines=polyline,
+    outputorder=edgesfirst,
+    fontname="DejaVu Sans",
+    fontcolor="#d8e7f5",
+    label="P2PFlow — Single Executor Process and Durable Coordination",
+    labelloc=t,
+    fontsize=24
+  ];
+  node [shape=box, style="rounded,filled", fillcolor="#12243b", color="#4f708f", fontcolor="#f4f8ff", fontname="DejaVu Sans", fontsize=9.5, penwidth=1.3, margin="0.12,0.08"];
+  edge [color="#38bdf8", fontcolor="#b9cbe0", fontname="DejaVu Sans", fontsize=8, penwidth=1.5, arrowsize=0.64];
+
+  clients [label="User · Merchant · Operator UIs\nexpected-wallet-bound HTTPS", fillcolor="#172d4d", color="#38bdf8"];
+  rpc [label="Base Sepolia RPC\nconfirmed HTTP + WSS wake hint"];
+  graph_provider [label="Goldsky GraphQL\npublic projection / lag checks", color="#4ade80"];
+  sources [label="Price providers\ntwo sources per market leg"];
+  signers [label="Managed signer endpoints\nrole-separated + independently enabled", color="#e879f9", style="rounded,dashed,filled"];
+
+  subgraph cluster_process {
+    label="EXACTLY ONE EXECUTOR PROCESS";
+    color="#3d6685";
+    fontcolor="#a8cde4";
+    style="rounded,filled";
+    fillcolor="#091725";
+    penwidth=2;
+
+    subgraph cluster_boundary {
+      label="HTTP + SECURITY BOUNDARY";
+      color="#2e4f69";
+      fontcolor="#8fb4ce";
+      style="rounded,filled";
+      fillcolor="#0d1d30";
+      http [label="HTTP router\nvalidation · no-store · CORS\nrate limits · correlation IDs"];
+      sessions [label="Wallet sessions\nnonce signature EOA/ERC-1271\nSecure cookie · CSRF rotation\nX-P2PFlow-Wallet binding"];
+      api [label="Participant + operator APIs\nquotes · orders · channels\nprivate refs · readiness"];
+      audit [label="Structured redacted audit\nno cookie / CSRF / PII / raw tx"];
+    }
+
+    subgraph cluster_domain {
+      label="DOMAIN SERVICES";
+      color="#276456";
+      fontcolor="#83d5bd";
+      style="rounded,filled";
+      fillcolor="#0c211e";
+      pricing [label="Pricing\nOFF / SHADOW / ENABLED\nquorum + evidence"];
+      matching [label="Matching\neligibility · caps · reservations\ndeterministic candidate digest"];
+      payments [label="Payment references\nAES-GCM · ACTIVE/BOUND/REVOKED/DELETED\nowner/party/purpose + short TTL"];
+      operations [label="Operations\nrole evidence · pause · reconciliation"];
+    }
+
+    subgraph cluster_automation {
+      label="CANONICAL AUTOMATION + RECOVERY";
+      color="#65512b";
+      fontcolor="#e8c36e";
+      style="rounded,filled";
+      fillcolor="#211c12";
+      scanner [label="Confirmed scanner\nHTTP authority · 12-block depth\ncanonical blocks/events · reorg detection"];
+      queue [label="Durable job queue + scheduler\ndeterministic IDs · leases · retries\nnotifications + lifecycle work"];
+      tx [label="Transaction coordinator\nsimulate · nonce lanes · outbox\nencrypted raw tx · receipt reconciliation"];
+      fence [label="Global canonical/write fence\nOFF → SHADOW → ENABLED\nfail closed on lag/deep reorg", fillcolor="#3a2028", color="#fb7185"];
+    }
+
+    runtime [label="Runtime + composition root\nvalidated config · one lifecycle\none DB pool · graceful drain", fillcolor="#262844", color="#a78bfa"];
+    health [label="Health / readiness\nprovider · cursor · lag · worker\nmode + write-disable evidence"];
+  }
+
+  postgres [label="PostgreSQL — durable source\nsessions · CSRF · idempotency · private ciphertext\nblocks/events/cursors · jobs/leases · reservations\noutbox/attempts/receipts · audits/retention", fillcolor="#1b2940", color="#51d5c5", penwidth=2.1];
+  diamond [label="v2 Diamond\ncanonical state + custody", fillcolor="#173648", color="#51d5c5"];
+
+  clients -> http [label="HTTPS", color="#38bdf8"];
+  http -> sessions; sessions -> api; http -> audit [style=dashed];
+  api -> pricing; api -> matching; api -> payments; api -> operations;
+  runtime -> http; runtime -> scanner; runtime -> queue; runtime -> health;
+  pricing -> queue [label="publish candidate"];
+  matching -> queue [label="assignment candidate"];
+  scanner -> queue [label="deterministic canonical jobs", color="#4ade80"];
+  queue -> tx [label="leased command"];
+  operations -> tx;
+  fence -> scanner [color="#fb7185", style=dashed];
+  fence -> queue [color="#fb7185", style=dashed];
+  fence -> tx [color="#fb7185", style=dashed];
+  scanner -> health; queue -> health; tx -> health;
+
+  rpc -> scanner [label="blocks · logs · receipts", color="#38bdf8"];
+  graph_provider -> matching [label="candidate projection", color="#4ade80"];
+  graph_provider -> health [label="projection lag", color="#4ade80"];
+  sources -> pricing [label="observations", color="#38bdf8"];
+  tx -> signers [label="approved digest", color="#e879f9", style=dashed];
+  signers -> tx [label="signature only", color="#e879f9", style=dashed];
+  tx -> diamond [label="managed transaction", color="#f59e0b", penwidth=2];
+  scanner -> diamond [label="authoritative reads", color="#38bdf8"];
+
+  sessions -> postgres [color="#38bdf8"];
+  payments -> postgres [color="#e879f9"];
+  scanner -> postgres [color="#4ade80"];
+  queue -> postgres [color="#38bdf8"];
+  tx -> postgres [color="#f59e0b"];
+  audit -> postgres [style=dashed];
+  runtime -> postgres [label="one pool", color="#a78bfa"];
+}

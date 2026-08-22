@@ -1,0 +1,32 @@
+---
+description: Optional Play Framework rules for this repository. Add path to coding-standards.mdc → documentation.stackRules when using Play.
+globs:
+alwaysApply: false
+---
+
+# play.mdc — Play Framework stack rules (optional per repository)
+
+Define **repo-specific** Play upgrade paths and verification here. Agents read this **only** when listed in `codingStandards.documentation.stackRules` — the kit does **not** hardcode Play or Lombok rules.
+
+```yaml
+playStack:
+  targetVersion: TBD
+  upgradeFrom:
+    playVersion: TBD
+    runtimeVersion: TBD
+
+  paths:
+    routes: conf/routes
+    controllers: app/controllers
+    services: app/services
+    models: app/models
+    tests: test/
+
+  buildFiles: []  # e.g. build.sbt, project/plugins.sbt
+
+  migrations: []  # repo-specific — from official Play migration guide + SDD
+
+  verify: []  # repo-specific checks before compile (grep patterns, coordinate pins, etc.)
+```
+
+**Agent rule:** Play changes require scope per SDD — not build files alone. Run `playStack.verify` from **this file** at [project-context-sync](../../sdlc-system/workflow/project-context-sync.md). **Compile** proves compatibility ([pre-pr-verification.md](../../sdlc-system/workflow/pre-pr-verification.md)).

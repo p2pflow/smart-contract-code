@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic.local/cursor/sdlc/handoff/1.1",
+  "title": "SDLC Agent Handoff",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "workflowId",
+    "agent",
+    "status",
+    "timestamp",
+    "inputs",
+    "outputs",
+    "errors",
+    "nextAction"
+  ],
+  "properties": {
+    "contractVersion": { "enum": ["1.0", "1.1"] },
+    "workflowId": { "type": "string", "format": "uuid" },
+    "agent": {
+      "type": "string",
+      "enum": [
+        "orchestrator",
+        "project-discovery",
+        "sdd-architect",
+        "jira",
+        "planning",
+        "developer",
+        "qa",
+        "impact-analysis",
+        "flow-validation",
+        "review",
+        "pr-manager",
+        "bugbot",
+        "sdd-sync"
+      ]
+    },
+    "status": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "inputs": {
+      "type": "object",
+      "required": ["workflowContext"],
+      "properties": {
+        "workflowContext": {
+          "type": "object",
+          "required": [
+            "projectContext",
+            "architectureContext",
+            "codingStandards",
+            "deploymentContext",
+            "businessFlowsContext"
+          ],
+          "properties": {
+            "projectContext": { "type": "object" },
+            "architectureContext": { "type": "object" },
+            "codingStandards": { "type": "object" },
+            "deploymentContext": { "type": "object" },
+            "loadedAt": { "type": "string" },
+            "mdcPaths": { "type": "object" }
+          }
+        }
+      }
+    },
+    "outputs": { "type": "object" },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message", "retryable"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "retryable": { "type": "boolean" },
+          "details": { "type": "object" }
+        }
+      }
+    },
+    "nextAction": { "type": "string", "pattern": "^(invoke:|wait:|transition:|halt:)" }
+  },
+  "additionalProperties": false
+}

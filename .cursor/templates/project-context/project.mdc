@@ -1,0 +1,82 @@
+---
+description: Project identity, repositories, technology, Jira, default branch, and constraints for SDLC agents.
+globs:
+alwaysApply: false
+---
+
+# project.mdc — Per-repository configuration (edit for this project only)
+
+> **Only `project-context/*.mdc` differs when copying the kit.** Replace `TBD` and `<placeholders>` before running SDLC.
+
+```yaml
+project:
+  name: TBD  # repo folder name or service id
+  displayName: TBD
+  type: backend-service  # backend-service | frontend-app | monolith | microservice | library
+
+repositories:
+  primary: <org>/<repo>
+  modifiable:
+    - <org>/<repo>
+  readOnly: []
+  involved:
+    - <org>/<repo>
+  localWorkspace: true
+
+technology:
+  languages:
+    - TBD
+  languageVersions: {}
+  frameworks: []
+  buildTool: TBD  # sbt | maven | gradle | npm | pip | poetry | other
+  testCommands:
+    fullSuite: TBD
+    singleClass: TBD
+  packageRoots: []
+  routeConfigPatterns: []
+
+bugbot:
+  enabled: true
+  repoUrl: https://github.com/<org>/<repo>
+  triggerOnDraftPr: true
+  triggerComment: "/bugbot"
+  botLogins:
+    - cursor-bugbot
+    - bugbot
+  setupDoc: .cursor/docs/bugbot-setup.md
+
+jira:
+  enabled: true
+  baseUrl: https://company.atlassian.net
+  projectKey: TBD
+  projectStyle: team-managed
+  issueTypes:
+    epic: Epic
+    story: Story
+    task: Task
+    subtask: Sub-task
+
+branching:
+  defaultBranch: master
+  mergeStrategy: merge
+  commitConvention: conventional
+
+dependencies:
+  internal: []
+  external: []
+
+agentVerification:
+  runLocally: true  # agents may run compile/test locally during execution; pre-PR sync still runs minimum compile
+  ciCommands:
+    compile: TBD  # e.g. sbt compile — mandatory at pre-PR sync for every feature
+    unitTests: TBD
+  skipLocal: []  # empty when runLocally is true; set deferTo for CI as secondary evidence
+  deferTo:
+    - CI pipeline after PR push
+    - pre-PR gate requires deps/versions reconciled, compile pass, gh pr checks green (all work types)
+
+constraints:
+  - Do not commit secrets, tokens, or .env files
+  - SDLC agents must not run local build/test/runtime unless runLocally is true
+  - Do not edit .cursor/ kit files (docs, skills, sdlc-system) — only .cursor/project-context/*.mdc is per-project
+```

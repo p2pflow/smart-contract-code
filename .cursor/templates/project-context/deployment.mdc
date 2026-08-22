@@ -1,0 +1,41 @@
+---
+description: Deployment environments, cloud provider, and rollback strategy.
+globs:
+alwaysApply: false
+---
+
+# deployment.mdc — Per-repository configuration (edit for this project only)
+
+```yaml
+deployment:
+  cloudProvider: TBD  # aws | gcp | azure | on-prem | other
+
+  environments:
+    - name: local
+      purpose: developer workstation
+      runCommand: TBD
+    - name: staging
+      purpose: pre-production
+      deployMechanism: team-pipeline
+    - name: production
+      purpose: live traffic
+      deployMechanism: team-pipeline
+
+  strategy:
+    type: rolling
+    featureFlags: TBD
+
+  rollback:
+    code: revert PR and redeploy previous artifact
+    database: per team runbook
+    config: revert config in dedicated commit
+
+  ci:
+    provider: github-actions
+    prChecks: required-before-merge
+    watchCommand: gh pr checks {number}
+
+  observability:
+    apm: TBD
+    logs: structured application logs
+```

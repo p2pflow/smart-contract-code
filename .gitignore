@@ -23,3 +23,7 @@ deployed-addresses.json
 # Misc
 .DS_Store
 *.log
+
+# Local SDLC workflow state and reports
+.cursor/sdlc-system/state/
+.cursor/sdlc-system/workflow-artifacts/

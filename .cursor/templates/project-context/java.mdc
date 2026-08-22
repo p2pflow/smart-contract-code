@@ -1,0 +1,30 @@
+---
+description: Optional JVM stack rules for this repository. Add path to coding-standards.mdc → documentation.stackRules when using Java.
+globs:
+alwaysApply: false
+---
+
+# java.mdc — JVM stack rules (optional per repository)
+
+Define **repo-specific** upgrade and migration rules here. Agents read this file only when listed in `codingStandards.documentation.stackRules` — the kit does **not** hardcode JVM, Lombok, or annotation-processor rules.
+
+```yaml
+javaStack:
+  targetVersion: TBD
+  sourceEncoding: UTF-8
+
+  upgradeScope:
+    includeLayers: []  # e.g. controllers, services, models, repositories, tests
+    configOnlyInsufficient: true
+
+  buildFiles: []  # e.g. build.sbt, pom.xml, .java-version
+
+  migrations: []  # repo-specific: package renames, API replacements, deprecated removals
+
+  verification: []  # repo-specific: grep patterns, version pins, processor config checks
+
+  ci:
+    jdkImage: TBD
+```
+
+**Agent rule:** Apply `migrations` and `verification` defined **in this file and the SDD**. Pre-PR: reconcile versions, run **compile** ([pre-pr-verification.md](../../sdlc-system/workflow/pre-pr-verification.md)).

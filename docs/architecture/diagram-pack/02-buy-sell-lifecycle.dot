@@ -1,0 +1,98 @@
+digraph P2PFlowLifecycle {
+  graph [
+    bgcolor="#071321",
+    pad="0.26",
+    margin="0",
+    rankdir=TB,
+    nodesep="0.72",
+    ranksep="0.38",
+    splines=polyline,
+    outputorder=edgesfirst,
+    fontname="DejaVu Sans",
+    fontcolor="#d8e7f5",
+    label="P2PFlow — Complete BUY and SELL Settlement Journeys",
+    labelloc=t,
+    fontsize=24
+  ];
+  node [shape=box, style="rounded,filled", fillcolor="#12243b", color="#4f708f", fontcolor="#f4f8ff", fontname="DejaVu Sans", fontsize=10, penwidth=1.35, margin="0.12,0.09"];
+  edge [color="#38bdf8", fontcolor="#b9cbe0", fontname="DejaVu Sans", fontsize=8, penwidth=1.65, arrowsize=0.68];
+
+  buy_title [label="BUY · user receives USDC after paying fiat", fillcolor="#173648", color="#51d5c5", fontsize=13, penwidth=2];
+  b1 [label="1 · Public quote\ntrade route is session-gated\nquorum-derived price"];
+  b2 [label="2 · Create BUY\nwallet-signed on Diamond", color="#f59e0b"];
+  b3 [label="3 · Assign candidates\nmatching write only if ENABLED\ncap + eligibility checked\nno capacity reserved yet"];
+  b4 [label="4 · Merchant accepts\ncapacity reserved on-chain"];
+  b5 [label="5 · Reveal merchant\npayment reference", color="#e879f9"];
+  b6 [label="6 · User sends fiat\noff-chain"];
+  b7 [label="7 · Mark FIAT_SENT\non Diamond", color="#f59e0b"];
+  b8 [label="8 · Merchant confirms\nreserved USDC → user", fillcolor="#163629", color="#4ade80"];
+
+  sell_title [label="SELL · merchant receives user-escrowed USDC after paying fiat", fillcolor="#2e294b", color="#a78bfa", fontsize=13, penwidth=2];
+  s1 [label="1 · Quote + encrypted\npayout reference", color="#e879f9"];
+  s2 [label="2 · Exact allowance\nthen create SELL", color="#f59e0b"];
+  s3 [label="3 · Diamond escrows USDC\nreceipt-derived order ID"];
+  s4 [label="4 · Bind opaque reference\nto canonical SELL event", color="#e879f9"];
+  s5 [label="5 · Assign + accept\nmerchant reveals payout"];
+  s6 [label="6 · Merchant sends fiat\noff-chain"];
+  s7 [label="7 · Mark FIAT_SENT\non Diamond", color="#f59e0b"];
+  s8 [label="8 · User confirms\nescrow → merchant liquidity\nwithdrawal is separate", fillcolor="#163629", color="#4ade80"];
+
+  { rank=same; buy_title; sell_title; }
+  { rank=same; b1; s1; }
+  { rank=same; b2; s2; }
+  { rank=same; b3; s3; }
+  { rank=same; b4; s4; }
+  { rank=same; b5; s5; }
+  { rank=same; b6; s6; }
+  { rank=same; b7; s7; }
+  { rank=same; b8; s8; }
+
+  buy_title -> b1 [style=invis, weight=10];
+  sell_title -> s1 [style=invis, weight=10];
+  b1 -> b2 [label="price evidence", color="#38bdf8"];
+  b2 -> b3 [label="CREATED", color="#4ade80"];
+  b3 -> b4 [label="ASSIGNED", color="#f59e0b"];
+  b4 -> b5 [label="ACCEPTED", color="#4ade80"];
+  b5 -> b6 [label="private / TTL", color="#e879f9"];
+  b6 -> b7 [label="off-chain payment", color="#e879f9", style=dotted];
+  b7 -> b8 [label="FIAT_SENT → COMPLETED", color="#4ade80"];
+
+  s1 -> s2 [label="private data stays off-chain", color="#e879f9"];
+  s2 -> s3 [label="escrow once", color="#f59e0b"];
+  s3 -> s4 [label="12-block canonical proof", color="#4ade80"];
+  s4 -> s5 [label="BOUND → ASSIGNED", color="#38bdf8"];
+  s5 -> s6 [label="ACCEPTED", color="#4ade80"];
+  s6 -> s7 [label="off-chain payment", color="#e879f9", style=dotted];
+  s7 -> s8 [label="FIAT_SENT → COMPLETED", color="#4ade80"];
+
+  recovery [
+    label="Shared terminal and recovery rules\nCANCELLED · EXPIRED · DISPUTED → settlement or cancellation\nExact-once escrow/reservation release · canonical receipt proof · durable retry",
+    fillcolor="#3a2028",
+    color="#fb7185",
+    fontcolor="#ffe5ea",
+    fontsize=11,
+    penwidth=1.8
+  ];
+  privacy [label="Private boundary\nPII/payment values: executor ciphertext + short-lived disclosure only\nNever chain events, Graph, logs, browser storage, or diagram evidence", fillcolor="#301f3e", color="#e879f9"];
+  authority [label="Authority boundary\nDiamond decides lifecycle + custody\nExecutor coordinates; subgraph projects", fillcolor="#17303a", color="#51d5c5"];
+  { rank=same; privacy; recovery; authority; }
+
+  buy_title -> sell_title [style=invis, weight=30];
+  b1 -> s1 [style=invis, weight=30];
+  b2 -> s2 [style=invis, weight=30];
+  b3 -> s3 [style=invis, weight=30];
+  b4 -> s4 [style=invis, weight=30];
+  b5 -> s5 [style=invis, weight=30];
+  b6 -> s6 [style=invis, weight=30];
+  b7 -> s7 [style=invis, weight=30];
+  b8 -> s8 [style=invis, weight=30];
+
+  b2 -> recovery [color="#fb7185", style=dashed, label="cancel / expiry / dispute"];
+  b4 -> recovery [color="#fb7185", style=dashed];
+  b7 -> recovery [color="#fb7185", style=dashed];
+  s3 -> recovery [color="#fb7185", style=dashed];
+  s5 -> recovery [color="#fb7185", style=dashed];
+  s7 -> recovery [color="#fb7185", style=dashed];
+  privacy -> recovery [style=invis];
+  recovery -> authority [style=invis];
+}

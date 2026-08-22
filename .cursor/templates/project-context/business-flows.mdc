@@ -1,0 +1,24 @@
+---
+description: Named business flows for flow-validation agent regression and risk analysis.
+globs:
+alwaysApply: false
+---
+
+# business-flows.mdc — Per-repository configuration (edit for this project only)
+
+> Add one `businessFlows` entry per end-to-end user or partner journey.
+
+```yaml
+businessFlows:
+  - id: example-core-flow
+    name: TBD — primary user journey
+    description: TBD
+    entryPoints: []
+    criticality: high
+
+  - id: example-secondary-flow
+    name: TBD — secondary journey
+    description: TBD
+    entryPoints: []
+    criticality: medium
+```

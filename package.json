@@ -13,6 +13,8 @@
     "test:invariant-gas": "hardhat test test/v2-invariant-gas.test.js",
     "test:system": "node test/system/local-system.mjs",
     "coverage": "hardhat coverage",
+    "docs:diagrams": "node scripts/generate-architecture-diagram-pack.mjs",
+    "docs:diagrams:check": "node scripts/generate-architecture-diagram-pack.mjs --check",
     "docs:pdf": "node scripts/generate-high-level-pdf.mjs",
     "docs:pdf:check": "node scripts/generate-high-level-pdf.mjs --check",
     "verify:toolchain": "node scripts/verify-phase1.js",
@@ -38,6 +40,8 @@
     "protocol:check": "npm run protocol:fixture:check && npm --prefix packages/protocol run check",
     "preflight:fixture": "npm --prefix packages/protocol run build --silent && node scripts/preflight-v2.mjs --check-local-fixture",
     "preflight:base-sepolia": "npm --prefix packages/protocol run build --silent && node scripts/preflight-v2.mjs",
+    "deploy:base-sepolia:check": "node scripts/deploy-base-sepolia.js --check",
+    "deploy:base-sepolia": "node scripts/deploy-base-sepolia.js --broadcast",
     "deploy": "node scripts/deployment-disabled.mjs",
     "upgrade": "node scripts/deployment-disabled.mjs",
     "node": "hardhat node"

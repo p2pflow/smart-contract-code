@@ -1,0 +1,58 @@
+---
+description: Language, framework, testing, and review standards for implementation and QA agents.
+globs:
+alwaysApply: true
+---
+
+# coding-standards.mdc — Per-repository configuration (edit for this project only)
+
+```yaml
+codingStandards:
+  languages: {}
+
+  frameworks: {}
+
+  testing:
+    framework: TBD
+    runner: TBD
+    location: TBD
+    requirements:
+      - New business logic requires tests
+    coverage:
+      tool: optional
+      threshold: null
+
+  naming:
+    commits: conventional
+    packages: match existing layout
+
+  review:
+    blockingSeverities: [BLOCKER]
+    strictReview: false
+    dimensions:
+      - architecture
+      - security
+      - performance
+      - maintainability
+      - entropy
+    securityChecks:
+      - no secrets in code or config commits
+      - do not edit .cursor/ kit files outside project-context
+
+  entropy:
+    enabled: true
+    policy: remove-on-touch
+    onChange:
+      - remove unused symbols and commented-out code
+      - delete superseded paths when replacing behavior
+      - remove orphaned tests and config keys
+    blockReview:
+      - new commented-out code without tracked reason
+      - parallel superseded implementation left in diff
+    reference: .cursor/sdlc-system/workflow/entropy-management.md
+
+  documentation:
+    sdlcArtifacts: docs/sdlc/{workflowId}/
+    projectGuide: AGENTS.md
+    stackRules: []  # e.g. java.mdc, play.mdc — repo-specific migration/upgrade detail (optional)
+```

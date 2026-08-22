@@ -1,0 +1,45 @@
+---
+description: System architecture, service boundaries, and integration points for SDLC design and review.
+globs:
+alwaysApply: false
+---
+
+# architecture.mdc — YAML schema (template — not live config)
+
+> **Bootstrap:** On `start`, the orchestrator **reads the repo** and **generates** `.cursor/project-context/architecture.mdc` with real `summary`, `layers[].paths`, `integrations`, etc. See [project-context-bootstrap.md](../../sdlc-system/workflow/project-context-bootstrap.md) § `architecture.mdc`.
+
+```yaml
+architecture:
+  summary: TBD  # bootstrap: one paragraph from README + codebase — what THIS system does
+
+  style: modular-monolith  # bootstrap: infer from repo layout
+
+  layers:
+    - name: http
+      paths: []  # bootstrap: list real paths — controllers, routes, handlers, api/
+    - name: business
+      paths: []  # bootstrap: services, domain, use-cases, core logic
+    - name: infrastructure
+      paths: []  # bootstrap: repositories, clients, adapters, messaging
+
+  boundaries: []
+
+  integrations: []
+
+  auth:
+    userFacingPattern: TBD
+    partnerPattern: TBD
+    configPaths: []
+
+  errorHandling:
+    businessException: TBD
+    codes: []
+
+  diagrams:
+    existing: []
+    preferredFormat: mermaid
+
+  repositoryRelationships:
+    - primary: <org>/<repo>
+      consumes: []
+```

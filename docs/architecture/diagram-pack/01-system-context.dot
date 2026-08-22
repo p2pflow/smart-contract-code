@@ -1,0 +1,127 @@
+digraph P2PFlowSystemContext {
+  graph [
+    bgcolor="#071321",
+    pad="0.28",
+    margin="0",
+    rankdir=LR,
+    nodesep="0.48",
+    ranksep="0.72",
+    splines=polyline,
+    outputorder=edgesfirst,
+    fontname="DejaVu Sans",
+    fontcolor="#d8e7f5",
+    label="P2PFlow — Production System Context",
+    labelloc=t,
+    fontsize=24
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#12243b",
+    color="#4f708f",
+    fontcolor="#f4f8ff",
+    fontname="DejaVu Sans",
+    fontsize=11,
+    penwidth=1.4,
+    margin="0.16,0.10"
+  ];
+  edge [
+    color="#38bdf8",
+    fontcolor="#b9cbe0",
+    fontname="DejaVu Sans",
+    fontsize=9,
+    penwidth=1.7,
+    arrowsize=0.72
+  ];
+
+  subgraph cluster_clients {
+    label="STATIC PRODUCTION CLIENTS";
+    color="#26435f";
+    fontcolor="#8faac3";
+    style="rounded,filled";
+    fillcolor="#0a182a";
+    user [label="User UI\nBUY / SELL / payment status"];
+    merchant [label="Merchant UI\nliquidity / assignment / settlement"];
+    admin [label="Operator UI\nroles / pause / dispute / recovery"];
+  }
+
+  wallet [label="EIP-1193 wallet\nEOA or ERC-1271 identity", fillcolor="#1a2f48", color="#f59e0b"];
+
+  subgraph cluster_chain {
+    label="BASE SEPOLIA · CHAIN ID 84532";
+    color="#6e531d";
+    fontcolor="#f6c965";
+    style="rounded,filled";
+    fillcolor="#151b24";
+    diamond [label="Fresh v2 EIP-2535 Diamond\ncanonical custody + lifecycle authority", fillcolor="#173648", color="#51d5c5", penwidth=2.2];
+    usdc [label="Official Base Sepolia USDC\n0x036CbD53842c5426634e7929541eC2318f3dCF7e", fillcolor="#26351f", color="#4ade80"];
+  }
+
+  subgraph cluster_executor {
+    label="ONE EXECUTOR PROCESS";
+    color="#315775";
+    fontcolor="#93c5df";
+    style="rounded,filled";
+    fillcolor="#0a182a";
+    executor [label="HTTPS API + session boundary\npricing + matching + private references\nscanner + workers + tx coordinator", fillcolor="#172d4d", color="#38bdf8", penwidth=2.1];
+    postgres [label="PostgreSQL\nsessions · cursors · jobs · outbox\nreservations · attempts · audit", fillcolor="#1a2940"];
+  }
+
+  subgraph cluster_projection {
+    label="PUBLIC READ MODEL";
+    color="#285b46";
+    fontcolor="#75d49a";
+    style="rounded,filled";
+    fillcolor="#0a1c1c";
+    goldsky [label="Goldsky subgraph\npublic events + aggregates\nnever custody authority", fillcolor="#15352e", color="#4ade80"];
+  }
+
+  subgraph cluster_services {
+    label="SEPARATELY GATED SERVICES";
+    color="#594b73";
+    fontcolor="#c3a8df";
+    style="rounded,dashed,filled";
+    fillcolor="#141426";
+    rpc [label="Confirmed HTTP RPC\n+ WSS wake hints"];
+    prices [label="Independent price sources\nUSDC/USD × USD/INR quorum"];
+    signers [label="Role-separated managed signers\npricing · matching · recovery", color="#e879f9"];
+  }
+
+  protocol [label="@p2pflow/protocol\ncanonical ABI · errors · actions\ndeployed manifest + digests", fillcolor="#212544", color="#a78bfa", penwidth=1.9];
+  runtime_doc [label="Static host + public runtime document\nmanifest · API/RPC/Graph URLs · Thirdweb client ID", fillcolor="#212544", color="#a78bfa"];
+  fiat [label="External INR / UPI rail\nparty payment + receipt attestations\nnot chain-verified bank settlement", fillcolor="#301f3e", color="#e879f9", style="rounded,dashed,filled"];
+  modes [label="Automation gates\nOFF → SHADOW → ENABLED\nreadiness + explicit enablement", fillcolor="#3b2027", color="#fb7185"];
+
+  user -> wallet [label="connect + sign", color="#f59e0b"];
+  merchant -> wallet [color="#f59e0b"];
+  admin -> wallet [color="#f59e0b"];
+  wallet -> diamond [label="wallet-signed writes", color="#f59e0b", penwidth=2.2];
+
+  user -> executor [label="public quote · session · projections · private ref", color="#38bdf8"];
+  merchant -> executor [label="session · assignments · private reveal", color="#38bdf8"];
+  admin -> executor [label="ops · evidence · controls", color="#38bdf8"];
+  admin -> goldsky [label="direct pinned public reads", color="#4ade80"];
+  user -> fiat [label="BUY: user sends INR", color="#e879f9", style=dotted];
+  merchant -> fiat [label="SELL: merchant sends INR", color="#e879f9", style=dotted];
+
+  diamond -> usdc [label="escrow / reserve / release", color="#f59e0b"];
+  diamond -> goldsky [label="canonical public events", color="#4ade80", penwidth=2.1];
+  executor -> postgres [label="durable atomic state", dir=both, color="#38bdf8"];
+  executor -> diamond [label="confirmed reads", color="#38bdf8"];
+  executor -> diamond [label="managed writes only when enabled", color="#f59e0b", style=dashed, constraint=false];
+  rpc -> executor [label="blocks · receipts · wakeups", color="#38bdf8"];
+  goldsky -> executor [label="pinned projections / lag checks", color="#4ade80"];
+  prices -> executor [label="signed observations", color="#38bdf8"];
+  signers -> executor [label="approval-gated signing", color="#e879f9", style=dashed];
+  modes -> executor [label="fail-closed write fence", color="#fb7185", style=dashed];
+
+  protocol -> user [style=dashed, color="#a78bfa"];
+  protocol -> merchant [style=dashed, color="#a78bfa"];
+  protocol -> admin [style=dashed, color="#a78bfa"];
+  protocol -> executor [style=dashed, color="#a78bfa"];
+  protocol -> diamond [label="canonical selectors + events", style=dashed, color="#a78bfa"];
+  protocol -> goldsky [label="event ABI", style=dashed, color="#a78bfa"];
+  runtime_doc -> user [style=dashed, color="#a78bfa"];
+  runtime_doc -> merchant [style=dashed, color="#a78bfa"];
+  runtime_doc -> admin [style=dashed, color="#a78bfa"];
+}
