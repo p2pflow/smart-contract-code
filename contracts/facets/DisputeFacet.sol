@@ -2,9 +2,13 @@
 pragma solidity 0.8.24;
 
 import {
+    AppStorageV2,
     DisputeResolution,
     DisputeStatus,
     DisputeV2,
+    MerchantAvailability,
+    MerchantStatus,
+    MerchantV2,
     OrderStatus,
     OrderType,
     OrderV2
@@ -12,94 +16,95 @@ import {
 import {
     DisputeNotAllowed,
     DisputeNotOpen,
+    DisputeWindowClosed,
     OrderNotFound,
     UnauthorizedOrderActor
 } from "../shared/Errors.sol";
 import {Modifiers} from "../shared/Modifiers.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
-import {LibCustody} from "../libraries/LibCustody.sol";
 
 contract DisputeFacet is Modifiers {
     event DisputeRaised(
         bytes32 indexed orderId,
+        address indexed merchant,
         address indexed by,
+        OrderType orderType,
         OrderStatus priorOrderStatus,
-        uint256 raisedAt
+        uint256 raisedAt,
+        uint256 disputeDeadline
     );
-    event DisputeResolved(
-        bytes32 indexed orderId,
-        address indexed resolver,
-        DisputeResolution resolution,
-        OrderStatus finalOrderStatus,
-        uint256 resolvedAt
-    );
-    event OrderCompleted(
+    event DisputeResolvedNeutral(
         bytes32 indexed orderId,
         address indexed merchant,
-        address indexed user,
-        OrderType orderType,
-        uint256 usdcAmount,
-        uint256 fiatAmountE6,
-        uint256 completedAt
+        address indexed resolver,
+        uint256 resolvedAt
     );
-    event OrderCancelled(bytes32 indexed orderId, address indexed by, uint256 cancelledAt);
 
     function openDispute(bytes32 orderId) external nonReentrant {
+        AppStorageV2 storage s = LibAppStorage.appStorage();
         OrderV2 storage order = _requireOrder(orderId);
-        if (order.status != OrderStatus.ACCEPTED && order.status != OrderStatus.FIAT_SENT) {
+        if (msg.sender != order.user) revert UnauthorizedOrderActor(orderId, msg.sender);
+        if (order.merchant == address(0) || order.disputeDeadline == 0) {
             revert DisputeNotAllowed(orderId);
         }
-        if (msg.sender != order.user && msg.sender != order.merchant) {
-            revert UnauthorizedOrderActor(orderId, msg.sender);
+        if (block.timestamp >= order.disputeDeadline) {
+            revert DisputeWindowClosed(orderId, order.disputeDeadline, block.timestamp);
         }
-        DisputeV2 storage dispute = LibAppStorage.appStorage().disputes[orderId];
-        if (dispute.status != DisputeStatus.NONE) revert DisputeNotAllowed(orderId);
+        if (order.orderType == OrderType.SELL) {
+            if (order.status != OrderStatus.COMPLETED) revert DisputeNotAllowed(orderId);
+        } else if (order.status != OrderStatus.CANCELLED) {
+            revert DisputeNotAllowed(orderId);
+        }
 
-        OrderStatus priorStatus = order.status;
-        if (order.orderType == OrderType.BUY) {
-            LibCustody.lockBuyReservationForDispute(order);
-        }
+        DisputeV2 storage dispute = s.disputes[orderId];
+        if (dispute.status != DisputeStatus.NONE) revert DisputeNotAllowed(orderId);
+        MerchantV2 storage merchant = s.merchants[order.merchant];
+        if (
+            merchant.status == MerchantStatus.EXITED || merchant.status == MerchantStatus.UNSTAKE_PENDING
+                || merchant.wallet == address(0)
+        ) revert DisputeNotAllowed(orderId);
+
         dispute.status = DisputeStatus.OPEN;
-        dispute.priorOrderStatus = priorStatus;
+        dispute.resolution = DisputeResolution.NONE;
+        dispute.priorOrderStatus = order.status;
+        dispute.orderType = order.orderType;
+        dispute.merchant = order.merchant;
         dispute.openedBy = msg.sender;
         dispute.openedAt = block.timestamp;
-        order.status = OrderStatus.DISPUTED;
 
-        emit DisputeRaised(orderId, msg.sender, priorStatus, block.timestamp);
+        merchant.openDisputeCount += 1;
+        merchant.status = MerchantStatus.DISPUTED;
+        merchant.availability = MerchantAvailability.OFFLINE;
+
+        emit DisputeRaised(
+            orderId,
+            order.merchant,
+            msg.sender,
+            order.orderType,
+            order.status,
+            block.timestamp,
+            order.disputeDeadline
+        );
     }
 
-    function resolveDispute(bytes32 orderId, DisputeResolution resolution)
-        external
-        onlyDiamondOwner
-        nonReentrant
-    {
-        OrderV2 storage order = _requireOrder(orderId);
-        DisputeV2 storage dispute = LibAppStorage.appStorage().disputes[orderId];
-        if (dispute.status != DisputeStatus.OPEN || order.status != OrderStatus.DISPUTED) {
-            revert DisputeNotOpen(orderId);
-        }
+    function resolveDisputeNeutral(bytes32 orderId) external onlyDiamondOwner nonReentrant {
+        AppStorageV2 storage s = LibAppStorage.appStorage();
+        _requireOrder(orderId);
+        DisputeV2 storage dispute = s.disputes[orderId];
+        if (dispute.status != DisputeStatus.OPEN) revert DisputeNotOpen(orderId);
 
-        if (resolution == DisputeResolution.SETTLE_TRADE) {
-            LibCustody.complete(order);
-            emit OrderCompleted(
-                orderId,
-                order.merchant,
-                order.user,
-                order.orderType,
-                order.usdcAmount,
-                order.fiatAmountE6,
-                order.completedAt
-            );
-        } else {
-            LibCustody.cancel(order, OrderStatus.CANCELLED);
-            emit OrderCancelled(orderId, msg.sender, order.cancelledAt);
-        }
-
+        MerchantV2 storage merchant = s.merchants[dispute.merchant];
         dispute.status = DisputeStatus.RESOLVED;
-        dispute.resolution = resolution;
+        dispute.resolution = DisputeResolution.NEUTRAL;
         dispute.resolver = msg.sender;
         dispute.resolvedAt = block.timestamp;
-        emit DisputeResolved(orderId, msg.sender, resolution, order.status, block.timestamp);
+
+        merchant.openDisputeCount -= 1;
+        if (merchant.openDisputeCount == 0) {
+            merchant.status = MerchantStatus.ACTIVE;
+            merchant.availability = MerchantAvailability.OFFLINE;
+        }
+        emit DisputeResolvedNeutral(orderId, dispute.merchant, msg.sender, block.timestamp);
     }
 
     function getDispute(bytes32 orderId) external view onlyInitialized returns (DisputeV2 memory) {

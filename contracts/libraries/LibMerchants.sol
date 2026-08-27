@@ -15,15 +15,13 @@ library LibMerchants {
     uint8 internal constant SIDE_BUY = 1;
     uint8 internal constant SIDE_SELL = 2;
     uint8 internal constant SIDE_BOTH = SIDE_BUY | SIDE_SELL;
-    uint256 internal constant MAX_PAGE_SIZE = 100;
 
-    function generateChannelId(
-        address diamond,
-        address merchant,
-        uint256 nonce,
-        uint256 chainId
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encode("P2PFLOW_V2_CHANNEL", diamond, chainId, merchant, nonce));
+    function generateChannelId(address diamond, address merchant, uint256 nonce, uint256 chainId)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode("P2PFLOW_V3_CHANNEL", diamond, chainId, merchant, nonce));
     }
 
     function supportsSide(uint8 sideMask, OrderType orderType) internal pure returns (bool) {
@@ -32,7 +30,7 @@ library LibMerchants {
     }
 
     function availableUsdc(MerchantV2 storage merchant) internal view returns (uint256) {
-        return merchant.liquidityUsdc - merchant.reservedUsdc - merchant.disputeLockedUsdc;
+        return merchant.stakeUsdc - merchant.reservedUsdc;
     }
 
     function availableFiatE6(PaymentChannelV2 storage channel) internal view returns (uint256) {
@@ -40,10 +38,9 @@ library LibMerchants {
     }
 
     function isEligibleAccount(MerchantV2 storage merchant) internal view returns (bool) {
-        return
-            merchant.wallet != address(0) &&
-            merchant.status == MerchantStatus.ACTIVE &&
-            merchant.availability == MerchantAvailability.ONLINE;
+        return merchant.wallet != address(0)
+            && merchant.status == MerchantStatus.ACTIVE
+            && merchant.availability == MerchantAvailability.ONLINE;
     }
 
     function isEligibleChannel(
@@ -51,11 +48,10 @@ library LibMerchants {
         address merchant,
         OrderType orderType
     ) internal view returns (bool) {
-        return
-            channel.channelId != bytes32(0) &&
-            channel.merchant == merchant &&
-            channel.status == ChannelStatus.APPROVED &&
-            channel.availability == ChannelAvailability.ACTIVE &&
-            supportsSide(channel.sideMask, orderType);
+        return channel.channelId != bytes32(0)
+            && channel.merchant == merchant
+            && channel.status == ChannelStatus.APPROVED
+            && channel.availability == ChannelAvailability.ACTIVE
+            && supportsSide(channel.sideMask, orderType);
     }
 }

@@ -13,19 +13,21 @@ import {
 import {
     ChannelNotEligible,
     ChannelNotFound,
-    InsufficientAvailableLiquidity,
+    InsufficientAvailableStake,
     InsufficientFiatCapacity,
     InvalidAssignment,
     MerchantNotActive,
     MerchantNotFound,
-    MerchantNotOnline,
-    MerchantStakeBelowMinimum
+    MerchantNotOnline
 } from "../shared/Errors.sol";
 import {LibAppStorage} from "./LibAppStorage.sol";
 import {LibMerchants} from "./LibMerchants.sol";
 
 library LibEligibility {
-    function enforceAssignment(OrderV2 storage order, address merchantAddress, bytes32 channelId) internal view {
+    function enforceAssignment(OrderV2 storage order, address merchantAddress, bytes32 channelId)
+        internal
+        view
+    {
         if (merchantAddress == address(0) || channelId == bytes32(0) || merchantAddress == order.user) {
             revert InvalidAssignment();
         }
@@ -33,9 +35,6 @@ library LibEligibility {
         MerchantV2 storage merchant = s.merchants[merchantAddress];
         if (merchant.wallet == address(0)) revert MerchantNotFound(merchantAddress);
         if (merchant.status != MerchantStatus.ACTIVE) revert MerchantNotActive(merchantAddress);
-        if (merchant.stakeUsdc < s.config.minMerchantStakeUsdc) {
-            revert MerchantStakeBelowMinimum(merchantAddress, merchant.stakeUsdc, s.config.minMerchantStakeUsdc);
-        }
         if (merchant.availability != MerchantAvailability.ONLINE) revert MerchantNotOnline(merchantAddress);
         PaymentChannelV2 storage channel = s.channels[channelId];
         if (channel.channelId == bytes32(0)) revert ChannelNotFound(channelId);
@@ -44,10 +43,14 @@ library LibEligibility {
         }
         if (order.orderType == OrderType.BUY) {
             uint256 availableUsdc = LibMerchants.availableUsdc(merchant);
-            if (availableUsdc < order.usdcAmount) revert InsufficientAvailableLiquidity(availableUsdc, order.usdcAmount);
+            if (availableUsdc < order.usdcAmount) {
+                revert InsufficientAvailableStake(availableUsdc, order.usdcAmount);
+            }
         } else {
             uint256 availableFiatE6 = LibMerchants.availableFiatE6(channel);
-            if (availableFiatE6 < order.fiatAmountE6) revert InsufficientFiatCapacity(availableFiatE6, order.fiatAmountE6);
+            if (availableFiatE6 < order.fiatAmountE6) {
+                revert InsufficientFiatCapacity(availableFiatE6, order.fiatAmountE6);
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ error ReentrantCall();
 error UnauthorizedExecutor(address caller);
 
 error InvalidPriceValues();
+error StalePrice(uint256 updatedAt, uint256 currentTime);
 error SlippageBoundExceeded(uint256 selectedPriceE6, uint256 boundPriceE6);
 
 error MerchantAlreadyRegistered();
@@ -27,7 +28,7 @@ error MerchantNotOnline(address merchant);
 error MerchantStakeBelowMinimum(address merchant, uint256 stakeUsdc, uint256 minimumUsdc);
 error InvalidMerchantStatus();
 error MerchantHasObligations(address merchant);
-error InsufficientAvailableLiquidity(uint256 available, uint256 required);
+error InsufficientAvailableStake(uint256 available, uint256 required);
 error InsufficientFiatCapacity(uint256 availableE6, uint256 requiredE6);
 error ChannelNotFound(bytes32 channelId);
 error ChannelNotEligible(bytes32 channelId);
@@ -39,10 +40,19 @@ error ChannelHasObligations(bytes32 channelId, uint256 obligationCount);
 error OrderNotFound(bytes32 orderId);
 error InvalidOrderState(bytes32 orderId, uint8 actual);
 error InvalidOrderType(bytes32 orderId, uint8 actual);
+error InvalidOrderMode(bytes32 orderId, uint8 actual);
+error PaymentDetailsNotShared(bytes32 orderId);
 error UnauthorizedOrderActor(bytes32 orderId, address actor);
+error InsufficientUserUsdcBalance(uint256 available, uint256 required);
 error CustodyAlreadyFinalized(bytes32 orderId);
 error InvalidTerminalStatus(uint8 status);
 error InvalidAssignment();
+error EmptyCandidateList();
+error DuplicateCandidate(address merchant, bytes32 channelId);
+error CandidateNotAssigned(bytes32 orderId, address merchant, bytes32 channelId);
+error CandidateAlreadyDeclined(bytes32 orderId, address merchant, bytes32 channelId);
+error OrderNotExpired(bytes32 orderId, uint256 expiresAt, uint256 currentTime);
 
 error DisputeNotAllowed(bytes32 orderId);
 error DisputeNotOpen(bytes32 orderId);
+error DisputeWindowClosed(bytes32 orderId, uint256 deadline, uint256 currentTime);

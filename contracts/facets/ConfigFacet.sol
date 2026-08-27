@@ -5,6 +5,7 @@ import {AppStorageV2, PlatformConfig} from "../shared/AppStorage.sol";
 import {InvalidAmount, PlatformIsNotPaused, PlatformIsPaused} from "../shared/Errors.sol";
 import {Modifiers} from "../shared/Modifiers.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
+import {LibOrders} from "../libraries/LibOrders.sol";
 
 contract ConfigFacet is Modifiers {
     event PlatformPaused(address indexed by);
@@ -39,9 +40,31 @@ contract ConfigFacet is Modifiers {
         external
         view
         onlyInitialized
-        returns (uint256 stake, uint256 liquidity, uint256 reservedBuy, uint256 sellEscrow)
+        returns (
+            uint256 currentMerchantUsdc,
+            uint256 totalDepositedUsdc,
+            uint256 reservedBuyUsdc,
+            uint256 sellEscrowUsdc
+        )
     {
         AppStorageV2 storage s = LibAppStorage.appStorage();
-        return (s.totalMerchantStakeUsdc, s.totalMerchantLiquidityUsdc, s.totalReservedBuyUsdc, s.totalSellEscrowUsdc);
+        return (
+            s.totalMerchantStakeUsdc,
+            s.totalDepositedStakeUsdc,
+            s.totalReservedBuyUsdc,
+            s.totalSellEscrowUsdc
+        );
+    }
+
+    function getProtocolTimings()
+        external
+        pure
+        returns (uint256 orderPhaseTimeout, uint256 disputeWindow, uint256 maxPriceAge)
+    {
+        return (
+            LibOrders.ORDER_PHASE_TIMEOUT,
+            LibOrders.DISPUTE_WINDOW,
+            LibOrders.MAX_PRICE_AGE
+        );
     }
 }

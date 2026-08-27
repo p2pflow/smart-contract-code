@@ -6,7 +6,9 @@ import {OrderType} from "../shared/AppStorage.sol";
 
 library LibOrders {
     uint256 internal constant E6 = 1_000_000;
-    uint256 internal constant MAX_ASSIGNMENTS = 4;
+    uint256 internal constant ORDER_PHASE_TIMEOUT = 15 minutes;
+    uint256 internal constant DISPUTE_WINDOW = 6 hours;
+    uint256 internal constant MAX_PRICE_AGE = 10 minutes;
 
     function generateOrderId(
         address diamond,
@@ -14,7 +16,7 @@ library LibOrders {
         uint256 nonce,
         uint256 chainId
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode("P2PFLOW_V2_ORDER", diamond, chainId, user, nonce));
+        return keccak256(abi.encode("P2PFLOW_V3_ORDER", diamond, chainId, user, nonce));
     }
 
     function computeFiatAmountE6(

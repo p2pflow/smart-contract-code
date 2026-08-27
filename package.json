@@ -14,6 +14,8 @@
     "deploy:base-sepolia:check": "node scripts/deploy-base-sepolia.js --check",
     "deploy:base-sepolia": "node scripts/deploy-base-sepolia.js --broadcast",
     "deploy:base-sepolia:mock": "bash scripts/deploy-base-sepolia-mock.sh",
+    "upgrade:base-sepolia:order:check": "node scripts/upgrade-order-facet.js",
+    "upgrade:base-sepolia:order": "node scripts/upgrade-order-facet.js --broadcast",
     "node": "hardhat node"
   },
   "devDependencies": {
